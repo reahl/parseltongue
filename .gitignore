@@ -1,0 +1,6 @@
+.vagrant
+.ngrok
+*~
+.floo
+.flooignore
+.cache
