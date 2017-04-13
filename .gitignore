@@ -4,3 +4,5 @@
 .floo
 .flooignore
 .cache
+/test1/build/
+/test1/dist/
