@@ -18,5 +18,10 @@ Vagrant.configure("2") do |config|
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get install -y gdb
+  /vagrant/gemstone/systemChanges.sh
  SHELL
+ #config.vm.provision :shell, path: "/vagrant/gemstone/systemChanges.sh"
+ config.vm.provision "shell", privileged: false, inline: <<-SHELL
+  /vagrant/gemstone/gemPath.sh
+  SHELL
 end

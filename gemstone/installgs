@@ -12,7 +12,9 @@
 #=========================================================================
 
 #GemStone install/directory.
-cd /opt/gemstone/GemStone64Bit3.3.3-x86_64.Linux/install/
+GEMSTONE=/opt/gemstone/GemStone64Bit3.3.3-x86_64.Linux
+export GEMSTONE
+cd $GEMSTONE/install/
 
 currdir=`pwd | sed -e 's/\(.*\)\/\(.*\)$/\2/g'` # Basic `basename`
 if [ "x$currdir" != "xinstall" ]; then
@@ -565,7 +567,8 @@ do
 
     #read prompt
     prompt="y"
-    "x$prompt" = "xy"
+    echo "y"
+
     if [ "x$prompt" = "xy" ] || [ "x$prompt" = "xY" ] \
        || [ "x$prompt" = "x" ]; then
       chmod 770 $theDir
@@ -653,6 +656,8 @@ if [ $myEffectiveUid -eq 0 ]; then
 
   #read prompt
   prompt="y"
+  echo "y"
+
   if [ "x$prompt" != "xn" ] && [ "x$prompt" != "xN" ]; then 
     permchange=1
     chownFile="/tmp/installgs-$$-check"
@@ -664,6 +669,8 @@ if [ $myEffectiveUid -eq 0 ]; then
       echo "What is the Unix login name to which the files should belong?"
       #read theUser
       theUser="vagrant"
+      echo "vagrant"
+
       # The following tries to determine if the specified user exists
       chown $theUser $chownFile
       if [ "$?" != "0" ]; then
@@ -688,6 +695,8 @@ if [ $myEffectiveUid -eq 0 ]; then
 
       #read theGroup
       theGroup="vagrant"
+      echo "vagrant"
+
       # The following tries to determine if the specified group exists
       chgrp $theGroup $chownFile
       if [ "$?" != "0" ]; then
@@ -726,6 +735,8 @@ if [ $myEffectiveUid -eq 0 ]; then
 
     #read prompt
     prompt="y"
+    echo "y"
+
     if [ "x$prompt" = "xn" ] || [ "x$prompt" = "xN" ]; then
       defaultdb=0
     else # copy it
@@ -761,6 +772,8 @@ if [ $myEffectiveUid -eq 0 ]; then
 
     #read prompt
     prompt="n"
+    echo "n"
+
     if [ "x$prompt" = "xn" ] || [ "x$prompt" = "xN" ]; then 
       # say installgs.clruidgid 
       echo "Clearing setuid/setgid bits..."
@@ -817,6 +830,8 @@ if [ $myEffectiveUid -eq 0 ]; then
   wantsProtection=y
   #read prompt
   prompt="n"
+  echo "n"
+
   if [ "x$prompt" = "xn" ]; then 
     wantsProtection=n
   fi
@@ -1053,6 +1068,7 @@ else
 
   #read wantsNetldi
   wantsNetldi="y"
+  echo "y"
   echo "-----------------------------------------------------------------"
 
   if [ "x$wantsNetldi" = "xy" ]; then
@@ -1088,6 +1104,7 @@ else
 
     #read useDefault
     useDefault="y"
+    echo "y"
     if [ "x$useDefault" != "xn" ] && [ "x$useDefault" != "xN" ]; then
       if [ $myEffectiveUid -eq 0 ]; then
         $GEMSTONE/bin/startnetldi
