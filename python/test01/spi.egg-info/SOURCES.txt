@@ -1,0 +1,8 @@
+exeption.c
+setup.py
+spi.c
+spi_data.c
+spi.egg-info/PKG-INFO
+spi.egg-info/SOURCES.txt
+spi.egg-info/dependency_links.txt
+spi.egg-info/top_level.txt
