@@ -2,11 +2,8 @@
 #To create virtualenv run: python setup.py develop -N.
 #To clean run: python setup.py clean
 from setuptools import setup, find_packages, Extension
-module1 = Extension('test', sources = ['test.c', 'test_data.c'])
-
-setup (
-    name = 'test',
-    version = '1.0',
-    description = 'Do stuff!',
-    ext_modules = [module1],
- )
+#from distutils.core import setup, Extension
+setup(name="player", version="1.0",
+      ext_modules=[
+         Extension("player", ["player.c"]),
+         ])
