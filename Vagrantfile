@@ -14,10 +14,13 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   config.vm.network "forwarded_port", guest: 8363, host: 8363
 
+  config.vm.synced_folder "~/work/test_code", "/test_code"
+
  config.vm.provision "shell", inline: <<-SHELL
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get install -y gdb
+  pip install cython
   /vagrant/gemstone/installGemStone.sh
  SHELL
  #config.vm.provision :shell, path: "/vagrant/gemstone/systemChanges.sh"
