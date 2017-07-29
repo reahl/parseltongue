@@ -11,8 +11,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = "reahl/xenial64"
 
-  config.vm.network "forwarded_port", guest: 8000, host: 8000
-  config.vm.network "forwarded_port", guest: 8363, host: 8363
+  config.vm.network "forwarded_port", guest: 5433, host: 5433
 
   config.vm.synced_folder "~/work/test_code", "/test_code"
 
