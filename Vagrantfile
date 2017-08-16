@@ -13,12 +13,11 @@ Vagrant.configure("2") do |config|
 
   config.vm.network "forwarded_port", guest: 5433, host: 5433
 
-  config.vm.synced_folder "~/work/test_code", "/test_code"
-
  config.vm.provision "shell", inline: <<-SHELL
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get install -y gdb
+  apt-get install -y libpam0g-dev
   pip install cython
   /vagrant/gemstone/installGemStone.sh
  SHELL
