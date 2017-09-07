@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<JadeLogin gemVersion="64-bit 3.3.3" stoneHost="localhost" stoneName="gs64stone" stoneNRS="!tcp@localhost#server!gs64stone" gemType="remote" gemHost="localhost" gemService="5433" gemNRS="!tcp@localhost#netldi:5433#task!gemnetobject" hostUserID="vagrant" hostPassword="" gsUserID="DataCurator" gsPassword="swordfish" initials="IwanVosloo" useSocket="false"/>
