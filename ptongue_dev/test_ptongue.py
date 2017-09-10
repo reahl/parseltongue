@@ -46,11 +46,14 @@ def test_resolve_string_symbol():
 def test_resolve_symbol_object():
     session = Session('DataCurator', 'swordfish')
     try:
-        nil_symbol = session.new_symbol('nil')
+        # nil_symbol = session.new_symbol('nil')
+        # nil_symbol = GemObject(session)
+        nil_symbol = session.resolve_symbol('nil')
         assert isinstance(nil_symbol, GemObject)
-        nil = session.resolve_symbol(nil_symbol) 
-        assert isinstance(nil, GemObject)
-        assert nil.oop == 20
+        # nil = session.resolve_symbol(nil_symbol) 
+        # assert isinstance(nil, GemObject)
+        # assert nil.oop == 20
+        assert nil_symbol.oop == 20
     finally:
         session.logout()
 
@@ -59,7 +62,7 @@ def test_basic_perform_returns_value():
     session = Session('DataCurator', 'swordfish')
     try:
         date_class = session.resolve_symbol('Date')
-        return_object = date_class.perform('yourself')
+        returned_object = date_class.perform('yourself')
         assert date_class.oop == returned_object.oop
     finally:
         session.logout()
@@ -69,4 +72,6 @@ def test_transactions():
     pass
 
 
-
+test_resolve_string_symbol()
+test_resolve_symbol_object()
+test_basic_perform_returns_value()

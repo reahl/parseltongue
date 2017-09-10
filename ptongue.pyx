@@ -150,16 +150,18 @@ class InvalidSession(Exception):
 
 #======================================================================================================================
 class GemstoneError(Exception):
-    def __init__(self, message, reason, exception):
+    def __init__(self, message, reason):#, exception):
         self.message = message
         self.reason = reason
-        self.exception = exception
+        # self.exception = exception
 
     def __str__(self):
-        return '{}: {}, {}'.format(self.exception, self.message, self.reason)
+        # return '{}: {}, {}'.format(self.exception, self.message, self.reason)
+        return ('{}, {}'.format(self.message, self.reason)).decode('utf-8')
 
 cdef make_GemstoneError(GciErrSType e):
-   return GemstoneError(e.message.decode('utf-8'), e.reason.decode('utf-8'), GemObject(e.exceptionObj))
+    print('{}, {}'.format(e.message, e.reason))
+    return GemstoneError(e.message.decode('utf-8'), e.reason.decode('utf-8'))#, GemObject(session, e.exceptionObj))
 
 
 #======================================================================================================================
@@ -170,9 +172,13 @@ cdef char* to_c_bytes(py_string):
 cdef class GemObject:
     cdef OopType oop
     cdef Session session
-    def __cinit__(self, Session session, OopType oop):
+    def __cinit__(self, Session session, OopType oop=OOP_NIL):
         self.session = session
         self.oop = oop
+
+    @property
+    def oop(self):
+        return self.oop
 
     def perform(self, selector, *args):
         cdef GciErrSType error
@@ -259,14 +265,15 @@ cdef class Session:
             return_oop = GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
                                             symbol_list.oop if symbol_list else OOP_NIL, &error)
         elif isinstance(symbol, GemObject):
-            return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, symbol_list, &error)
+            return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, 
+                                            symbol_list.oop if symbol_list else OOP_NIL, &error)
         else:
             assert None, 'I am unhappy'
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(error)
         return GemObject(self, return_oop)
            
-    def log_out(self):
+    def logout(self):
         cdef GciErrSType error
         if not GciTsLogout(self.c_session, &error):
            raise make_GemstoneError(error)
