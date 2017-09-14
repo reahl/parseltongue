@@ -158,8 +158,8 @@ class GemstoneError(Exception):
     def __str__(self):
         return '{}: {}, {}'.format(self.exception, self.message, self.reason)
 
-cdef make_GemstoneError(GciErrSType e):
-   return GemstoneError(e.message.decode('utf-8'), e.reason.decode('utf-8'), GemObject(e.exceptionObj))
+cdef make_GemstoneError(Session session, GciErrSType e):
+    return GemstoneError(e.message.decode('utf-8'), e.reason.decode('utf-8'), GemObject(session, e.exceptionObj))
 
 
 #======================================================================================================================
@@ -197,7 +197,7 @@ cdef class GemObject:
                                             &error)
         free(cargs)
         if return_oop == OOP_ILLEGAL:
-           raise make_GemstoneError(error)
+           raise make_GemstoneError(self.session, error)
         return GemObject(self.session, return_oop)
 
     def __str__(self):
@@ -225,29 +225,31 @@ cdef class Session:
                             password.encode('utf-8'),
                             0, 0, &error)
         if self.c_session == NULL:
-           raise make_GemstoneError(error)
+            raise make_GemstoneError(self, error)
 
     def abort(self):
         cdef GciErrSType error
         if not GciTsAbort(self.c_session, &error):
-           raise make_GemstoneError(error)
+           raise make_GemstoneError(self, error)
 
     def begin(self):
         cdef GciErrSType error
         if not GciTsBegin(self.c_session, &error):
-           raise make_GemstoneError(error)
+           raise make_GemstoneError(self, error)
 
     def commit(self):
         cdef GciErrSType error
         if not GciTsCommit(self.c_session, &error):
-           raise make_GemstoneError(error)
+           raise make_GemstoneError(self, error)
 
+    @property
     def is_remote(self):
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         if remote == -1:
            raise InvalidSession()
         return <bint>remote
 
+    @property
     def is_logged_in(self):
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
@@ -263,12 +265,12 @@ cdef class Session:
         else:
             assert None, 'I am unhappy'
         if return_oop == OOP_ILLEGAL:
-            raise make_GemstoneError(error)
+            raise make_GemstoneError(self, error)
         return GemObject(self, return_oop)
            
     def log_out(self):
         cdef GciErrSType error
         if not GciTsLogout(self.c_session, &error):
-           raise make_GemstoneError(error)
+           raise make_GemstoneError(self, error)
 
 #======================================================================================================================

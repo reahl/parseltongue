@@ -6,3 +6,5 @@ build
 .flooignore
 .cache
 *.cpp
+*.iml
+.idea
