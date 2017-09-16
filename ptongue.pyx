@@ -174,6 +174,10 @@ cdef class GemObject:
         self.session = session
         self.oop = oop
 
+    @property
+    def oop(self):
+        return self.oop
+
     def perform(self, selector, *args):
         cdef GciErrSType error
         cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL

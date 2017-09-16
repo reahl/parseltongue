@@ -3,6 +3,8 @@ from contextlib import contextmanager
 import os
 from tempfile import TemporaryFile
 
+import pytest
+
 from ptongue import Session, GemObject
 from reahl.component.shelltools import Executable
 
@@ -22,38 +24,42 @@ class NetLdi:
        pass
 
 
-@contextmanager
-def NetLDI(guest_mode=True):
-    start_args = ['-g'] if guest_mode else []
-    start_netldi = Executable('startnetldi')
-    stop_args = []
-    stop_netldi = Executable('stopnetldi')
+class NetLDI():
+    def __init__(self, guest_mode=True):
+        self.start_args = ['-g'] if guest_mode else []
+        self.start_netldi = Executable('startnetldi')
+        self.stop_args = []
+        self.stop_netldi = Executable('stopnetldi')
 
-    def check_output_contains(expected_phrase):
+    def check_output_contains(self, out, expected_phrase):
         return True if len([line for line in out if line.contains(expected_phrase)]) > 0 else False
 
-    with TemporaryFile(mode='w+') as out:
-        with open(os.devnull, 'w') as DEVNULL:
-            start_netldi.check_call(start_args, stdout=out, stderr=DEVNULL)
-            started = check_output_contains('has been started')
-            started_elsewhere = check_output_contains('is already running')
-    try:
-        yield
-    finally:
-        if started and not started_elsewhere:
-            stop_netldi.check_call(stop_args)
+    def start(self):
+        with TemporaryFile(mode='w+') as out:
+            with open(os.devnull, 'w') as DEVNULL:
+                self.start_netldi.check_call(self.start_args, stdout=out, stderr=DEVNULL)
+
+    def stop(self):
+        self.stop_netldi.check_call(self.stop_args)
 
 
-def test_login_captive_os_user():
-    with NetLDI():
-        session = Session('DataCurator', 'swordfish')
-        assert session.is_logged_in
+@pytest.fixture(scope="session")
+def netldi_guestmode_fixture():
+    netldi = NetLDI(guest_mode=True)
+    netldi.start()
+    yield netldi
+    netldi.stop()
 
-        session.log_out()
-        assert not session.is_logged_in
+
+def test_login_captive_os_user(netldi_guestmode_fixture):
+    session = Session('DataCurator', 'swordfish')
+    assert session.is_logged_in
+
+    session.log_out()
+    assert not session.is_logged_in
 
 
-def test_login_os_user():
+def test_login_os_user(netldi_guestmode_fixture):
     session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
     assert session.is_logged_in
 
@@ -61,7 +67,7 @@ def test_login_os_user():
     assert not session.is_logged_in
 
 
-def test_resolve_string_symbol():
+def test_resolve_string_symbol(netldi_guestmode_fixture):
     session = Session('DataCurator', 'swordfish')
     try:
         nil = session.resolve_symbol('nil') 
@@ -71,23 +77,24 @@ def test_resolve_string_symbol():
         session.log_out()
 
      
-def test_resolve_symbol_object():
+def test_resolve_symbol_object(netldi_guestmode_fixture):
     session = Session('DataCurator', 'swordfish')
     try:
         nil_symbol = session.new_symbol('nil')
         assert isinstance(nil_symbol, GemObject)
         nil = session.resolve_symbol(nil_symbol) 
         assert isinstance(nil, GemObject)
+        assert nil is GemObject
         assert nil.oop == 20
     finally:
         session.log_out()
 
 
-def test_basic_perform_returns_value():
+def test_basic_perform_returns_value(netldi_guestmode_fixture):
     session = Session('DataCurator', 'swordfish')
     try:
         date_class = session.resolve_symbol('Date')
-        return_object = date_class.perform('yourself')
+        returned_object = date_class.perform('yourself')
         assert date_class.oop == returned_object.oop
     finally:
         session.log_out()
