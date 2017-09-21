@@ -124,11 +124,13 @@ def test_resolve_string_symbol(session):
     nil = session.resolve_symbol('nil') 
     assert isinstance(nil, GemObject)
     assert nil.oop == 20
+    assert nil.is_nil
 
 
 def test_resolve_symbol_object(session):
     nil_symbol = session.new_symbol('nil')
     assert isinstance(nil_symbol, GemObject)
+    assert nil_symbol.is_symbol
     nil = session.resolve_symbol(nil_symbol) 
     assert isinstance(nil, GemObject)
     assert nil.oop == 20
@@ -140,6 +142,28 @@ def test_basic_perform_returns_value(session):
     assert date_class.oop == returned_object.oop
 
 
-def test_transactions():
-    pass
+def test_translating_booleans_to_python(session):
+    true = session.resolve_symbol('true').to_py
+    assert true is True
+    false = session.resolve_symbol('false').to_py
+    assert false is False
+
+
+def test_transactions(session):
+    some_object = session.resolve_symbol('Date')
+    my_symbol = session.new_symbol('my_symbol')
+    user_globals = session.resolve_symbol('UserGlobals')
+
+    user_globals.perform('at:put:', my_symbol, some_object) 
+    assert user_globals.perform('includesKey:', my_symbol).to_py
+    session.abort()
+    assert not user_globals.perform('includesKey:', my_symbol).to_py
+
+    user_globals.perform('at:put:', my_symbol, some_object) 
+    assert user_globals.perform('includesKey:', my_symbol).to_py
+    session.commit()
+    session.abort()
+    assert user_globals.perform('includesKey:', my_symbol).to_py
+
+
 

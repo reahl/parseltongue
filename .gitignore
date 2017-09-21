@@ -8,3 +8,8 @@ build
 *.cpp
 *.iml
 .idea
+.eggs
+*.egg-info
+*.so
+__pycache__
+
