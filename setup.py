@@ -5,7 +5,11 @@ from os import environ
 gemstone_dir = environ['GEMSTONE']
 
 setup(
-    ext_modules = cythonize([Extension('ptongue', 
+    name='parseltongue',
+    install_requires=['Cython'],
+    setup_requires=['Cython'],
+    tests_require=['pytest', 'reahl-component'],
+    ext_modules=cythonize([Extension('ptongue',
                     include_dirs = ['{}/include'.format(gemstone_dir)],
                     library_dirs=['.', '{}/lib'.format(gemstone_dir)],
                     libraries=['gcits-3.3.3-64'],

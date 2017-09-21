@@ -5,50 +5,95 @@ from tempfile import TemporaryFile
 
 import pytest
 
-from ptongue import Session, GemObject
+from ptongue import Session, GemObject, GemstoneError
 from reahl.component.shelltools import Executable
 
 
-class Stone:
-   def start(self):
-       pass
-   def stop(self):
-       pass
-   def is_started(self):
-       return False
-
-class NetLdi:
-   def start(self, guest_mode=True):
-       pass
-   def stop(self):
-       pass
+class GemstoneService(object):
+    def __init__(self, service_name, start_command, stop_command, start_args=[], stop_args=[],
+                 start_output_check='', stop_output_check=''):
+        self.service_name = service_name
+        self.start_args = start_args
+        self.start_executable = Executable(start_command)
+        self.stop_args = stop_args
+        self.stop_executable = Executable(stop_command)
+        self.start_output_check = start_output_check
+        self.stop_output_check = stop_output_check
 
 
-class NetLDI():
-    def __init__(self, guest_mode=True):
-        self.start_args = ['-g'] if guest_mode else []
-        self.start_netldi = Executable('startnetldi')
-        self.stop_args = []
-        self.stop_netldi = Executable('stopnetldi')
+    def check_output_contains(self, temp_output_file, expected_phrase):
+        temp_output_file.seek(0)
+        output_lines = [line for line in temp_output_file]
+        return True if len([line for line in output_lines if expected_phrase in line]) > 0 else False
 
-    def check_output_contains(self, out, expected_phrase):
-        return True if len([line for line in out if line.contains(expected_phrase)]) > 0 else False
 
     def start(self):
         with TemporaryFile(mode='w+') as out:
             with open(os.devnull, 'w') as DEVNULL:
-                self.start_netldi.check_call(self.start_args, stdout=out, stderr=DEVNULL)
+                self.start_executable.check_call(self.start_args, stdout=out, stderr=DEVNULL)
+                assert not self.check_output_contains(out, 'already running'), 'Another instance of %s is already running, and shouldn\'t be' % self.service_name
+                assert self.check_output_contains(out, self.start_output_check)
 
     def stop(self):
-        self.stop_netldi.check_call(self.stop_args)
+        with TemporaryFile(mode='w+') as out:
+            with open(os.devnull, 'w') as DEVNULL:
+                self.stop_executable.check_call(self.stop_args, stdout=out, stderr=DEVNULL)
+                assert self.check_output_contains(out, self.stop_output_check)
 
 
-@pytest.fixture(scope="session")
+class NetLDI(GemstoneService):
+    def __init__(self, guest_mode=True):
+        start_args = ['-g'] if guest_mode else []
+        super(NetLDI, self).__init__('netLDI',
+                                     'startnetldi', 'stopnetldi',
+                                     start_args=start_args,
+                                     start_output_check='GemStone server \'gs64ldi\' has been started, process ',
+                                     stop_output_check='GemStone server \'gs64ldi\' has been stopped.',
+                                     )
+
+
+class Stone(GemstoneService):
+    def __init__(self):
+        stone_name = 'gs64stone'
+        username = 'DataCurator'
+        password = 'swordfish'
+        super(Stone, self).__init__('stone',
+                                    'startstone', 'stopstone',
+                                    start_args=[stone_name], stop_args=[stone_name, username, password],
+                                    start_output_check='GemStone server gs64stone has been started, process ',
+                                    stop_output_check='Stone repository monitor \'gs64stone\' has been stopped.',
+                                    )
+
+
+@pytest.fixture(scope="function")
 def netldi_guestmode_fixture():
     netldi = NetLDI(guest_mode=True)
     netldi.start()
     yield netldi
+    netldi.stop()\
+
+
+@pytest.fixture(scope="module")
+def stone_fixture():
+    stone = Stone()
+    stone.start()
+    yield stone
+    stone.stop()
+
+
+@contextmanager
+def netldi_context(guest_mode=False):
+    netldi = NetLDI(guest_mode=guest_mode)
+    netldi.start()
+    yield
     netldi.stop()
+
+
+def test_to_start_stone(stone_fixture):
+    # Not testing anything. Since pytest does not allow multiple fixtures, using "module" and this fake test
+    # should start the stone for the duration of this module test
+    # TODO: do this in another way
+    pass
 
 
 def test_login_captive_os_user(netldi_guestmode_fixture):
@@ -59,12 +104,19 @@ def test_login_captive_os_user(netldi_guestmode_fixture):
     assert not session.is_logged_in
 
 
-def test_login_os_user(netldi_guestmode_fixture):
-    session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
-    assert session.is_logged_in
+def test_login_os_user():
+    with netldi_context(guest_mode=False):
+        try:
+            Session('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
+        except GemstoneError as e:
+            # TODO: this can be done better : with expected() from reahl-tofu
+            assert 'Password validation failed for user vagrant' in e.message
 
-    session.log_out()
-    assert not session.is_logged_in
+        session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
+        assert session.is_logged_in
+
+        session.log_out()
+        assert not session.is_logged_in
 
 
 def test_resolve_string_symbol(netldi_guestmode_fixture):
@@ -76,7 +128,7 @@ def test_resolve_string_symbol(netldi_guestmode_fixture):
     finally:
         session.log_out()
 
-     
+
 def test_resolve_symbol_object(netldi_guestmode_fixture):
     session = Session('DataCurator', 'swordfish')
     try:
@@ -98,9 +150,8 @@ def test_basic_perform_returns_value(netldi_guestmode_fixture):
         assert date_class.oop == returned_object.oop
     finally:
         session.log_out()
-    
+
 
 def test_transactions():
     pass
-
 
