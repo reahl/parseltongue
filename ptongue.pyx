@@ -164,8 +164,7 @@ cdef make_GemstoneError(Session session, GciErrSType e):
 
 #======================================================================================================================
 cdef char* to_c_bytes(py_string):
-    py_bytes = py_string.encode('utf-8')
-    return py_bytes
+    return py_string.encode('utf-8')
 
 cdef class GemObject:
     cdef OopType oop

@@ -65,38 +65,39 @@ class Stone(GemstoneService):
                                     )
 
 
-@pytest.fixture(scope="function")
-def netldi_guestmode_fixture():
-    netldi = NetLDI(guest_mode=True)
-    netldi.start()
-    yield netldi
-    netldi.stop()\
-
-
 @pytest.fixture(scope="module")
 def stone_fixture():
     stone = Stone()
     stone.start()
-    yield stone
-    stone.stop()
-
+    try:
+       yield stone
+    finally:
+       stone.stop()
 
 @contextmanager
-def netldi_context(guest_mode=False):
+def running_netldi(guest_mode=False):
     netldi = NetLDI(guest_mode=guest_mode)
     netldi.start()
-    yield
-    netldi.stop()
+    try:
+       yield netldi
+    finally:
+       netldi.stop()
+
+@pytest.fixture
+def guestmode_netldi(stone_fixture):
+    with running_netldi(guest_mode=True) as netldi:
+       yield netldi
+
+@pytest.fixture
+def session(guestmode_netldi):
+    session = Session('DataCurator', 'swordfish')
+    try:
+       yield session
+    finally:
+       session.log_out()
 
 
-def test_to_start_stone(stone_fixture):
-    # Not testing anything. Since pytest does not allow multiple fixtures, using "module" and this fake test
-    # should start the stone for the duration of this module test
-    # TODO: do this in another way
-    pass
-
-
-def test_login_captive_os_user(netldi_guestmode_fixture):
+def test_login_captive_os_user(guestmode_netldi):
     session = Session('DataCurator', 'swordfish')
     assert session.is_logged_in
 
@@ -104,8 +105,8 @@ def test_login_captive_os_user(netldi_guestmode_fixture):
     assert not session.is_logged_in
 
 
-def test_login_os_user():
-    with netldi_context(guest_mode=False):
+def test_login_os_user(stone_fixture):
+    with running_netldi(guest_mode=False):
         try:
             Session('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
         except GemstoneError as e:
@@ -119,37 +120,24 @@ def test_login_os_user():
         assert not session.is_logged_in
 
 
-def test_resolve_string_symbol(netldi_guestmode_fixture):
-    session = Session('DataCurator', 'swordfish')
-    try:
-        nil = session.resolve_symbol('nil') 
-        assert isinstance(nil, GemObject)
-        assert nil.oop == 20
-    finally:
-        session.log_out()
+def test_resolve_string_symbol(session):
+    nil = session.resolve_symbol('nil') 
+    assert isinstance(nil, GemObject)
+    assert nil.oop == 20
 
 
-def test_resolve_symbol_object(netldi_guestmode_fixture):
-    session = Session('DataCurator', 'swordfish')
-    try:
-        nil_symbol = session.new_symbol('nil')
-        assert isinstance(nil_symbol, GemObject)
-        nil = session.resolve_symbol(nil_symbol) 
-        assert isinstance(nil, GemObject)
-        assert nil is GemObject
-        assert nil.oop == 20
-    finally:
-        session.log_out()
+def test_resolve_symbol_object(session):
+    nil_symbol = session.new_symbol('nil')
+    assert isinstance(nil_symbol, GemObject)
+    nil = session.resolve_symbol(nil_symbol) 
+    assert isinstance(nil, GemObject)
+    assert nil.oop == 20
 
 
-def test_basic_perform_returns_value(netldi_guestmode_fixture):
-    session = Session('DataCurator', 'swordfish')
-    try:
-        date_class = session.resolve_symbol('Date')
-        returned_object = date_class.perform('yourself')
-        assert date_class.oop == returned_object.oop
-    finally:
-        session.log_out()
+def test_basic_perform_returns_value(session):
+    date_class = session.resolve_symbol('Date')
+    returned_object = date_class.perform('yourself')
+    assert date_class.oop == returned_object.oop
 
 
 def test_transactions():
