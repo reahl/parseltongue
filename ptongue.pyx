@@ -80,6 +80,8 @@ cdef extern from "gcits.hf":
     OopType OOP_NIL
     OopType OOP_ILLEGAL
     OopType OOP_CLASS_BOOLEAN
+    OopType OOP_FALSE
+    OopType OOP_TRUE
     OopType OOP_CLASS_INTEGER
     OopType OOP_CLASS_Float
     OopType OOP_CLASS_SMALL_DOUBLE
@@ -192,12 +194,6 @@ cdef class GemstoneError(Exception):
 class InvalidSession(Exception):
     pass
 
-# class GemstoneError(Exception):
-#     def __init__(self, GemstoneError err):
-#         self.error = err
-
-#     def __str__(self):
-#         return self.error.__str__()
 #======================================================================================================================
 cdef char* to_c_bytes(py_string):
     return py_string.encode('utf-8')
@@ -238,7 +234,7 @@ cdef class GemObject:
         error = GemstoneError(self.session)
         oop_types = self.oop_type()
         if 'OOP_CLASS_BOOLEAN' in oop_types:
-            return True #GciOopToBool(self.oop)
+            return self.oop == OOP_TRUE
         elif 'OOP_CLASS_INTEGER' in oop_types:
             return self.oop_to_int()
         elif any(True for x in ['OOP_CLASS_SMALL_DOUBLE', 'OOP_CLASS_FLOAT'] if x in oop_types):
@@ -314,7 +310,6 @@ cdef class GemObject:
 
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.oop)
-
 
 #======================================================================================================================
 cdef class Session:
