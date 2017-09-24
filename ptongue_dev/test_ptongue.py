@@ -111,7 +111,7 @@ def test_login_os_user(stone_fixture):
             Session('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
         except GemstoneError as e:
             # TODO: this can be done better : with expected() from reahl-tofu
-            assert 'Password validation failed for user vagrant' in e.error.message
+            assert 'Password validation failed for user vagrant' in e.message
             
 
         session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
@@ -148,7 +148,7 @@ def test_translating_booleans_to_python(session):
     assert true is True
     false = session.resolve_symbol('false').to_py
     assert false is False
-
+    
 
 def test_transactions(session):
     some_object = session.resolve_symbol('Date')

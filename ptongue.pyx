@@ -80,6 +80,7 @@ cdef extern from "gcits.hf":
     OopType OOP_NIL
     OopType OOP_ILLEGAL
     OopType OOP_CLASS_BOOLEAN
+    OopType OOP_CLASS_INTEGER
     OopType OOP_CLASS_Float
     OopType OOP_CLASS_SMALL_DOUBLE
     OopType OOP_CLASS_BYTE_ARRAY
@@ -119,11 +120,14 @@ cdef extern from "gcits.hf":
     int GciTsIsKindOfClass(GciSession sess, OopType obj, OopType aClass, GciErrSType *err)
     OopType GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err)
     bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
+    OopType GciTsI64ToOop(GciSession sess, long int arg, GciErrSType *err)
+    bint GciTsOopToI64(GciSession sess, OopType oop, long int *result, GciErrSType *err)
 
 #======================================================================================================================
 TYPES = [(OOP_NIL, 'OOP_NIL'),
         (OOP_ILLEGAL, 'OOP_ILLEGAL'),
         (OOP_CLASS_BOOLEAN, 'OOP_CLASS_BOOLEAN'),
+        (OOP_CLASS_INTEGER, 'OOP_CLASS_INTEGER'),
         (OOP_CLASS_Float, 'OOP_CLASS_FLOAT'),
         (OOP_CLASS_SMALL_DOUBLE, 'OOP_CLASS_SMALL_DOUBLE'),
         (OOP_CLASS_BYTE_ARRAY, 'OOP_CLASS_BYTE_ARRAY'),
@@ -136,7 +140,7 @@ TYPES = [(OOP_NIL, 'OOP_NIL'),
         (OOP_CLASS_IDENTITY_BAG, 'OOP_CLASS_IDENTITY_BAG')]
 #======================================================================================================================
 #Option 1
-cdef class PyGciErrSType:
+cdef class GemstoneError(Exception):
     cdef GciErrSType c_error
     cdef Session session
     def __cinit__(self, sess):
@@ -188,23 +192,21 @@ cdef class PyGciErrSType:
 class InvalidSession(Exception):
     pass
 
-class GemstoneError(Exception):
-    def __init__(self, PyGciErrSType err):
-        self.error = err
+# class GemstoneError(Exception):
+#     def __init__(self, GemstoneError err):
+#         self.error = err
 
-    def __str__(self):
-        return self.error.__str__()
+#     def __str__(self):
+#         return self.error.__str__()
 #======================================================================================================================
 cdef char* to_c_bytes(py_string):
     return py_string.encode('utf-8')
 
 cdef class GemObject:
-    cdef PyGciErrSType error
     cdef OopType oop
     cdef Session session
     def __cinit__(self, Session session, OopType oop=OOP_NIL):
         self.session = session
-        self.error = PyGciErrSType(session)
         self.oop = oop
 
     @property
@@ -220,36 +222,39 @@ cdef class GemObject:
         return 'OOP_CLASS_SYMBOL' in self.oop_type()
 
     def oop_type(self):
-        self.error.c_error.init()
+        error = GemstoneError(self.session)
         cdef int is_type_of
         oop_types = []
         for type_oop in TYPES:
-            is_type_of = GciTsIsKindOf(self.session.c_session, self.oop, type_oop[0], &(self.error.c_error))
+            is_type_of = GciTsIsKindOf(self.session.c_session, self.oop, type_oop[0], &(error.c_error))
             if is_type_of:
                 oop_types.append(type_oop[1])
             elif is_type_of == -1:
-                raise GemstoneError(self.error)
+                raise error
         return oop_types
 
     @property
     def to_py(self):
-        self.error.c_error.init()
+        error = GemstoneError(self.session)
         oop_types = self.oop_type()
         if 'OOP_CLASS_BOOLEAN' in oop_types:
             return True #GciOopToBool(self.oop)
-        elif any(True for x in ['OOP_CLASS_STRING', 'OOP_CLASS_Utf8'] if x in oop_types) :
-            return self.fetch_chars(1, 1024)
+        elif 'OOP_CLASS_INTEGER' in oop_types:
+            return self.oop_to_int()
         elif any(True for x in ['OOP_CLASS_SMALL_DOUBLE', 'OOP_CLASS_FLOAT'] if x in oop_types):
             return self.oop_to_double()
+        elif any(True for x in ['OOP_CLASS_STRING', 'OOP_CLASS_Utf8'] if x in oop_types) :
+            return self.fetch_chars(1, 1024)
         elif any(True for x in ['OOP_CLASS_ARRAY', 'OOP_CLASS_BYTE_ARRAY'] if x in oop_types):
             return self.fetch_bytes(1, 1024)
 
     cdef fetch_bytes(self, long long start_index, long long num_bytes):# return num of bytes fetched??
+        error = GemstoneError(self.session)
         cdef ByteType* dest = <ByteType *>malloc(num_bytes * sizeof(ByteType))
         cdef long long bytes_returned = GciTsFetchBytes(self.session.c_session, self.oop, start_index, dest, num_bytes,
-                                    &(self.error.c_error));
+                                    &(error.c_error));
         if bytes_returned == -1:
-            raise GemstoneError(self.error)
+            raise error
         args = [dest[0]]
         for i in xrange(1, bytes_returned):
             args.append(dest[i])
@@ -257,23 +262,32 @@ cdef class GemObject:
         return args
 
     cdef fetch_chars(self, long long start_index, long long max_size):
+        error = GemstoneError(self.session)
         cdef char *c_string = <char *>malloc(max_size * sizeof(char))
         cdef long long bytes_returned = GciTsFetchChars(self.session.c_session, self.oop, start_index, c_string, max_size,
-                                                        &(self.error.c_error))
+                                                        &(error.c_error))
         if bytes_returned == -1:
-            raise GemstoneError(self.error)
+            raise error
         py_string = c_string.decode('utf-8')
         free (c_string)
         return py_string
 
+    cdef oop_to_int(self):
+        error = GemstoneError(self.session)
+        cdef long int result = 0 
+        if not GciTsOopToI64(self.session.c_session, self.oop, &result, &(error.c_error)):
+            raise error
+        return result
+
     cdef oop_to_double(self):
+        error = GemstoneError(self.session)
         cdef double result = 0
-        if not GciTsOopToDouble(self.session.c_session, self.oop, &result, &(self.error.c_error)):
-            raise GemstoneError(self.error)
+        if not GciTsOopToDouble(self.session.c_session, self.oop, &result, &(error.c_error)):
+            raise error
         return result
 
     def perform(self, selector, *args):
-        self.error.c_error.init()
+        error = GemstoneError(self.session)
         cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
 
@@ -292,10 +306,10 @@ cdef class GemObject:
                                             len(args),
                                             flags,
                                             environment_id,
-                                            &(self.error.c_error))
+                                            &(error.c_error))
         free(cargs)
         if return_oop == OOP_ILLEGAL:
-           raise GemstoneError(self.error)
+           raise error
         return GemObject(self.session, return_oop)
 
     def __str__(self):
@@ -305,11 +319,10 @@ cdef class GemObject:
 #======================================================================================================================
 cdef class Session:
     cdef GciSession c_session
-    cdef PyGciErrSType error
     def __cinit__(self, str username, str password, str stone_name='gs64stone',
                   str host_username=None, str host_password='',
                   str netldi_task='gemnetobject'):
-        self.error = PyGciErrSType(self)
+        error = GemstoneError(self)
         cdef char* c_host_username = NULL
         if host_username:
             c_host_username = to_c_bytes(host_username)
@@ -321,24 +334,24 @@ cdef class Session:
                             netldi_task.encode('utf-8'),
                             username.encode('utf-8'),
                             password.encode('utf-8'),
-                            0, 0, &(self.error.c_error))
+                            0, 0, &(error.c_error))
         if self.c_session == NULL:
-            raise GemstoneError(self.error)
+            raise error
 
     def abort(self):
-        self.error.c_error.init()
-        if not GciTsAbort(self.c_session, &(self.error.c_error)):
-            raise GemstoneError(self.error)
+        error = GemstoneError(self)
+        if not GciTsAbort(self.c_session, &(error.c_error)):
+            raise error
 
     def begin(self):
-        self.error.c_error.init()
-        if not GciTsBegin(self.c_session, &(self.error.c_error)):
-            raise GemstoneError(self.error)
+        error = GemstoneError(self)
+        if not GciTsBegin(self.c_session, &(error.c_error)):
+            raise error
 
     def commit(self):
-        self.error.c_error.init()
-        if not GciTsCommit(self.c_session, &(self.error.c_error)):
-            raise GemstoneError(self.error)
+        error = GemstoneError(self)
+        if not GciTsCommit(self.c_session, &(error.c_error)):
+            raise error
 
     @property
     def is_remote(self):
@@ -353,42 +366,44 @@ cdef class Session:
         return remote != -1
 
     def py_object_to_oop(self, py_object):
-        self.error.c_error.init()
+        error = GemstoneError(self)
         cdef OopType return_oop = OOP_NIL
         if isinstance(py_object, str):
-            return_oop = GciTsNewUtf8String(self.c_session, py_object.encode('utf-8'), 0, &(self.error.c_error))
-        elif isinstance(py_object, (int, long, float)):
-            return_oop = GciTsDoubleToOop(self.c_session, py_object, &(self.error.c_error))
+            return_oop = GciTsNewUtf8String(self.c_session, py_object.encode('utf-8'), 0, &(error.c_error))
+        elif isinstance(py_object, int):
+            return_oop = GciTsI64ToOop(self.c_session, py_object, &(error.c_error))
+        elif isinstance(py_object, (long, float)):
+            return_oop = GciTsDoubleToOop(self.c_session, py_object, &(error.c_error))
         if return_oop == OOP_ILLEGAL:
-            raise GemstoneError(self.error)
+            raise error
         return GemObject(self, return_oop)
 
     def new_symbol(self, str py_string):
-        self.error.c_error.init()
+        error = GemstoneError(self)
         cdef char *c_string = to_c_bytes(py_string)
-        cdef OopType return_oop = GciTsNewSymbol(self.c_session, c_string, &(self.error.c_error))
+        cdef OopType return_oop = GciTsNewSymbol(self.c_session, c_string, &(error.c_error))
         if return_oop == OOP_ILLEGAL:
-            raise GemstoneError(self.error)
+            raise error
         return GemObject(self, return_oop)
 
     def resolve_symbol(self, symbol, GemObject symbol_list=None):
-        self.error.c_error.init()
+        error = GemstoneError(self)
         cdef OopType return_oop = OOP_NIL
         if isinstance(symbol, str):
             return_oop = GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
-                                            symbol_list.oop if symbol_list else OOP_NIL, &(self.error.c_error))
+                                            symbol_list.oop if symbol_list else OOP_NIL, &(error.c_error))
         elif isinstance(symbol, GemObject):
             return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, 
-                                            symbol_list.oop if symbol_list else OOP_NIL, &(self.error.c_error))
+                                            symbol_list.oop if symbol_list else OOP_NIL, &(error.c_error))
         else:
             assert None, 'I am unhappy'
         if return_oop == OOP_ILLEGAL:
-            raise GemstoneError(self.error)
+            raise error
         return GemObject(self, return_oop)
            
     def log_out(self):
-        self.error.c_error.init()
-        if not GciTsLogout(self.c_session, &(self.error.c_error)):
-            raise GemstoneError(self.error)
+        error = GemstoneError(self)
+        if not GciTsLogout(self.c_session, &(error.c_error)):
+            raise error
 
 #======================================================================================================================
