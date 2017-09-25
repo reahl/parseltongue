@@ -17,6 +17,8 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
    /vagrant/gemstone/defineGemStoneEnvironment.sh
+   mkdir ~/.reahlworkspace
+   touch ~/.reahlworkspace/dist-egg
    pip install cython
    pip install pytest
    pip install reahl.component
