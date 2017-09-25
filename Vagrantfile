@@ -20,7 +20,5 @@ Vagrant.configure("2") do |config|
    mkdir ~/.reahlworkspace
    touch ~/.reahlworkspace/dist-egg
    pip install cython
-   pip install pytest
-   pip install reahl.component
   SHELL
 end
