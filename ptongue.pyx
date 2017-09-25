@@ -31,9 +31,6 @@ GCI_ERR_reasonSize    =  GCI_ERR_STR_SIZE
 GCI_MAX_ERR_ARGS      =  10
 
 #======================================================================================================================
-cdef extern from "gci.hf":
-    bint GciOopToBool(OopType theObject)
-
 cdef extern from "gcits.hf":
     cdef cppclass GciErrSType:
         OopType         category
