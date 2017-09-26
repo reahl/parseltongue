@@ -112,7 +112,7 @@ def test_login_os_user(stone_fixture):
         except GemstoneError as e:
             # TODO: this can be done better : with expected() from reahl-tofu
             assert 'Password validation failed for user vagrant' in e.message
-
+            
         session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
         assert session.is_logged_in
 

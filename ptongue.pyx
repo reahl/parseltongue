@@ -76,6 +76,9 @@ cdef extern from "gcits.hf":
     int GciTsSessionIsRemote(GciSession sess)
     OopType OOP_NIL
     OopType OOP_ILLEGAL
+    OopType OOP_FALSE
+    OopType OOP_TRUE
+    OopType OOP_CLASS_SYMBOL
     OopType GciTsPerform(
         GciSession sess,
         OopType receiver,
@@ -90,13 +93,21 @@ cdef extern from "gcits.hf":
         OopType symbolList, GciErrSType *err)
     OopType GciTsResolveSymbolObj(GciSession sess, 
 		OopType str, OopType symbolList, GciErrSType *err)
+    OopType GciTsNewSymbol(GciSession sess, const char *cString,
+        GciErrSType *err)
+    int GciTsIsKindOf(GciSession sess, OopType obj, OopType aClass, GciErrSType *err)
 
 
 #======================================================================================================================
-cdef class PyGciErrSType:
+cdef class GemstoneError(Exception):
     cdef GciErrSType c_error
-    def __cinit__(self):
+    cdef Session session
+    def __cinit__(self, sess):
         self.c_error.init()
+        self.session = sess
+
+    cdef set_error(self, GciErrSType error):
+        self.c_error = error
 
     @property
     def category(self):
@@ -108,13 +119,13 @@ cdef class PyGciErrSType:
 
     @property
     def exception_obj(self):
-        return GemObject(self.c_error.exceptionObj)
+        return GemObject(self.session, self.c_error.exceptionObj)
 
     @property
     def args(self):
         args = [GemObject(self.c_error.args[0])]
         for i in xrange(1, self.c_error.argCount):
-            args.append(GemObject(self.c_error.args[i]))
+            args.append(GemObject(self.session, self.c_error.args[i]))
         return args
 
     @property
@@ -131,47 +142,64 @@ cdef class PyGciErrSType:
 
     @property
     def reason(self):
-        return self.c_error.reason
+        return self.c_error.reason.decode('utf-8')
 
     @property
     def message(self):
-        return self.c_error.message
-
-    # def set_error(self, int errNum, str msg):
-    #     self.c_error.setError(errNum, msg.encode('utf-8'))
-
-    # def set_fatal_error(self, int errNum, str msg):
-    #     self.c_error.setFatalError(errNum, msg.encode('utf-8'))
-
-
-
-class InvalidSession(Exception):
-   pass
-
-#======================================================================================================================
-class GemstoneError(Exception):
-    def __init__(self, message, reason, exception):
-        self.message = message
-        self.reason = reason
-        self.exception = exception
+        return self.c_error.message.decode('utf-8')
 
     def __str__(self):
-        return '{}: {}, {}'.format(self.exception, self.message, self.reason)
+        return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
+
 
 cdef make_GemstoneError(Session session, GciErrSType e):
     return GemstoneError(e.message.decode('utf-8'), e.reason.decode('utf-8'), GemObject(session, e.exceptionObj))
 
+class InvalidSession(Exception):
+    pass
+
+
+cdef make_GemstoneError(Session session, GciErrSType e):
+    error = GemstoneError(session)
+    error.set_error(e)
+    return error
 
 #======================================================================================================================
 cdef char* to_c_bytes(py_string):
     return py_string.encode('utf-8')
 
 cdef class GemObject:
-    cdef OopType oop
+    cdef OopType c_oop
     cdef Session session
     def __cinit__(self, Session session, OopType oop):
         self.session = session
-        self.oop = oop
+        self.c_oop = oop
+
+    @property
+    def oop(self):
+        return self.c_oop
+
+    @property
+    def is_nil(self):
+        return self.c_oop == OOP_NIL
+
+    @property
+    def is_symbol(self):
+        return self.is_kind_of(GemObject(self.session, OOP_CLASS_SYMBOL))
+
+    @property
+    def to_py(self):
+        if self.c_oop == OOP_TRUE:
+            return True
+        elif self.c_oop == OOP_FALSE:
+            return False
+
+    def is_kind_of(self, GemObject a_class):
+        cdef GciErrSType error
+        cdef int is_kind_of_result = GciTsIsKindOf(self.session.c_session, self.c_oop, a_class.c_oop, &error)
+        if is_kind_of_result == -1:
+            raise make_GemstoneError(self.session, error)
+        return <bint>is_kind_of_result
 
     @property
     def oop(self):
@@ -179,7 +207,7 @@ cdef class GemObject:
 
     def perform(self, selector, *args):
         cdef GciErrSType error
-        cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
+        cdef OopType selector_oop = selector.c_oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
 
         cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
@@ -190,7 +218,7 @@ cdef class GemObject:
         environment_id = 0
 
         cdef OopType return_oop = GciTsPerform(self.session.c_session,
-                                            self.oop,
+                                            self.c_oop,
                                             selector_oop,
                                             selector_str,
                                             cargs, 
@@ -204,8 +232,7 @@ cdef class GemObject:
         return GemObject(self.session, return_oop)
 
     def __str__(self):
-        return '<%s object with oop %s>' % (self.__class__, self.oop)
-
+        return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
 #======================================================================================================================
 cdef class Session:
@@ -214,7 +241,6 @@ cdef class Session:
                   str host_username=None, str host_password='',
                   str netldi_task='gemnetobject'):
         cdef GciErrSType error
-
         cdef char* c_host_username = NULL
         if host_username:
             c_host_username = to_c_bytes(host_username)
@@ -249,7 +275,7 @@ cdef class Session:
     def is_remote(self):
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         if remote == -1:
-           raise InvalidSession()
+            raise InvalidSession()
         return <bint>remote
 
     @property
@@ -257,14 +283,23 @@ cdef class Session:
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
+    def new_symbol(self, str py_string):
+        cdef GciErrSType error
+        cdef char *c_string = to_c_bytes(py_string)
+        cdef OopType return_oop = GciTsNewSymbol(self.c_session, c_string, &error)
+        if return_oop == OOP_ILLEGAL:
+            raise make_GemstoneError(self, error)
+        return GemObject(self, return_oop)
+
     def resolve_symbol(self, symbol, GemObject symbol_list=None):
         cdef GciErrSType error
-        cdef OopType return_oop
+        cdef OopType return_oop = OOP_NIL
         if isinstance(symbol, str):
             return_oop = GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
                                             symbol_list.oop if symbol_list else OOP_NIL, &error)
         elif isinstance(symbol, GemObject):
-            return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, symbol_list, &error)
+            return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, 
+                                            symbol_list.oop if symbol_list else OOP_NIL, &error)
         else:
             assert None, 'I am unhappy'
         if return_oop == OOP_ILLEGAL:

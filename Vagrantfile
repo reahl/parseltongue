@@ -12,11 +12,12 @@ Vagrant.configure("2") do |config|
    apt-get update
    apt-get install -y gdb
    apt-get install -y libpam0g-dev
-   pip install cython
    /vagrant/gemstone/installGemStone.sh
   SHELL
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
    /vagrant/gemstone/defineGemStoneEnvironment.sh
+   mkdir -p ~/.reahlworkspace/dist-egg
+   pip install cython
   SHELL
 end
