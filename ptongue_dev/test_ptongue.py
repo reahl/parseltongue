@@ -148,7 +148,7 @@ def test_execute(session):
     assert date_class.oop == date_class_resolved.oop
 
 
-def test_executei_in_context(session):
+def test_execute_in_context(session):
     date_class_resolved = session.resolve_symbol('Date')
     date_class = session.execute('^self yourself', context=date_class_resolved)
     assert date_class.oop == date_class_resolved.oop

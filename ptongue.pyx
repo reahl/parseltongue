@@ -152,12 +152,8 @@ cdef class GemstoneError(Exception):
         return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
 
 
-cdef make_GemstoneError(Session session, GciErrSType e):
-    return GemstoneError(e.message.decode('utf-8'), e.reason.decode('utf-8'), GemObject(session, e.exceptionObj))
-
 class InvalidSession(Exception):
     pass
-
 
 cdef make_GemstoneError(Session session, GciErrSType e):
     error = GemstoneError(session)
@@ -203,7 +199,7 @@ cdef class GemObject:
 
     @property
     def oop(self):
-        return self.oop
+        return self.c_oop
 
     def perform(self, selector, *args):
         cdef GciErrSType error
