@@ -6,3 +6,10 @@ build
 .flooignore
 .cache
 *.cpp
+*.iml
+.idea
+.eggs
+*.egg-info
+*.so
+__pycache__
+
