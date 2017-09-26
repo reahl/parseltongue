@@ -149,7 +149,7 @@ cdef class GemstoneError(Exception):
         return self.c_error.message.decode('utf-8')
 
     def __str__(self):
-        return ('{}: {}, {}'.format(self.exception, self.message, self.reason)).replace('\\n', '')
+        return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
 
 class InvalidSession(Exception):
     pass
