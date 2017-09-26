@@ -99,7 +99,6 @@ cdef extern from "gcits.hf":
 
 
 #======================================================================================================================
-#Option 1
 cdef class GemstoneError(Exception):
     cdef GciErrSType c_error
     cdef Session session
@@ -150,7 +149,7 @@ cdef class GemstoneError(Exception):
         return self.c_error.message.decode('utf-8')
 
     def __str__(self):
-        return ('{}{}'.format(self.message, self.reason)).replace('\\n', '\n')
+        return ('{}: {}, {}'.format(self.exception, self.message, self.reason)).replace('\\n', '')
 
 class InvalidSession(Exception):
     pass
@@ -192,10 +191,10 @@ cdef class GemObject:
 
     def is_kind_of(self, GemObject a_class):
         cdef GciErrSType error
-        cdef int is_type_of = GciTsIsKindOf(self.session.c_session, self.c_oop, a_class.c_oop, &error)
-        if is_type_of == -1:
+        cdef int is_kind_of_result = GciTsIsKindOf(self.session.c_session, self.c_oop, a_class.c_oop, &error)
+        if is_kind_of_result == -1:
             raise make_GemstoneError(self.session, error)
-        return <bint>is_type_of
+        return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
         cdef GciErrSType error
