@@ -157,6 +157,7 @@ cdef class GemstoneError(Exception):
     def __str__(self):
         return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
 
+
 class InvalidSession(Exception):
     pass
 
@@ -213,6 +214,10 @@ cdef class GemObject:
             raise make_GemstoneError(self.session, error)
         return <bint>is_kind_of_result
 
+    @property
+    def oop(self):
+        return self.c_oop
+
     def perform(self, selector, *args):
         cdef GciErrSType error
         cdef OopType selector_oop = selector.c_oop if isinstance(selector, GemObject) else OOP_ILLEGAL
@@ -267,17 +272,17 @@ cdef class Session:
     def abort(self):
         cdef GciErrSType error
         if not GciTsAbort(self.c_session, &error):
-            raise make_GemstoneError(self, error)
+           raise make_GemstoneError(self, error)
 
     def begin(self):
         cdef GciErrSType error
         if not GciTsBegin(self.c_session, &error):
-            raise make_GemstoneError(self, error)
+           raise make_GemstoneError(self, error)
 
     def commit(self):
         cdef GciErrSType error
         if not GciTsCommit(self.c_session, &error):
-            raise make_GemstoneError(self, error)
+           raise make_GemstoneError(self, error)
 
     @property
     def is_remote(self):
@@ -332,6 +337,6 @@ cdef class Session:
     def log_out(self):
         cdef GciErrSType error
         if not GciTsLogout(self.c_session, &error):
-            raise make_GemstoneError(self, error)
+           raise make_GemstoneError(self, error)
 
 #======================================================================================================================
