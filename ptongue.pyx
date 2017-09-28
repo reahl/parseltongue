@@ -176,6 +176,9 @@ cdef class GemstoneError(Exception):
 class InvalidSession(Exception):
     pass
 
+class NotYetImplemented(Exception):
+    pass
+
 cdef make_GemstoneError(Session session, GciErrSType e):
     error = GemstoneError(session)
     error.set_error(e)
@@ -211,7 +214,10 @@ cdef class GemObject:
             return well_known_py_instances[self.oop]
         except KeyError:
             gem_class = self.oop_class()
-            gem_class_name = well_known_class_names[gem_class.oop]
+            try:
+                gem_class_name = well_known_class_names[gem_class.oop]
+            except KeyError:
+                raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
 
     def _intreger_to_py(self):
