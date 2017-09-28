@@ -80,6 +80,7 @@ cdef extern from "gcits.hf":
     OopType OOP_TRUE
     OopType OOP_CLASS_SYMBOL
     OopType OOP_CLASS_INTEGER
+    OopType OOP_CLASS_SMALL_INTEGER
     OopType OOP_CLASS_Utf8
     OopType GciTsPerform(
         GciSession sess,
@@ -98,11 +99,26 @@ cdef extern from "gcits.hf":
     OopType GciTsNewSymbol(GciSession sess, const char *cString,
         GciErrSType *err)
     int GciTsIsKindOf(GciSession sess, OopType obj, OopType aClass, GciErrSType *err)
+    OopType GciTsFetchClass(GciSession sess, OopType obj, GciErrSType *err)
     OopType GciTsExecute(GciSession sess,
         const char* sourceStr, OopType sourceOop,
         OopType contextObject, OopType symbolList,
         int flags, unsigned short environmentId,  GciErrSType *err)
     bint GciTsOopToI64(GciSession sess, OopType oop, long int *result, GciErrSType *err)
+#======================================================================================================================
+
+well_known_class_names = { 
+    OOP_CLASS_SYMBOL: 'symbol',
+    OOP_CLASS_INTEGER: 'intreger',
+    OOP_CLASS_SMALL_INTEGER: 'intreger',
+    OOP_CLASS_Utf8: 'string'
+ }
+
+well_known_py_instances = {
+    OOP_TRUE: True,
+    OOP_FALSE: False,
+    OOP_NIL: None
+}
 
 #======================================================================================================================
 cdef class GemstoneError(Exception):
@@ -190,21 +206,27 @@ cdef class GemObject:
 
     @property
     def to_py(self):
-        if self.c_oop == OOP_NIL:
-            return None
-        elif self.c_oop == OOP_TRUE:
-            return True
-        elif self.c_oop == OOP_FALSE:
-            return False
-        elif self.is_kind_of(GemObject(self.session, OOP_CLASS_INTEGER)):
-            return self.oop_to_int()
+        value = None
+        try: 
+            return well_known_py_instances[self.oop]
+        except KeyError:
+            gem_class = self.oop_class()
+            gem_class_name = well_known_class_names[gem_class.oop]
+            return getattr(self, '_{}_to_py'.format(gem_class_name))()
 
-    cdef oop_to_int(self):
+    def _intreger_to_py(self):
         cdef GciErrSType error
         cdef long int result = 0 
         if not GciTsOopToI64(self.session.c_session, self.oop, &result, &error):
             make_GemstoneError(self.session, error)
         return result
+
+    def oop_class(self):
+        cdef GciErrSType error
+        cdef OopType return_oop = GciTsFetchClass(self.session.c_session, self.c_oop, &error)
+        if return_oop == OOP_ILLEGAL:
+           raise make_GemstoneError(self.session, error)
+        return GemObject(self.session, return_oop)
 
     def is_kind_of(self, GemObject a_class):
         cdef GciErrSType error
@@ -291,14 +313,12 @@ cdef class Session:
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
-    def execute(self, str source_str=None, GemObject source_oop=None, 
-                GemObject context=None, GemObject symbol_list=None):
+    def execute(self, str source_str=None, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef char *c_source_str = NULL
         if source_str:
             c_source_str = to_c_bytes(source_str)
-        cdef OopType return_oop = GciTsExecute(self.c_session, c_source_str, 
-                                            source_oop.oop if source_oop else OOP_CLASS_Utf8,
+        cdef OopType return_oop = GciTsExecute(self.c_session, c_source_str, OOP_CLASS_Utf8,
                                             context.oop if context else OOP_NIL, 
                                             symbol_list.oop if symbol_list else OOP_NIL,
                                             0, 0,  &error)
