@@ -109,8 +109,8 @@ cdef extern from "gcits.hf":
 
 well_known_class_names = { 
     OOP_CLASS_SYMBOL: 'symbol',
-    OOP_CLASS_INTEGER: 'intreger',
-    OOP_CLASS_SMALL_INTEGER: 'intreger',
+    OOP_CLASS_INTEGER: 'integer',
+    OOP_CLASS_SMALL_INTEGER: 'integer',
     OOP_CLASS_Utf8: 'string'
  }
 
@@ -220,11 +220,11 @@ cdef class GemObject:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
 
-    def _intreger_to_py(self):
+    def _integer_to_py(self):
         cdef GciErrSType error
         cdef long int result = 0 
         if not GciTsOopToI64(self.session.c_session, self.oop, &result, &error):
-            make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.session, error)
         return result
 
     def _class(self):
@@ -319,7 +319,7 @@ cdef class Session:
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
-    def execute(self, str source_str=None, GemObject context=None, GemObject symbol_list=None):
+    def execute(self, str source_str, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef char *c_source_str = NULL
         if source_str:
