@@ -188,16 +188,16 @@ def test_translating_nil_to_python(session):
 
 
 def test_transactions(session):
+    some_object = session.resolve_symbol('Date')
+    my_symbol = session.new_symbol('my_symbol')
+    user_globals = session.resolve_symbol('UserGlobals')
+
+    user_globals.perform('at:put:', my_symbol, some_object) 
+    assert user_globals.perform('includesKey:', my_symbol).to_py
+    session.abort()
+    assert not user_globals.perform('includesKey:', my_symbol).to_py
+
     try:
-       some_object = session.resolve_symbol('Date')
-       my_symbol = session.new_symbol('my_symbol')
-       user_globals = session.resolve_symbol('UserGlobals')
-
-       user_globals.perform('at:put:', my_symbol, some_object) 
-       assert user_globals.perform('includesKey:', my_symbol).to_py
-       session.abort()
-       assert not user_globals.perform('includesKey:', my_symbol).to_py
-
        user_globals.perform('at:put:', my_symbol, some_object) 
        assert user_globals.perform('includesKey:', my_symbol).to_py
        session.commit()
