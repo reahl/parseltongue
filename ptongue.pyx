@@ -213,7 +213,7 @@ cdef class GemObject:
         try: 
             return well_known_py_instances[self.oop]
         except KeyError:
-            gem_class = self._class()
+            gem_class = self.gemstone_class()
             try:
                 gem_class_name = well_known_class_names[gem_class.oop]
             except KeyError:
@@ -227,7 +227,7 @@ cdef class GemObject:
             raise make_GemstoneError(self.session, error)
         return result
 
-    def _class(self):
+    def gemstone_class(self):
         cdef GciErrSType error
         cdef OopType return_oop = GciTsFetchClass(self.session.c_session, self.c_oop, &error)
         if return_oop == OOP_ILLEGAL:
