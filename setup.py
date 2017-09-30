@@ -6,7 +6,7 @@ gemstone_dir = environ['GEMSTONE']
 
 setup(
     name='parseltongue',
-    setup_requires=['cython','pytest-runner', 'backports.weakref'],
+    setup_requires=['cython','pytest-runner'],
     tests_require=['pytest', 'reahl-component'],
     ext_modules=cythonize([Extension('ptongue',
                     include_dirs = ['{}/include'.format(gemstone_dir)],

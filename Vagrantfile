@@ -19,6 +19,5 @@ Vagrant.configure("2") do |config|
    /vagrant/gemstone/defineGemStoneEnvironment.sh
    mkdir -p ~/.reahlworkspace/dist-egg
    pip install cython
-   pip install backports.weakref
   SHELL
 end
