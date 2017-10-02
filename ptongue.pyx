@@ -207,7 +207,7 @@ cdef class GemObject:
 
     @property
     def is_symbol(self):
-        return self.is_kind_of(GemObject(self.session, OOP_CLASS_SYMBOL))
+        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
 
     @property
     def to_py(self):
