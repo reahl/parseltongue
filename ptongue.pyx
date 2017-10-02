@@ -134,21 +134,21 @@ cdef class GemstoneError(Exception):
 
     @property
     def category(self):
-        return GemObject.make_gem_object(self.c_error.category)   
+        return self.session.get_or_create_gem_object(self.c_error.category)   
 
     @property
     def context(self):
-        return GemObject.make_gem_object(self.c_error.context)
+        return self.session.get_or_create_gem_object(self.c_error.context)
 
     @property
     def exception_obj(self):
-        return GemObject.make_gem_object(self.session, self.c_error.exceptionObj)
+        return self.session.get_or_create_gem_object(self.c_error.exceptionObj)
 
     @property
     def args(self):
-        args = [GemObject.make_gem_object(self.c_error.args[0])]
+        args = [self.session.get_or_create_gem_object(self.c_error.args[0])]
         for i in xrange(1, self.c_error.argCount):
-            args.append(GemObject.make_gem_object(self.session, self.c_error.args[i]))
+            args.append(self.session.get_or_create_gem_object(self.c_error.args[i]))
         return args
 
     @property
@@ -197,14 +197,6 @@ cdef class GemObject:
         self.session = session
         self.c_oop = oop
 
-    @classmethod 
-    def make_gem_object(cls, Session session, OopType oop):
-        if oop in session.instances:
-            return session.instances[oop]
-        new_gem_object = GemObject(session, oop)
-        session.instances[oop] = new_gem_object
-        return new_gem_object
-
     @property
     def oop(self):
         return self.c_oop
@@ -242,7 +234,7 @@ cdef class GemObject:
         cdef OopType return_oop = GciTsFetchClass(self.session.c_session, self.c_oop, &error)
         if return_oop == OOP_ILLEGAL:
            raise make_GemstoneError(self.session, error)
-        return GemObject.make_gem_object(self.session, return_oop)
+        return self.session.get_or_create_gem_object(return_oop)
 
     def is_kind_of(self, GemObject a_class):
         cdef GciErrSType error
@@ -275,7 +267,7 @@ cdef class GemObject:
         free(cargs)
         if return_oop == OOP_ILLEGAL:
            raise make_GemstoneError(self.session, error)
-        return GemObject.make_gem_object(self.session, return_oop)
+        return self.session.get_or_create_gem_object(return_oop)
 
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
@@ -283,7 +275,7 @@ cdef class GemObject:
 #======================================================================================================================
 cdef class Session:
     cdef GciSession c_session
-    cdef object c_instances
+    cdef object instances
     def __cinit__(self, str username, str password, str stone_name='gs64stone',
                   str host_username=None, str host_password='',
                   str netldi_task='gemnetobject'):
@@ -292,7 +284,7 @@ cdef class Session:
         if host_username:
             c_host_username = to_c_bytes(host_username)
 
-        self.c_instances = WeakValueDictionary()
+        self.instances = WeakValueDictionary()
         self.c_session = GciTsLogin(stone_name.encode('utf-8'),
                             c_host_username,
                             host_password.encode('utf-8'),
@@ -331,9 +323,14 @@ cdef class Session:
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
-    @property
-    def instances(self):
-        return self.c_instances
+    def get_or_create_gem_object(self, oop):
+        try:
+            return self.instances[oop]
+        except KeyError:
+            new_gem_object = GemObject(self, oop)
+            self.instances[oop] = new_gem_object
+            return new_gem_object
+
 
     def execute(self, str source_str, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
@@ -346,7 +343,7 @@ cdef class Session:
                                             0, 0,  &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
-        return GemObject.make_gem_object(self, return_oop)
+        return self.get_or_create_gem_object(return_oop)
 
     def new_symbol(self, str py_string):
         cdef GciErrSType error
@@ -354,7 +351,7 @@ cdef class Session:
         cdef OopType return_oop = GciTsNewSymbol(self.c_session, c_string, &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
-        return GemObject.make_gem_object(self, return_oop)
+        return self.get_or_create_gem_object(return_oop)
 
     def resolve_symbol(self, symbol, GemObject symbol_list=None):
         cdef GciErrSType error
@@ -369,7 +366,7 @@ cdef class Session:
             assert None, 'I am unhappy'
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
-        return GemObject.make_gem_object(self, return_oop)
+        return self.get_or_create_gem_object(return_oop)
            
     def log_out(self):
         cdef GciErrSType error
