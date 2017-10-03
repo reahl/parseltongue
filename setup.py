@@ -8,7 +8,7 @@ setup(
     name='parseltongue',
     setup_requires=['cython','pytest-runner'],
     tests_require=['pytest', 'reahl-component'],
-    pakages=['ptongue'],
+    packages=['ptongue'],
     ext_modules=cythonize([Extension('ptongue.gemproxy',
                     include_dirs = ['{}/include'.format(gemstone_dir)],
                     library_dirs=['.', '{}/lib'.format(gemstone_dir)],
