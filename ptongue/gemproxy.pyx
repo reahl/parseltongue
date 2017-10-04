@@ -124,9 +124,9 @@ well_known_class_names = {
     OOP_CLASS_Float: 'double',
     OOP_CLASS_SYMBOL: 'string',
     OOP_CLASS_CHARACTER: 'string',
-    OOP_CLASS_Utf8: 'string'
-    OOP_CLASS_Unicode7: 'string'
-    OOP_CLASS_Unicode16: 'string'
+    OOP_CLASS_Utf8: 'string',
+    OOP_CLASS_Unicode7: 'string',
+    OOP_CLASS_Unicode16: 'string',
     OOP_CLASS_Unicode32: 'string'
  }
 
