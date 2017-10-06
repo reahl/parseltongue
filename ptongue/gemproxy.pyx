@@ -79,11 +79,16 @@ cdef extern from "gcits.hf":
     OopType OOP_ILLEGAL
     OopType OOP_FALSE
     OopType OOP_TRUE
-    OopType OOP_CLASS_SYMBOL
     OopType OOP_CLASS_INTEGER
     OopType OOP_CLASS_SMALL_INTEGER
     OopType OOP_CLASS_SMALL_DOUBLE 
     OopType OOP_CLASS_Float
+    OopType OOP_CLASS_SYMBOL
+    OopType OOP_CLASS_STRING
+    OopType OOP_CLASS_DoubleByteString
+    OopType OOP_CLASS_DoubleByteSymbol
+    OopType OOP_CLASS_QuadByteString
+    OopType OOP_CLASS_QuadByteSymbol
     OopType OOP_CLASS_CHARACTER
     OopType OOP_CLASS_Utf8
     OopType OOP_CLASS_Unicode7
@@ -112,9 +117,13 @@ cdef extern from "gcits.hf":
         OopType contextObject, OopType symbolList,
         int flags, unsigned short environmentId,  GciErrSType *err)
     bint GciTsOopToI64(GciSession sess, OopType oop, long int *result, GciErrSType *err)
+    bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
     long long GciTsFetchChars(GciSession sess, OopType theObject, long long startIndex, char *cString, 
         long long maxSize, GciErrSType *err)
-    bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
+    long long GciTsFetchUnicode(GciSession sess,
+        OopType obj, unsigned short *dest, long long destSize, long *requiredSize,
+        GciErrSType *err )
+
 #======================================================================================================================
 
 well_known_class_names = { 
@@ -122,9 +131,14 @@ well_known_class_names = {
     OOP_CLASS_SMALL_INTEGER: 'integer',
     OOP_CLASS_SMALL_DOUBLE: 'double',
     OOP_CLASS_Float: 'double',
+    OOP_CLASS_STRING: 'string',
     OOP_CLASS_SYMBOL: 'string',
+    OOP_CLASS_DoubleByteString: 'string',
+    OOP_CLASS_DoubleByteSymbol: 'string',
+    OOP_CLASS_QuadByteString: 'string',
+    OOP_CLASS_QuadByteSymbol: 'string',
     OOP_CLASS_CHARACTER: 'string',
-    OOP_CLASS_Utf8: 'string',
+    OOP_CLASS_Utf8: 'utf8',
     OOP_CLASS_Unicode7: 'string',
     OOP_CLASS_Unicode16: 'string',
     OOP_CLASS_Unicode32: 'string'
@@ -253,11 +267,32 @@ cdef class GemObject:
 
     def _string_to_py(self, long long start_index=1, long long max_size=1024):
         cdef GciErrSType error
+        cdef unsigned short *c_string = <unsigned short *>malloc(max_size * sizeof(unsigned short))
+        cdef long int *required_size = <long int *>malloc(1 * sizeof(long int))
+        cdef long long bytes_returned = GciTsFetchUnicode(self.session.c_session,
+                    self.oop, c_string, max_size, required_size, &error)
+        required_size_py = required_size[0]
+        max_size_py = max_size
+
+        if bytes_returned == -1:
+            raise make_GemstoneError(self.session, error)
+        py_string = ''
+        for i in xrange(bytes_returned):
+            py_string = '{}{}'.format(py_string, chr(c_string[i]))
+
+        free (required_size)
+        free (c_string)
+        return py_string
+
+    def _utf8_to_py(self, long long start_index=1, long long max_size=1024):
+        cdef GciErrSType error
         cdef char *c_string = <char *>malloc(max_size * sizeof(char))
         cdef long long bytes_returned = GciTsFetchChars(self.session.c_session, self.oop, start_index, 
-                                                        c_string, max_size, &error)
+                                                c_string, max_size, &error)
+
         if bytes_returned == -1:
-            make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.session, error)
+
         py_string = c_string.decode('utf-8')
         free (c_string)
         return py_string
