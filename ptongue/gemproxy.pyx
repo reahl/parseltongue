@@ -123,7 +123,11 @@ cdef extern from "gcits.hf":
     long long GciTsFetchUnicode(GciSession sess,
         OopType obj, unsigned short *dest, long long destSize, long *requiredSize,
         GciErrSType *err )
-    long long GciTsFetchSize(GciSession sess, OopType obj, GciErrSType *err)
+    long long GciTsFetchUtf8(GciSession sess,OopType obj, ByteType *dest, long long destSize, 
+        long *requiredSize, GciErrSType *err )
+    long long GciTsFetchUtf8Bytes(GciSession sess,
+        OopType aString, long long startIndex, ByteType *dest, long long bufSize,
+        OopType *utf8String, GciErrSType *err , int flags)
 
 #======================================================================================================================
 
@@ -267,38 +271,77 @@ cdef class GemObject:
         return result
 
     def _string_to_py(self):
-        cdef GciErrSType fetch_size_error
-        cdef GciErrSType fetch_unicode_error
-        cdef long long max_size = GciTsFetchSize(self.session.c_session, self.oop, &fetch_size_error)
-        cdef unsigned short *c_string = <unsigned short *>malloc(max_size * sizeof(unsigned short))
+        cdef GciErrSType error
+        cdef long long max_size = self.perform('size').to_py
+        cdef unsigned short *dest = <unsigned short *>malloc(max_size * sizeof(unsigned short))
         cdef long int required_size = 0
-        cdef long long bytes_returned = GciTsFetchUnicode(self.session.c_session, self.oop, c_string,
-                                                        max_size, &required_size, &fetch_unicode_error)
-        if required_size > max_size:
-            raise make_GemstoneError(self.session, fetch_size_error)
-        elif bytes_returned == -1:
-            raise make_GemstoneError(self.session, fetch_unicode_error)
+        cdef long long bytes_returned = GciTsFetchUnicode(self.session.c_session, self.oop, dest,
+                                                        max_size, &required_size, &error)
+
+        if bytes_returned == -1:
+            raise make_GemstoneError(self.session, error)
 
         py_string = ''
         for i in xrange(bytes_returned):
-            py_string = '{}{}'.format(py_string, chr(c_string[i]))
+            py_string = '{}{}'.format(py_string, chr(dest[i]))
 
-        free (c_string)
+        free (dest)
         return py_string
 
     def _utf8_to_py(self):
-        cdef GciErrSType fetch_size_error
-        cdef GciErrSType fetch_chars_error
-        cdef long long max_size = GciTsFetchSize(self.session.c_session, self.oop, &fetch_size_error)
+        cdef GciErrSType error
+        cdef long long max_size = self.perform('size').to_py
         cdef char *c_string = <char *>malloc(max_size * sizeof(char))
         cdef long long bytes_returned = GciTsFetchChars(self.session.c_session, self.oop, 1, 
-                                                        c_string, max_size + 1, &fetch_chars_error)
+                                                        c_string, max_size + 1, &error)
         if bytes_returned == -1:
-            raise make_GemstoneError(self.session, fetch_chars_error)
+            raise make_GemstoneError(self.session, error)
 
         py_string = c_string.decode('utf-8')
         free (c_string)
         return py_string
+
+    def fetch_utf8(self):
+        cdef GciErrSType error
+        cdef long long dest_size = 1024 #self.perform('size').to_py
+        cdef ByteType *dest = <ByteType *>malloc(dest_size * sizeof(ByteType))
+        cdef long int required_size = 0
+        cdef bytes_returned = GciTsFetchUtf8(self.session.c_session, self.oop, dest, dest_size, 
+            &required_size, &error)
+
+        if bytes_returned == -1:
+            raise make_GemstoneError(self.session, error)
+
+        py_string = ''
+        py_bytes = []
+        for i in xrange(bytes_returned):
+            py_string = '{}{}'.format(py_string, chr(dest[i]))
+            py_bytes.append(dest[i])
+
+        free (dest)
+        return [py_string, py_bytes]
+
+    def fetch_utf8_bytes(self):
+        cdef GciErrSType error
+        cdef long long dest_size = 1024 #self.perform('size').to_py
+        cdef ByteType *dest = <ByteType *>malloc(dest_size * sizeof(ByteType))
+        cdef long int required_size = 0
+        cdef OopType utf8_string
+
+        cdef long long bytes_returned = GciTsFetchUtf8Bytes(self.session.c_session, self.oop,
+            1, dest, dest_size, &utf8_string, &error, 0)
+
+        if bytes_returned == -1:
+            raise make_GemstoneError(self.session, error)
+
+        py_string = ''
+        py_bytes = []
+        for i in xrange(bytes_returned):
+            py_string = '{}{}'.format(py_string, chr(dest[i]))
+            py_bytes.append(dest[i])
+
+        free (dest)
+        return [py_string, py_bytes]
 
     def gemstone_class(self):
         cdef GciErrSType error
