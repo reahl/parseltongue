@@ -79,10 +79,21 @@ cdef extern from "gcits.hf":
     OopType OOP_ILLEGAL
     OopType OOP_FALSE
     OopType OOP_TRUE
-    OopType OOP_CLASS_SYMBOL
     OopType OOP_CLASS_INTEGER
     OopType OOP_CLASS_SMALL_INTEGER
+    OopType OOP_CLASS_SMALL_DOUBLE 
+    OopType OOP_CLASS_Float
+    OopType OOP_CLASS_SYMBOL
+    OopType OOP_CLASS_STRING
+    OopType OOP_CLASS_DoubleByteString
+    OopType OOP_CLASS_DoubleByteSymbol
+    OopType OOP_CLASS_QuadByteString
+    OopType OOP_CLASS_QuadByteSymbol
+    OopType OOP_CLASS_CHARACTER
     OopType OOP_CLASS_Utf8
+    OopType OOP_CLASS_Unicode7
+    OopType OOP_CLASS_Unicode16
+    OopType OOP_CLASS_Unicode32
     OopType GciTsPerform(
         GciSession sess,
         OopType receiver,
@@ -106,16 +117,31 @@ cdef extern from "gcits.hf":
         OopType contextObject, OopType symbolList,
         int flags, unsigned short environmentId,  GciErrSType *err)
     bint GciTsOopToI64(GciSession sess, OopType oop, long int *result, GciErrSType *err)
+    bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
+    long long GciTsFetchUtf8(GciSession sess,OopType obj, ByteType *dest, long long destSize, 
+        long *requiredSize, GciErrSType *err )
+
 #======================================================================================================================
 
 well_known_class_names = { 
-    OOP_CLASS_SYMBOL: 'symbol',
     OOP_CLASS_INTEGER: 'integer',
     OOP_CLASS_SMALL_INTEGER: 'integer',
-    OOP_CLASS_Utf8: 'string'
+    OOP_CLASS_SMALL_DOUBLE: 'double',
+    OOP_CLASS_Float: 'double',
+    OOP_CLASS_STRING: 'string',
+    OOP_CLASS_SYMBOL: 'string',
+    OOP_CLASS_DoubleByteString: 'string',
+    OOP_CLASS_DoubleByteSymbol: 'string',
+    OOP_CLASS_QuadByteString: 'string',
+    OOP_CLASS_QuadByteSymbol: 'string',
+    OOP_CLASS_CHARACTER: 'string',
+    OOP_CLASS_Utf8: 'string',
+    OOP_CLASS_Unicode7: 'string',
+    OOP_CLASS_Unicode16: 'string',
+    OOP_CLASS_Unicode32: 'string'
  }
 
-well_known_py_instances = {
+well_known_instances = {
     OOP_TRUE: True,
     OOP_FALSE: False,
     OOP_NIL: None
@@ -180,6 +206,9 @@ class InvalidSession(Exception):
 class NotYetImplemented(Exception):
     pass
 
+class GemstoneApiError(Exception):
+    pass
+
 cdef make_GemstoneError(Session session, GciErrSType e):
     error = GemstoneError(session)
     error.set_error(e)
@@ -213,7 +242,7 @@ cdef class GemObject:
     def to_py(self):
         value = None
         try: 
-            return well_known_py_instances[self.oop]
+            return well_known_instances[self.oop]
         except KeyError:
             gem_class = self.gemstone_class()
             try:
@@ -228,6 +257,42 @@ cdef class GemObject:
         if not GciTsOopToI64(self.session.c_session, self.oop, &result, &error):
             raise make_GemstoneError(self.session, error)
         return result
+
+    def _double_to_py(self):
+        cdef GciErrSType error
+        cdef double result = 0
+        if not GciTsOopToDouble(self.session.c_session, self.oop, &result, &error):
+            make_GemstoneError(self.session, error)
+        return result
+
+    def _string_to_py(self):
+        cdef GciErrSType error
+        cdef long long max_bytes
+        cdef ByteType *c_string
+        cdef long int required_size = self.session.initial_fetch_size
+        cdef long long bytes_returned
+        cdef bytes py_bytes
+        cdef long long tries = 0
+
+        while required_size > max_bytes:
+            tries = tries + 1
+            if tries > 2:
+                raise GemstoneApiError('Expected GciTsFetchUtf8 to fetch all bytes on a second call.')
+            max_bytes = required_size
+            c_string = <ByteType *>malloc((max_bytes + 1) *sizeof(ByteType))
+            try:
+                bytes_returned = GciTsFetchUtf8(self.session.c_session,
+                         self.oop, c_string, max_bytes, &required_size, &error)
+
+                if bytes_returned == -1:
+                    raise make_GemstoneError(self.session, error)
+
+                c_string[bytes_returned] = '\0'
+                py_bytes = c_string
+            finally:
+                free (c_string)
+
+        return py_bytes.decode('utf-8')
 
     def gemstone_class(self):
         cdef GciErrSType error
@@ -276,9 +341,11 @@ cdef class GemObject:
 cdef class Session:
     cdef GciSession c_session
     cdef object instances
+    cdef short initial_fetch_size
     def __cinit__(self, str username, str password, str stone_name='gs64stone',
                   str host_username=None, str host_password='',
                   str netldi_task='gemnetobject'):
+        self.initial_fetch_size = 200
         cdef GciErrSType error
         cdef char* c_host_username = NULL
         if host_username:
@@ -322,6 +389,10 @@ cdef class Session:
     def is_logged_in(self):
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
+
+    @property
+    def initial_fetch_size(self):
+        return self.initial_fetch_size
 
     def get_or_create_gem_object(self, oop):
         try:

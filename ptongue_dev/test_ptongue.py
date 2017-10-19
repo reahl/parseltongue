@@ -122,11 +122,29 @@ def test_translating_integers_to_python(session):
     number = session.execute('^123').to_py
     assert number is 123
 
+def test_translating_floats_to_python(session):
+    number = session.execute('^123.123').to_py
+    assert number == 123.123
 
 def test_translating_nil_to_python(session):
     nil_py = session.resolve_symbol('nil').to_py
     assert nil_py is None
 
+def test_translating_unicode_strings_to_python(session):
+    unicode_string = 'šamas'
+    string = session.execute("((Unicode16 new) add:( Character codePoint: 0353); yourself), 'amas'")
+    assert string.to_py == unicode_string
+
+@pytest.mark.parametrize('multiplier, plus',[
+    (1, 0),
+    (2, 0),
+    (1, 1),
+    (0, 0)
+    ])
+def test_translating_strings_to_python(session, multiplier, plus):
+    unicode_string = 'a' * (session.initial_fetch_size * multiplier + plus)
+    string = session.execute("'{}'".format(unicode_string))
+    assert string.to_py == unicode_string
 
 def test_transactions(session):
     some_object = session.resolve_symbol('Date')
