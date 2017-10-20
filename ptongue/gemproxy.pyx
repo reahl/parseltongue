@@ -81,6 +81,7 @@ cdef extern from "gcits.hf":
     OopType OOP_TRUE
     OopType OOP_CLASS_INTEGER
     OopType OOP_CLASS_SMALL_INTEGER
+    OopType OOP_CLASS_LargeInteger
     OopType OOP_CLASS_SMALL_DOUBLE 
     OopType OOP_CLASS_Float
     OopType OOP_CLASS_SYMBOL
@@ -120,12 +121,17 @@ cdef extern from "gcits.hf":
     bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
     long long GciTsFetchUtf8(GciSession sess,OopType obj, ByteType *dest, long long destSize, 
         long *requiredSize, GciErrSType *err )
+    OopType GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err)
+    OopType GciTsI64ToOop(GciSession sess, long long arg, GciErrSType *err)
+    OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
+        bint convertToUnicode, GciErrSType *err)
 
 #======================================================================================================================
 
 well_known_class_names = { 
     OOP_CLASS_INTEGER: 'integer',
     OOP_CLASS_SMALL_INTEGER: 'integer',
+    OOP_CLASS_LargeInteger: 'integer',
     OOP_CLASS_SMALL_DOUBLE: 'double',
     OOP_CLASS_Float: 'double',
     OOP_CLASS_STRING: 'string',
@@ -225,6 +231,22 @@ cdef class GemObject:
     def __cinit__(self, Session session, OopType oop):
         self.session = session
         self.c_oop = oop
+
+    @classmethod
+    def from_py(cls, Session session, py_object):
+        cdef GciErrSType error
+        cdef OopType return_oop = OOP_NIL
+        if isinstance(py_object, str):
+            return_oop = GciTsNewUtf8String(session.c_session, py_object.encode('utf-8'), 0, &error)
+        elif isinstance(py_object, int):
+            return_oop = GciTsI64ToOop(session.c_session, py_object, &error)
+        elif isinstance(py_object, float):
+            return_oop = GciTsDoubleToOop(session.c_session, py_object, &error)
+        else:
+            raise NotYetImplemented()
+        if return_oop == OOP_ILLEGAL:
+            raise make_GemstoneError(session, error)
+        return session.get_or_create_gem_object(return_oop)
 
     @property
     def oop(self):

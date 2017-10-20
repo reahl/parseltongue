@@ -146,6 +146,27 @@ def test_translating_strings_to_python(session, multiplier, plus):
     string = session.execute("'{}'".format(unicode_string))
     assert string.to_py == unicode_string
 
+def test_translating_python_int_to_gemstone(session):
+    small_int = 123
+    large_int = 9223372036854775807
+    small_int_oop = GemObject.from_py(session, small_int)
+    large_int_oop = GemObject.from_py(session, large_int)
+    assert small_int_oop.to_py == small_int
+    assert large_int_oop.to_py == large_int
+
+def test_translating_python_float_to_gemstone(session):
+    small_double = 123.123
+    test_float = float(('9' * 40) + '.' + ('9' * 40))
+    small_double_oop = GemObject.from_py(session, small_double)
+    test_float_oop = GemObject.from_py(session, test_float)
+    assert small_double_oop.to_py == small_double
+    assert test_float_oop.to_py == test_float
+
+def test_translating_python_string_to_gemstone(session):
+    test_string = 'šamas'
+    test_string_oop = GemObject.from_py(session, 'šamas')
+    assert test_string_oop.to_py == test_string
+
 def test_transactions(session):
     some_object = session.resolve_symbol('Date')
     my_symbol = session.new_symbol('my_symbol')
