@@ -148,11 +148,14 @@ def test_translating_strings_to_python(session, multiplier, plus):
 
 def test_translating_python_int_to_gemstone(session):
     small_int = 123
-    large_int = 9223372036854775807
+    large_int = 9223372036854775807 #max long long size
+    very_large_int = int('9' * 80)
     small_int_oop = GemObject.from_py(session, small_int)
     large_int_oop = GemObject.from_py(session, large_int)
+    very_large_int_oop = GemObject.from_py(session, very_large_int)
     assert small_int_oop.to_py == small_int
     assert large_int_oop.to_py == large_int
+    assert very_large_int_oop.to_py == very_large_int
 
 def test_translating_python_float_to_gemstone(session):
     small_double = 123.123

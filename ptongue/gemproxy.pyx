@@ -178,8 +178,8 @@ cdef class GemstoneError(Exception):
 
     @property
     def args(self):
-        args = [self.session.get_or_create_gem_object(self.c_error.args[0])]
-        for i in xrange(1, self.c_error.argCount):
+        args = []
+        for i in xrange(0, self.c_error.argCount):
             args.append(self.session.get_or_create_gem_object(self.c_error.args[i]))
         return args
 
@@ -193,7 +193,7 @@ cdef class GemstoneError(Exception):
 
     @property
     def fatal(self):
-        return self.c_error.fatal
+        return <bint>self.c_error.fatal
 
     @property
     def reason(self):
@@ -239,7 +239,10 @@ cdef class GemObject:
         if isinstance(py_object, str):
             return_oop = GciTsNewUtf8String(session.c_session, py_object.encode('utf-8'), 0, &error)
         elif isinstance(py_object, int):
-            return_oop = GciTsI64ToOop(session.c_session, py_object, &error)
+            try:
+                return_oop = GciTsI64ToOop(session.c_session, py_object, &error)
+            except OverflowError:
+                return_oop = session.execute('^{}'.format(py_object)).oop
         elif isinstance(py_object, float):
             return_oop = GciTsDoubleToOop(session.c_session, py_object, &error)
         else:
@@ -277,7 +280,12 @@ cdef class GemObject:
         cdef GciErrSType error
         cdef long int result = 0 
         if not GciTsOopToI64(self.session.c_session, self.oop, &result, &error):
-            raise make_GemstoneError(self.session, error)
+            if error.number != 2163:
+                raise make_GemstoneError(self.session, error)
+            tmp_oop = self.perform('asString')
+            tmp_string = tmp_oop._string_to_py()
+            return int(tmp_string)
+
         return result
 
     def _double_to_py(self):
@@ -423,7 +431,6 @@ cdef class Session:
             new_gem_object = GemObject(self, oop)
             self.instances[oop] = new_gem_object
             return new_gem_object
-
 
     def execute(self, str source_str, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
