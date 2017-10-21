@@ -193,7 +193,7 @@ cdef class GemstoneError(Exception):
 
     @property
     def fatal(self):
-        return <bint>self.c_error.fatal
+        return self.c_error.fatal
 
     @property
     def reason(self):
