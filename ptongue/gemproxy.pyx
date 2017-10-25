@@ -95,6 +95,8 @@ cdef extern from "gcits.hf":
     OopType OOP_CLASS_Unicode7
     OopType OOP_CLASS_Unicode16
     OopType OOP_CLASS_Unicode32
+    OopType OOP_TAG_SMALLINT
+    OopType OOP_NUM_TAG_BITS
     OopType GciTsPerform(
         GciSession sess,
         OopType receiver,
@@ -125,6 +127,7 @@ cdef extern from "gcits.hf":
     OopType GciTsI64ToOop(GciSession sess, long long arg, GciErrSType *err)
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
         bint convertToUnicode, GciErrSType *err)
+    OopType GCI_I32_TO_OOP(int arg)
 
 #======================================================================================================================
 
@@ -240,9 +243,12 @@ cdef class GemObject:
             return_oop = GciTsNewUtf8String(session.c_session, py_object.encode('utf-8'), 0, &error)
         elif isinstance(py_object, int):
             try:
-                return_oop = GciTsI64ToOop(session.c_session, py_object, &error)
+                return_oop = GCI_I32_TO_OOP(<int>py_object)
             except OverflowError:
-                return_oop = session.execute('^{}'.format(py_object)).oop
+                try:
+                    return_oop = GciTsI64ToOop(session.c_session, py_object, &error)
+                except OverflowError:
+                    return_oop = session.execute('^{}'.format(py_object)).oop
         elif isinstance(py_object, float):
             return_oop = GciTsDoubleToOop(session.c_session, py_object, &error)
         else:
@@ -276,6 +282,10 @@ cdef class GemObject:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
 
+    cdef int32_to_py(self):
+        cdef long return_value = <long long>self.c_oop ^ <long long>OOP_TAG_SMALLINT >> <long>OOP_NUM_TAG_BITS
+        return return_value
+
     def _integer_to_py(self):
         cdef GciErrSType error
         cdef long int result = 0 
@@ -291,7 +301,7 @@ cdef class GemObject:
     def _double_to_py(self):
         cdef GciErrSType error
         cdef double result = 0
-        if not GciTsOopToDouble(self.session.c_session, self.oop, &result, &error):
+        if not GciTsOopToDouble(self.session.c_session, self.c_oop, &result, &error):
             make_GemstoneError(self.session, error)
         return result
 
@@ -312,7 +322,7 @@ cdef class GemObject:
             c_string = <ByteType *>malloc((max_bytes + 1) *sizeof(ByteType))
             try:
                 bytes_returned = GciTsFetchUtf8(self.session.c_session,
-                         self.oop, c_string, max_bytes, &required_size, &error)
+                         self.c_oop, c_string, max_bytes, &required_size, &error)
 
                 if bytes_returned == -1:
                     raise make_GemstoneError(self.session, error)
