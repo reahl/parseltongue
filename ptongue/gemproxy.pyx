@@ -2,9 +2,26 @@ from libc.stdlib cimport *
 from libc.string cimport memcpy
 from weakref import WeakValueDictionary
 
+cdef extern from "bits/wordsize.h":
+    cdef const int __WORDSIZE
+
 ctypedef void* GciSession
 ctypedef long unsigned int OopType
 ctypedef unsigned char ByteType
+ctypedef int int32;
+
+ctypedef long int int64
+# IF __x86_64__ and not __ILP32__:
+#     DEF __WORDSIZE = 64
+# ELSE:
+#     DEF __WORDSIZE = 32
+
+# IF WORDSIZE == 64:
+#     ctypedef long int int64
+# ELSE:
+#     # __extension__
+#     ctypedef long long int int64
+
 cdef enum:
     AUTH_NONE = 0 
     AUTH_READ = 1
@@ -128,6 +145,7 @@ cdef extern from "gcits.hf":
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
         bint convertToUnicode, GciErrSType *err)
     OopType GCI_I32_TO_OOP(int arg)
+    bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
 
@@ -282,9 +300,13 @@ cdef class GemObject:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
 
-    cdef int32_to_py(self):
-        cdef long return_value = <long long>self.c_oop ^ <long long>OOP_TAG_SMALLINT >> <long>OOP_NUM_TAG_BITS
-        return return_value
+    def int32_to_py(self):
+        # cdef long return_value = <long long>self.c_oop ^ <long long>OOP_TAG_SMALLINT >> <long>OOP_NUM_TAG_BITS
+        cdef long return_value 
+        if GCI_OOP_IS_SMALL_INT(self.c_oop):
+            return_value = <long long>self.c_oop >> <long>OOP_NUM_TAG_BITS
+            if -2147483647 <= return_value and return_value <= 2147483647:
+                return return_value
 
     def _integer_to_py(self):
         cdef GciErrSType error
