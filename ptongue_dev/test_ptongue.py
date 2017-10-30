@@ -146,29 +146,44 @@ def test_translating_strings_to_python(session, multiplier, plus):
     string = session.execute("'{}'".format(unicode_string))
     assert string.to_py == unicode_string
 
-def test_translating_python_int_to_gemstone(session):
+def test_translating_py_int_to_gem_small_integers(session):
+    zero_int = 0
     small_int = 123
+    converted_zero_int = GemObject.from_py(session, zero_int)
+    converted_small_int = GemObject.from_py(session, small_int)
+    converted_negative_small_int = GemObject.from_py(session, -small_int)
+    assert converted_zero_int.to_py == zero_int
+    assert converted_small_int.to_py == small_int
+    assert converted_negative_small_int.to_py == -small_int
+
+def test_translating_py_int_to_gem_large_integers(session):
     large_int = 9223372036854775807 #max long long size
     very_large_int = int('9' * 80)
-    small_int_oop = GemObject.from_py(session, small_int)
-    large_int_oop = GemObject.from_py(session, large_int)
-    very_large_int_oop = GemObject.from_py(session, very_large_int)
-    assert small_int_oop.to_py == small_int
-    assert large_int_oop.to_py == large_int
-    assert very_large_int_oop.to_py == very_large_int
+    converted_large_int = GemObject.from_py(session, large_int)
+    converted_very_large_int = GemObject.from_py(session, very_large_int)
+    converted_negative_very_large_int = GemObject.from_py(session, -very_large_int)
+    assert converted_large_int.to_py == large_int
+    assert converted_very_large_int.to_py == very_large_int
+    assert converted_negative_very_large_int.to_py == -very_large_int
 
-def test_translating_python_float_to_gemstone(session):
+def test_translating_py_float_to_gem_small_double(session):
     small_double = 123.123
+    converted_small_double = GemObject.from_py(session, small_double)
+    converted_negative_small_double = GemObject.from_py(session, -small_double)
+    assert converted_small_double.to_py == small_double
+    assert converted_negative_small_double.to_py == -small_double
+
+def test_translating_py_float_to_gem_float(session):
     test_float = float(('9' * 40) + '.' + ('9' * 40))
-    small_double_oop = GemObject.from_py(session, small_double)
-    test_float_oop = GemObject.from_py(session, test_float)
-    assert small_double_oop.to_py == small_double
-    assert test_float_oop.to_py == test_float
+    converted_float = GemObject.from_py(session, test_float)
+    converted_negative_float = GemObject.from_py(session, -test_float)
+    assert converted_float.to_py == test_float
+    assert converted_negative_float.to_py == -test_float
 
 def test_translating_python_string_to_gemstone(session):
     test_string = 'šamas'
-    test_string_oop = GemObject.from_py(session, 'šamas')
-    assert test_string_oop.to_py == test_string
+    converted_test_string = GemObject.from_py(session, 'šamas')
+    assert converted_test_string.to_py == test_string
 
 def test_transactions(session):
     some_object = session.resolve_symbol('Date')

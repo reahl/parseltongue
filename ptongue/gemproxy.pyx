@@ -1,26 +1,14 @@
 from libc.stdlib cimport *
+from libc.stdint cimport int32_t, int64_t, uint64_t
 from libc.string cimport memcpy
 from weakref import WeakValueDictionary
 
-cdef extern from "bits/wordsize.h":
-    cdef const int __WORDSIZE
-
 ctypedef void* GciSession
-ctypedef long unsigned int OopType
 ctypedef unsigned char ByteType
-ctypedef int int32;
 
-ctypedef long int int64
-# IF __x86_64__ and not __ILP32__:
-#     DEF __WORDSIZE = 64
-# ELSE:
-#     DEF __WORDSIZE = 32
-
-# IF WORDSIZE == 64:
-#     ctypedef long int int64
-# ELSE:
-#     # __extension__
-#     ctypedef long long int int64
+ctypedef uint64_t OopType
+ctypedef int32_t int32
+ctypedef int64_t int64
 
 cdef enum:
     AUTH_NONE = 0 
@@ -47,6 +35,7 @@ ctypedef enum GciByteSwizEType:
 GCI_ERR_STR_SIZE      =  1024
 GCI_ERR_reasonSize    =  GCI_ERR_STR_SIZE
 GCI_MAX_ERR_ARGS      =  10
+GCI_OVERFLOW_ERROR_NUMBER = 2163
 
 #======================================================================================================================
 cdef extern from "gcits.hf":
@@ -67,7 +56,7 @@ cdef extern from "gcits.hf":
     cdef cppclass GciTsObjInfo:
         OopType         objId
         OopType         objClass               # OOP of the class of the obj 
-        long long       objSize              # obj's total size, in bytes or OOPs
+        int64       objSize              # obj's total size, in bytes or OOPs
         int             namedSize;                # num of named inst vars in the obj
         unsigned short  objectSecurityPolicyId  # previously named segmentId
         unsigned short  _bits;
@@ -114,6 +103,8 @@ cdef extern from "gcits.hf":
     OopType OOP_CLASS_Unicode32
     OopType OOP_TAG_SMALLINT
     OopType OOP_NUM_TAG_BITS
+    OopType MIN_SMALL_INT
+    OopType MAX_SMALL_INT
     OopType GciTsPerform(
         GciSession sess,
         OopType receiver,
@@ -136,25 +127,24 @@ cdef extern from "gcits.hf":
         const char* sourceStr, OopType sourceOop,
         OopType contextObject, OopType symbolList,
         int flags, unsigned short environmentId,  GciErrSType *err)
-    bint GciTsOopToI64(GciSession sess, OopType oop, long int *result, GciErrSType *err)
+    bint GciTsOopToI64(GciSession sess, OopType oop, int64 *result, GciErrSType *err)
     bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
-    long long GciTsFetchUtf8(GciSession sess,OopType obj, ByteType *dest, long long destSize, 
-        long *requiredSize, GciErrSType *err )
+    int64 GciTsFetchUtf8(GciSession sess,OopType obj, ByteType *dest, int64 destSize, 
+        int64 *requiredSize, GciErrSType *err )
     OopType GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err)
-    OopType GciTsI64ToOop(GciSession sess, long long arg, GciErrSType *err)
+    OopType GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err)
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
         bint convertToUnicode, GciErrSType *err)
-    OopType GCI_I32_TO_OOP(int arg)
+    OopType GCI_I32_TO_OOP(int64 arg)
     bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
 
 well_known_class_names = { 
-    OOP_CLASS_INTEGER: 'integer',
-    OOP_CLASS_SMALL_INTEGER: 'integer',
-    OOP_CLASS_LargeInteger: 'integer',
-    OOP_CLASS_SMALL_DOUBLE: 'double',
-    OOP_CLASS_Float: 'double',
+    OOP_CLASS_SMALL_INTEGER: 'small_integer',
+    OOP_CLASS_LargeInteger: 'large_integer',
+    OOP_CLASS_SMALL_DOUBLE: 'float',
+    OOP_CLASS_Float: 'float',
     OOP_CLASS_STRING: 'string',
     OOP_CLASS_SYMBOL: 'string',
     OOP_CLASS_DoubleByteString: 'string',
@@ -172,6 +162,20 @@ well_known_instances = {
     OOP_TRUE: True,
     OOP_FALSE: False,
     OOP_NIL: None
+}
+
+well_known_python_instances = {
+    True: OOP_TRUE,
+    False: OOP_FALSE,
+    None: OOP_NIL
+}
+
+implemented_python_types = {
+    "<class 'NoneType'>": "boolean_or_none",
+    "<class 'bool'>": "boolean_or_none",
+    "<class 'str'>": "string",
+    "<class 'int'>": "integer",
+    "<class 'float'>": "float"
 }
 
 #======================================================================================================================
@@ -199,10 +203,7 @@ cdef class GemstoneError(Exception):
 
     @property
     def args(self):
-        args = []
-        for i in xrange(0, self.c_error.argCount):
-            args.append(self.session.get_or_create_gem_object(self.c_error.args[i]))
-        return args
+        return [self.session.get_or_create_gem_object(a) for a in self.c_error.args[:self.c_error.argCount]]
 
     @property
     def number(self):
@@ -255,25 +256,54 @@ cdef class GemObject:
 
     @classmethod
     def from_py(cls, Session session, py_object):
-        cdef GciErrSType error
-        cdef OopType return_oop = OOP_NIL
-        if isinstance(py_object, str):
-            return_oop = GciTsNewUtf8String(session.c_session, py_object.encode('utf-8'), 0, &error)
-        elif isinstance(py_object, int):
-            try:
-                return_oop = GCI_I32_TO_OOP(<int>py_object)
-            except OverflowError:
-                try:
-                    return_oop = GciTsI64ToOop(session.c_session, py_object, &error)
-                except OverflowError:
-                    return_oop = session.execute('^{}'.format(py_object)).oop
-        elif isinstance(py_object, float):
-            return_oop = GciTsDoubleToOop(session.c_session, py_object, &error)
-        else:
+        cdef OopType return_oop
+        try:
+            dictionary_key = "{}".format(type(py_object))
+            method_name = implemented_python_types[dictionary_key]
+            return_oop = getattr(GemObject, 'py_to_{}_'.format(method_name))(session, py_object)
+        except KeyError:
             raise NotYetImplemented()
+        return session.get_or_create_gem_object(return_oop)
+
+    @classmethod
+    def py_to_boolean_or_none_(clc, Session session, py_bool):
+        well_known_python_instances[py_bool]
+
+    @classmethod
+    def py_to_string_(clc, Session session, str py_str):
+        cdef GciErrSType error
+        cdef OopType return_oop
+        return_oop = GciTsNewUtf8String(session.c_session, py_str.encode('utf-8'), 0, &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(session, error)
-        return session.get_or_create_gem_object(return_oop)
+        return return_oop
+
+    @classmethod
+    def compute_small_integer_oop(clc, int64 py_int):
+        cdef OopType return_oop
+        if py_int <= MAX_SMALL_INT and py_int >= MIN_SMALL_INT:
+            # return GCI_I32_TO_OOP(py_int)
+            return <OopType>(((<int64>py_int) << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT)
+        else:
+            raise OverflowError
+
+    @classmethod
+    def py_to_integer_(clc, Session session, py_int):
+        cdef OopType return_oop = OOP_NIL
+        try:
+            return_oop = GemObject.compute_small_integer_oop(py_int)
+        except OverflowError:    
+            return_oop = session.execute('^{}'.format(py_int)).oop
+        return return_oop
+
+    @classmethod
+    def py_to_float_(clc, Session session, py_float):
+        cdef GciErrSType error
+        cdef OopType return_oop = OOP_NIL
+        return_oop = GciTsDoubleToOop(session.c_session, py_float, &error)
+        if return_oop == OOP_ILLEGAL:
+            raise make_GemstoneError(session, error)
+        return return_oop
 
     @property
     def oop(self):
@@ -300,19 +330,19 @@ cdef class GemObject:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
 
-    def int32_to_py(self):
-        # cdef long return_value = <long long>self.c_oop ^ <long long>OOP_TAG_SMALLINT >> <long>OOP_NUM_TAG_BITS
-        cdef long return_value 
+    def _small_integer_to_py(self):
+        cdef int64 return_value 
         if GCI_OOP_IS_SMALL_INT(self.c_oop):
-            return_value = <long long>self.c_oop >> <long>OOP_NUM_TAG_BITS
-            if -2147483647 <= return_value and return_value <= 2147483647:
-                return return_value
+            return_value = <int64>self.c_oop >> <int64>OOP_NUM_TAG_BITS
+            return return_value
+        else:
+            raise GemstoneApiError('Expected oop to represent a Small Integer.')
 
-    def _integer_to_py(self):
+    def _large_integer_to_py(self):
         cdef GciErrSType error
-        cdef long int result = 0 
+        cdef int64 result = 0 
         if not GciTsOopToI64(self.session.c_session, self.oop, &result, &error):
-            if error.number != 2163:
+            if error.number != GCI_OVERFLOW_ERROR_NUMBER:
                 raise make_GemstoneError(self.session, error)
             tmp_oop = self.perform('asString')
             tmp_string = tmp_oop._string_to_py()
@@ -320,7 +350,7 @@ cdef class GemObject:
 
         return result
 
-    def _double_to_py(self):
+    def _float_to_py(self):
         cdef GciErrSType error
         cdef double result = 0
         if not GciTsOopToDouble(self.session.c_session, self.c_oop, &result, &error):
@@ -329,12 +359,12 @@ cdef class GemObject:
 
     def _string_to_py(self):
         cdef GciErrSType error
-        cdef long long max_bytes
+        cdef int64 max_bytes
         cdef ByteType *c_string
-        cdef long int required_size = self.session.initial_fetch_size
-        cdef long long bytes_returned
+        cdef int64 required_size = self.session.initial_fetch_size
+        cdef int64 bytes_returned
         cdef bytes py_bytes
-        cdef long long tries = 0
+        cdef int64 tries = 0
 
         while required_size > max_bytes:
             tries = tries + 1
