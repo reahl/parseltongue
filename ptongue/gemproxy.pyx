@@ -35,7 +35,6 @@ ctypedef enum GciByteSwizEType:
 GCI_ERR_STR_SIZE      =  1024
 GCI_ERR_reasonSize    =  GCI_ERR_STR_SIZE
 GCI_MAX_ERR_ARGS      =  10
-GCI_OVERFLOW_ERROR_NUMBER = 2163
 
 #======================================================================================================================
 cdef extern from "gcits.hf":
@@ -101,10 +100,10 @@ cdef extern from "gcits.hf":
     OopType OOP_CLASS_Unicode7
     OopType OOP_CLASS_Unicode16
     OopType OOP_CLASS_Unicode32
-    OopType OOP_TAG_SMALLINT
-    OopType OOP_NUM_TAG_BITS
-    OopType MIN_SMALL_INT
-    OopType MAX_SMALL_INT
+    uint64_t OOP_TAG_SMALLINT
+    uint64_t OOP_NUM_TAG_BITS
+    int64 MIN_SMALL_INT
+    int64 MAX_SMALL_INT
     OopType GciTsPerform(
         GciSession sess,
         OopType receiver,
@@ -131,6 +130,8 @@ cdef extern from "gcits.hf":
     bint GciTsOopToDouble(GciSession sess, OopType oop, double *result, GciErrSType *err)
     int64 GciTsFetchUtf8(GciSession sess,OopType obj, ByteType *dest, int64 destSize, 
         int64 *requiredSize, GciErrSType *err )
+    int64 GciTsFetchBytes(GciSession sess, OopType theObject, int64 startIndex, ByteType *dest, 
+        int64 numBytes, GciErrSType *err)
     OopType GciTsDoubleToOop(GciSession sess, double aDouble, GciErrSType *err)
     OopType GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err)
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
@@ -171,12 +172,28 @@ well_known_python_instances = {
 }
 
 implemented_python_types = {
-    "<class 'NoneType'>": "boolean_or_none",
-    "<class 'bool'>": "boolean_or_none",
-    "<class 'str'>": "string",
-    "<class 'int'>": "integer",
-    "<class 'float'>": "float"
+    'NoneType': "boolean_or_none",
+    'bool': "boolean_or_none",
+    'str': "string",
+    'int': "integer",
+    'float': "float"
 }
+
+#======================================================================================================================
+cdef make_GemstoneError(Session session, GciErrSType e):
+    error = GemstoneError(session)
+    error.set_error(e)
+    return error
+
+cdef compute_small_integer_oop(int64 py_int):
+    cdef OopType return_oop
+    if py_int <= MAX_SMALL_INT and py_int >= MIN_SMALL_INT:
+        return <OopType>(((<int64>py_int) << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT)
+    else:
+        raise OverflowError
+
+cdef char* to_c_bytes(py_string):
+    return py_string.encode('utf-8')
 
 #======================================================================================================================
 cdef class GemstoneError(Exception):
@@ -237,15 +254,7 @@ class NotYetImplemented(Exception):
 class GemstoneApiError(Exception):
     pass
 
-cdef make_GemstoneError(Session session, GciErrSType e):
-    error = GemstoneError(session)
-    error.set_error(e)
-    return error
-
 #======================================================================================================================
-cdef char* to_c_bytes(py_string):
-    return py_string.encode('utf-8')
-
 cdef class GemObject:
     cdef OopType c_oop
     cdef Session session
@@ -253,57 +262,6 @@ cdef class GemObject:
     def __cinit__(self, Session session, OopType oop):
         self.session = session
         self.c_oop = oop
-
-    @classmethod
-    def from_py(cls, Session session, py_object):
-        cdef OopType return_oop
-        try:
-            dictionary_key = "{}".format(type(py_object))
-            method_name = implemented_python_types[dictionary_key]
-            return_oop = getattr(GemObject, 'py_to_{}_'.format(method_name))(session, py_object)
-        except KeyError:
-            raise NotYetImplemented()
-        return session.get_or_create_gem_object(return_oop)
-
-    @classmethod
-    def py_to_boolean_or_none_(clc, Session session, py_bool):
-        well_known_python_instances[py_bool]
-
-    @classmethod
-    def py_to_string_(clc, Session session, str py_str):
-        cdef GciErrSType error
-        cdef OopType return_oop
-        return_oop = GciTsNewUtf8String(session.c_session, py_str.encode('utf-8'), 0, &error)
-        if return_oop == OOP_ILLEGAL:
-            raise make_GemstoneError(session, error)
-        return return_oop
-
-    @classmethod
-    def compute_small_integer_oop(clc, int64 py_int):
-        cdef OopType return_oop
-        if py_int <= MAX_SMALL_INT and py_int >= MIN_SMALL_INT:
-            # return GCI_I32_TO_OOP(py_int)
-            return <OopType>(((<int64>py_int) << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT)
-        else:
-            raise OverflowError
-
-    @classmethod
-    def py_to_integer_(clc, Session session, py_int):
-        cdef OopType return_oop = OOP_NIL
-        try:
-            return_oop = GemObject.compute_small_integer_oop(py_int)
-        except OverflowError:    
-            return_oop = session.execute('^{}'.format(py_int)).oop
-        return return_oop
-
-    @classmethod
-    def py_to_float_(clc, Session session, py_float):
-        cdef GciErrSType error
-        cdef OopType return_oop = OOP_NIL
-        return_oop = GciTsDoubleToOop(session.c_session, py_float, &error)
-        if return_oop == OOP_ILLEGAL:
-            raise make_GemstoneError(session, error)
-        return return_oop
 
     @property
     def oop(self):
@@ -339,16 +297,8 @@ cdef class GemObject:
             raise GemstoneApiError('Expected oop to represent a Small Integer.')
 
     def _large_integer_to_py(self):
-        cdef GciErrSType error
-        cdef int64 result = 0 
-        if not GciTsOopToI64(self.session.c_session, self.oop, &result, &error):
-            if error.number != GCI_OVERFLOW_ERROR_NUMBER:
-                raise make_GemstoneError(self.session, error)
-            tmp_oop = self.perform('asString')
-            tmp_string = tmp_oop._string_to_py()
-            return int(tmp_string)
-
-        return result
+        string_result = self.perform('asString')._latin1_to_py()
+        return int(string_result)
 
     def _float_to_py(self):
         cdef GciErrSType error
@@ -385,6 +335,30 @@ cdef class GemObject:
                 free (c_string)
 
         return py_bytes.decode('utf-8')
+
+    def _latin1_to_py(self):
+        cdef int64 start_index = 1
+        cdef int64 num_bytes  = self.session.initial_fetch_size
+        cdef int64 bytes_returned = num_bytes
+        cdef GciErrSType error
+        cdef bytes py_bytes = b''
+        cdef ByteType* dest
+        while bytes_returned == num_bytes:
+            if start_index > 5000000:
+                raise GemstoneApiError('GciTsFetchBytes exceeded the size limit of strings.')
+            dest = <ByteType *>malloc(num_bytes * sizeof(ByteType))
+            try:
+                bytes_returned = GciTsFetchBytes(self.session.c_session, self.oop, start_index,
+                                                        dest, num_bytes, &error);
+                if bytes_returned == -1:
+                    make_GemstoneError(self.session, error)
+
+                dest[bytes_returned] = b'\0'
+                py_bytes = py_bytes + dest
+                start_index = start_index + num_bytes
+            finally:
+                free(dest)
+        return py_bytes.decode('latin-1')
 
     def gemstone_class(self):
         cdef GciErrSType error
@@ -493,6 +467,42 @@ cdef class Session:
             new_gem_object = GemObject(self, oop)
             self.instances[oop] = new_gem_object
             return new_gem_object
+
+    def from_py(self, py_object):
+        cdef OopType return_oop
+        try:
+            method_name = implemented_python_types[py_object.__class__.__name__]
+            return_oop = getattr(self, 'py_to_{}_'.format(method_name))(py_object)
+        except KeyError:
+            raise NotYetImplemented()
+        return self.get_or_create_gem_object(return_oop)
+
+    def py_to_boolean_or_none_(self, py_object):
+        well_known_python_instances[py_object]
+
+    def py_to_string_(self, str py_str):
+        cdef GciErrSType error
+        cdef OopType return_oop
+        return_oop = GciTsNewUtf8String(self.c_session, py_str.encode('utf-8'), 0, &error)
+        if return_oop == OOP_ILLEGAL:
+            raise make_GemstoneError(self, error)
+        return return_oop
+
+    def py_to_integer_(self, py_int):
+        cdef OopType return_oop = OOP_NIL
+        try:
+            return_oop = compute_small_integer_oop(py_int)
+        except OverflowError:    
+            return_oop = self.execute('^{}'.format(py_int)).oop
+        return return_oop
+
+    def py_to_float_(self, py_float):
+        cdef GciErrSType error
+        cdef OopType return_oop = OOP_NIL
+        return_oop = GciTsDoubleToOop(self.c_session, py_float, &error)
+        if return_oop == OOP_ILLEGAL:
+            raise make_GemstoneError(self, error)
+        return return_oop
 
     def execute(self, str source_str, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error

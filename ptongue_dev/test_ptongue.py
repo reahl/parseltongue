@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import Session, GemObject, GemstoneError
+from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 @pytest.fixture(scope="module")
@@ -15,6 +15,7 @@ def stone_fixture():
     finally:
        stone.stop()
 
+
 @contextmanager
 def running_netldi(guest_mode=False):
     netldi = NetLDI(guest_mode=guest_mode)
@@ -24,10 +25,12 @@ def running_netldi(guest_mode=False):
     finally:
        netldi.stop()
 
+
 @pytest.fixture
 def guestmode_netldi(stone_fixture):
     with running_netldi(guest_mode=True) as netldi:
        yield netldi
+
 
 @pytest.fixture
 def session(guestmode_netldi):
@@ -62,11 +65,13 @@ def test_login_os_user(stone_fixture):
         session.log_out()
         assert not session.is_logged_in
 
+
 def test_resolve_string_symbol(session):
     nil = session.resolve_symbol('nil') 
     assert isinstance(nil, GemObject)
     assert nil.oop == 20
     assert nil.is_nil
+
 
 def test_resolve_symbol_object(session):
     nil_symbol = session.new_symbol('nil')
@@ -111,29 +116,33 @@ def test_identity_of_objects_stay_same(session):
     assert my_symbol is my_symbol_again
 
 
-def test_translating_booleans_to_python(session):
+def test_translating_gem_booleans_to_py_bool(session):
     true = session.resolve_symbol('true').to_py
     assert true is True
     false = session.resolve_symbol('false').to_py
     assert false is False
 
 
-def test_translating_integers_to_python(session):
+def test_translating_gem_small_integers_to_py_int(session):
     number = session.execute('^123').to_py
     assert number is 123
 
-def test_translating_floats_to_python(session):
+
+def test_translating_gem_small_doubles_to_py_float(session):
     number = session.execute('^123.123').to_py
     assert number == 123.123
 
-def test_translating_nil_to_python(session):
+
+def test_translating_gem_nil_to_py_none(session):
     nil_py = session.resolve_symbol('nil').to_py
     assert nil_py is None
 
-def test_translating_unicode_strings_to_python(session):
+
+def test_translating_gem_unicode_strings_to_py_str(session):
     unicode_string = 'šamas'
     string = session.execute("((Unicode16 new) add:( Character codePoint: 0353); yourself), 'amas'")
     assert string.to_py == unicode_string
+
 
 @pytest.mark.parametrize('multiplier, plus',[
     (1, 0),
@@ -141,49 +150,52 @@ def test_translating_unicode_strings_to_python(session):
     (1, 1),
     (0, 0)
     ])
-def test_translating_strings_to_python(session, multiplier, plus):
+def test_translating_gem_strings_to_py_str(session, multiplier, plus):
     unicode_string = 'a' * (session.initial_fetch_size * multiplier + plus)
     string = session.execute("'{}'".format(unicode_string))
     assert string.to_py == unicode_string
 
+
 def test_translating_py_int_to_gem_small_integers(session):
-    zero_int = 0
-    small_int = 123
-    converted_zero_int = GemObject.from_py(session, zero_int)
-    converted_small_int = GemObject.from_py(session, small_int)
-    converted_negative_small_int = GemObject.from_py(session, -small_int)
-    assert converted_zero_int.to_py == zero_int
-    assert converted_small_int.to_py == small_int
-    assert converted_negative_small_int.to_py == -small_int
+    zero_py_int_gem_small_integer = 0
+    py_int_gem_small_integer = 123
+    converted_zero_py_int_gem_small_integer = session.from_py(zero_py_int_gem_small_integer)
+    converted_py_int_gem_small_integer = session.from_py(py_int_gem_small_integer)
+    converted_negative_py_int_gem_small_integer = session.from_py(-py_int_gem_small_integer)
+    assert converted_zero_py_int_gem_small_integer.to_py == zero_py_int_gem_small_integer
+    assert converted_py_int_gem_small_integer.to_py == py_int_gem_small_integer
+    assert converted_negative_py_int_gem_small_integer.to_py == -py_int_gem_small_integer
+
 
 def test_translating_py_int_to_gem_large_integers(session):
-    large_int = 9223372036854775807 #max long long size
-    very_large_int = int('9' * 80)
-    converted_large_int = GemObject.from_py(session, large_int)
-    converted_very_large_int = GemObject.from_py(session, very_large_int)
-    converted_negative_very_large_int = GemObject.from_py(session, -very_large_int)
-    assert converted_large_int.to_py == large_int
-    assert converted_very_large_int.to_py == very_large_int
-    assert converted_negative_very_large_int.to_py == -very_large_int
+    py_int_gem_large_integer = int('9' * 80)
+    converted_py_int_gem_large_integer = session.from_py(py_int_gem_large_integer)
+    converted_negative_py_int_gem_large_integer = session.from_py(-py_int_gem_large_integer)
+    assert converted_py_int_gem_large_integer.to_py == py_int_gem_large_integer
+    assert converted_negative_py_int_gem_large_integer.to_py == -py_int_gem_large_integer
+
 
 def test_translating_py_float_to_gem_small_double(session):
-    small_double = 123.123
-    converted_small_double = GemObject.from_py(session, small_double)
-    converted_negative_small_double = GemObject.from_py(session, -small_double)
-    assert converted_small_double.to_py == small_double
-    assert converted_negative_small_double.to_py == -small_double
+    py_float_gem_small_double = 123.123
+    converted_py_float_gem_small_double = session.from_py(py_float_gem_small_double)
+    converted_negative_py_float_gem_small_double = session.from_py(-py_float_gem_small_double)
+    assert converted_py_float_gem_small_double.to_py == py_float_gem_small_double
+    assert converted_negative_py_float_gem_small_double.to_py == -py_float_gem_small_double
+
 
 def test_translating_py_float_to_gem_float(session):
-    test_float = float(('9' * 40) + '.' + ('9' * 40))
-    converted_float = GemObject.from_py(session, test_float)
-    converted_negative_float = GemObject.from_py(session, -test_float)
-    assert converted_float.to_py == test_float
-    assert converted_negative_float.to_py == -test_float
+    py_float_gem_float = float(('9' * 40) + '.' + ('9' * 40))
+    converted_py_float_gem_float = session.from_py(py_float_gem_float)
+    converted_negative_py_float_gem_float = session.from_py(-py_float_gem_float)
+    assert converted_py_float_gem_float.to_py == py_float_gem_float
+    assert converted_negative_py_float_gem_float.to_py == -py_float_gem_float
 
-def test_translating_python_string_to_gemstone(session):
-    test_string = 'šamas'
-    converted_test_string = GemObject.from_py(session, 'šamas')
-    assert converted_test_string.to_py == test_string
+
+def test_translating_py_str_to_gem_utf8_string(session):
+    py_str_gem_utf8_string = 'šamas'
+    converted_py_str_gem_utf8_string = session.from_py(py_str_gem_utf8_string)
+    assert converted_py_str_gem_utf8_string.to_py == py_str_gem_utf8_string
+
 
 def test_transactions(session):
     some_object = session.resolve_symbol('Date')
