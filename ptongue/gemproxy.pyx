@@ -483,7 +483,7 @@ cdef class Session:
     def py_to_string_(self, str py_str):
         cdef GciErrSType error
         cdef OopType return_oop
-        return_oop = GciTsNewUtf8String(self.c_session, py_str.encode('utf-8'), 0, &error)
+        return_oop = GciTsNewUtf8String(self.c_session, py_str.encode('utf-8'), True, &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return return_oop
