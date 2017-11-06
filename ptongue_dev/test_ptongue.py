@@ -239,6 +239,7 @@ def test_translating_py_float_to_gem_float(session):
 def test_translating_python_string_to_gemstone(session):
     py_str = 'šamas'
     converted_str = session.from_py(py_str)
+    assert converted_str.gemstone_class().perform('name').to_py == 'Unicode16'
     assert converted_str.to_py == py_str
 
 
