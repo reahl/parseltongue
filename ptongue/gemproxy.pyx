@@ -344,9 +344,7 @@ cdef class GemObject:
         cdef bytes py_bytes = b''
         cdef ByteType* dest
         while bytes_returned == num_bytes:
-            if start_index > 5000000:
-                raise GemstoneApiError('GciTsFetchBytes exceeded the size limit of strings.')
-            dest = <ByteType *>malloc(num_bytes * sizeof(ByteType))
+            dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
             try:
                 bytes_returned = GciTsFetchBytes(self.session.c_session, self.oop, start_index,
                                                         dest, num_bytes, &error);
@@ -478,7 +476,7 @@ cdef class Session:
         return self.get_or_create_gem_object(return_oop)
 
     def py_to_boolean_or_none_(self, py_object):
-        well_known_python_instances[py_object]
+        return well_known_python_instances[py_object]
 
     def py_to_string_(self, str py_str):
         cdef GciErrSType error
