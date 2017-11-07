@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented
+from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented, InvalidSession
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 @pytest.fixture(scope="module")
@@ -239,6 +239,46 @@ def test_session_init_exception(guestmode_netldi):
         pass
 
 
+def test_session_abort_exception(guestmode_netldi):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        session.log_out()
+        session.abort()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_begin_exception(guestmode_netldi):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        session.log_out()
+        session.begin()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_commit_exception(guestmode_netldi):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        session.log_out()
+        session.commit()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_is_remote_exception(guestmode_netldi):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        session.log_out()
+        session_is_remote = session.is_remote
+        assert False, 'expected an exception'
+    except InvalidSession:
+        pass
+
+
 def test_session_from_py_exception(session):
     try:
         py_not_implemented_type = []
@@ -280,6 +320,16 @@ def test_session_resolve_symbol_exception(session):
         pass
 
 
+def test_session_log_out_exception(guestmode_netldi):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        session.log_out()
+        session.log_out()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
 def test_gem_object_to_py_exception(session):
     try:
         date_symbol = session.resolve_symbol('Date')
@@ -289,7 +339,15 @@ def test_gem_object_to_py_exception(session):
         pass
 
 
-    # gemstone_class
+def test_gem_object_gemstone_class_exception(guestmode_netldi):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        date_symbol = session.resolve_symbol('Date')
+        session.log_out()
+        broken_class = date_symbol.gemstone_class()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
 
 
 def test_gem_object_is_kind_of_exception(session):
