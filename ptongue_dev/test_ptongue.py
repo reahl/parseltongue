@@ -129,8 +129,11 @@ def test_translating_booleans_to_python(session):
 
 
 def test_translating_integers_to_python(session):
-    number = session.execute('^123').to_py
-    assert number is 123
+    py_int = int('9' * session.initial_fetch_size)
+    converted_positive_int = session.execute('^{}'.format(py_int))
+    converted_negative_int = session.execute('^-{}'.format(py_int))
+    assert py_int == converted_positive_int.to_py
+    assert -py_int == converted_negative_int.to_py
 
 
 def test_translating_floats_to_python(session):
@@ -170,12 +173,8 @@ def test_translating_py_none_to_gem_nil(session, oop_true):
 def test_translating_py_bool_to_gem_boolean(session, oop_true):
     converted_true = session.from_py(True)
     converted_false = session.from_py(False)
-    # converted_true_class = converted_true.gemstone_class().perform('name')
-    # converted_false_class = converted_false.gemstone_class().perform('name')
-    # assert session.execute("self asString == 'Boolean'", context=converted_true_class).oop == oop_true    
-    # assert session.execute("self asString == 'Boolean'", context=converted_false_class).oop == oop_true
-    assert converted_true.gemstone_class().perform('name').to_py == 'Boolean'
-    assert converted_false.gemstone_class().perform('name').to_py == 'Boolean'
+    assert session.execute('self class == Boolean', context=converted_true).oop == oop_true
+    assert session.execute('self class == Boolean', context=converted_false).oop == oop_true
     assert session.execute('self == true', context=converted_true).oop == oop_true
     assert session.execute('self == false', context=converted_false).oop == oop_true
 
@@ -186,17 +185,9 @@ def test_translating_py_int_to_gem_small_integers(session, oop_true):
     converted_zero = session.from_py(py_zero)
     converted_positive_int = session.from_py(py_positive_int)
     converted_negative_int = session.from_py(-py_positive_int)
-    # converted_zero_class = converted_zero.gemstone_class().perform('name')
-    # converted_positive_int_class = converted_positive_int.gemstone_class().perform('name')
-    # converted_negative_int_class = converted_negative_int.gemstone_class().perform('name')
-    # assert session.execute("self asString == 'SmallInteger'", context=converted_zero_class).oop == oop_true
-    # assert session.execute("self asString == 'SmallInteger'", context=converted_positive_int_class).oop == oop_true    
-    # assert session.execute("self asString == 'SmallInteger'", context=converted_negative_int_class).oop == oop_true
-    assert converted_zero.gemstone_class().perform('name').to_py == 'SmallInteger'
-    assert converted_positive_int.gemstone_class().perform('name').to_py == 'SmallInteger'
-    assert converted_negative_int.gemstone_class().perform('name').to_py == 'SmallInteger'
-    # assert converted_positive_int.to_py == py_positive_int
-    # assert converted_negative_int.to_py == -py_positive_int
+    assert session.execute('self class == SmallInteger', context=converted_zero).oop == oop_true
+    assert session.execute('self class == SmallInteger', context=converted_positive_int).oop == oop_true    
+    assert session.execute('self class == SmallInteger', context=converted_negative_int).oop == oop_true
     assert session.execute('self == {}'.format(py_zero), context=converted_zero).oop == oop_true
     assert session.execute('self == {}'.format(py_positive_int), context=converted_positive_int).oop == oop_true
     assert session.execute('self == {}'.format(-py_positive_int), context=converted_negative_int).oop == oop_true
@@ -206,41 +197,38 @@ def test_translating_py_int_to_gem_large_integers(session, oop_true):
     py_positive_int = int('9' * session.initial_fetch_size)
     converted_positive_int = session.from_py(py_positive_int)
     converted_negative_int = session.from_py(-py_positive_int)
-    assert converted_positive_int.gemstone_class().perform('name').to_py == 'LargeInteger'
-    assert converted_negative_int.gemstone_class().perform('name').to_py == 'LargeInteger'
-    assert converted_positive_int.to_py == py_positive_int
-    assert converted_negative_int.to_py == -py_positive_int
-    # assert session.execute('self == {}'.format(py_positive_int), context=converted_positive_int).oop == oop_true
-    # assert session.execute('self == {}'.format(-py_positive_int), context=converted_negative_int).oop == oop_true
+    assert session.execute('self class == LargeInteger', context=converted_positive_int).oop == oop_true
+    assert session.execute('self class == LargeInteger', context=converted_negative_int).oop == oop_true
+    assert session.execute('self = {}'.format(py_positive_int), context=converted_positive_int).oop == oop_true
+    assert session.execute('self = {}'.format(-py_positive_int), context=converted_negative_int).oop == oop_true
 
 
-def test_translating_py_float_to_gem_small_double(session):
+def test_translating_py_float_to_gem_small_double(session, oop_true):
     py_positive_float = 123.123
     converted_positive_float = session.from_py(py_positive_float)
     converted_negative_float = session.from_py(-py_positive_float)
-    assert converted_positive_float.gemstone_class().perform('name').to_py == 'SmallDouble'
-    assert converted_negative_float.gemstone_class().perform('name').to_py == 'SmallDouble'
-    assert converted_positive_float.to_py == py_positive_float
-    assert converted_negative_float.to_py == -py_positive_float
-    # assert session.execute('self == {}'.format(py_positive_float), context=converted_positive_float).oop == oop_true
-    # assert session.execute('self == {}'.format(-py_positive_float), context=converted_negative_float).oop == oop_true
+    assert session.execute('self class == SmallDouble', context=converted_positive_float).oop == oop_true
+    assert session.execute('self class == SmallDouble', context=converted_negative_float).oop == oop_true
+    assert session.execute('self = {}'.format(py_positive_float), context=converted_positive_float).oop == oop_true
+    assert session.execute('self = {}'.format(-py_positive_float), context=converted_negative_float).oop == oop_true
 
 
-def test_translating_py_float_to_gem_float(session):
-    py_positive_float = float(('9' * 40) + '.' + ('9' * 40))
+def test_translating_py_float_to_gem_float(session, oop_true):
+    py_positive_float_string = ('9' * 40) + '.' + ('9' * 40)
+    py_positive_float = float(py_positive_float_string)
     converted_positive_float = session.from_py(py_positive_float)
     converted_negative_float = session.from_py(-py_positive_float)
-    assert converted_positive_float.gemstone_class().perform('name').to_py == 'Float'
-    assert converted_negative_float.gemstone_class().perform('name').to_py == 'Float'
-    assert converted_positive_float.to_py == py_positive_float
-    assert converted_negative_float.to_py == -py_positive_float
+    assert session.execute('self class == Float', context=converted_positive_float).oop == oop_true
+    assert session.execute('self class == Float', context=converted_negative_float).oop == oop_true
+    assert session.execute('self = {}'.format(py_positive_float_string), context=converted_positive_float).oop == oop_true
+    assert session.execute('self = -{}'.format(py_positive_float_string), context=converted_negative_float).oop == oop_true
 
 
-def test_translating_python_string_to_gemstone(session):
+def test_translating_python_string_to_gemstone(session, oop_true):
     py_str = 'šamas'
     converted_str = session.from_py(py_str)
-    assert converted_str.gemstone_class().perform('name').to_py == 'Unicode16'
-    assert converted_str.to_py == py_str
+    assert session.execute('self class == Unicode16', context=converted_str).oop == oop_true
+    assert session.execute("self = (((Unicode16 new) add:( Character codePoint: 0353); yourself), 'amas')", context=converted_str).oop == oop_true
 
 
 def test_transactions(session):
@@ -262,8 +250,3 @@ def test_transactions(session):
     finally:
        user_globals.perform('removeKey:', my_symbol) 
        session.commit()
-
-
-
-
-
