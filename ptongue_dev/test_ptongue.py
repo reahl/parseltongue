@@ -231,6 +231,86 @@ def test_translating_python_string_to_gemstone(session, oop_true):
     assert session.execute("self = (((Unicode16 new) add:( Character codePoint: 0353); yourself), 'amas')", context=converted_str).oop == oop_true
 
 
+def test_session_init_exception(guestmode_netldi):
+    try:
+        broken_session = Session('DataCurator', 'wrong_password')
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_from_py_exception(session):
+    try:
+        py_not_implemented_type = []
+        converted_not_implemented_type = session.from_py(py_not_implemented_type)
+        assert False, 'expected an exception'
+    except NotYetImplemented:
+        pass
+
+
+def test_session_execute_exception(session):
+    try:
+        broken_object = session.execute('hallo')
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_new_symbol_exception(session):
+    try:
+        py_string = 'a' * 2000
+        broken_symbol = session.new_symbol(py_string)
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_resolve_symbol_exception(session):
+    try:
+        broken_symbol = session.resolve_symbol(2)
+        assert False, 'expected an exception'
+    except AssertionError:
+        pass
+
+    try:
+        py_string = 'a' * 2000
+        broken_symbol = session.resolve_symbol(py_string)
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_gem_object_to_py_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        py_not_implemented = date_symbol.to_py
+        assert False, 'expected an exception'
+    except NotYetImplemented:
+        pass
+
+
+    # gemstone_class
+
+
+def test_gem_object_is_kind_of_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        converted_number = session.execute('2')
+        is_type_converted_number = date_symbol.is_kind_of(converted_number)
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_gem_object_perform_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        date_symbol_as_float = date_symbol.perform('asFloat')
+        assert False, 'should not get here'
+    except GemstoneError:
+        pass
+
+
 def test_transactions(session):
     some_object = session.resolve_symbol('Date')
     my_symbol = session.new_symbol('my_symbol')
