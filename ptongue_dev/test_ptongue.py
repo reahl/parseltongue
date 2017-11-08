@@ -380,16 +380,13 @@ def test_gem_object_string_to_py_exception(session):
         pass
 
 
-# def test_gem_object_latin1_to_py_exception(guestmode_netldi):
-#     try:
-#         session = Session('DataCurator', 'swordfish')
-#         date_symbol = session.resolve_symbol('Date')
-#         session.log_out()
-#         broken_py_str = date_symbol._latin1_to_py()
-#         print(py_str)
-#         assert False, 'expected an exception'
-#     except GemstoneError:
-#         pass
+def test_gem_object_latin1_to_py_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        broken_py_str = date_symbol._latin1_to_py()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
 
 
 def test_gem_object_gemstone_class_exception(guestmode_netldi):

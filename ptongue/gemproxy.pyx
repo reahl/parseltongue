@@ -349,7 +349,7 @@ cdef class GemObject:
                 bytes_returned = GciTsFetchBytes(self.session.c_session, self.oop, start_index,
                                                         dest, num_bytes, &error);
                 if bytes_returned == -1:
-                    make_GemstoneError(self.session, error)
+                    raise make_GemstoneError(self.session, error)
 
                 dest[bytes_returned] = b'\0'
                 py_bytes = py_bytes + dest
