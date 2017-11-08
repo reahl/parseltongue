@@ -304,7 +304,7 @@ cdef class GemObject:
         cdef GciErrSType error
         cdef double result = 0
         if not GciTsOopToDouble(self.session.c_session, self.c_oop, &result, &error):
-            make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.session, error)
         return result
 
     def _string_to_py(self):

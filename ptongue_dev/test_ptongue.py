@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented, InvalidSession
+from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 @pytest.fixture(scope="module")
@@ -46,6 +46,13 @@ def session(guestmode_netldi):
 @pytest.fixture
 def oop_true(session):
     yield session.resolve_symbol('true').oop
+
+
+@pytest.fixture
+def invalid_session(guestmode_netldi):
+    session = Session('DataCurator', 'swordfish')
+    session.log_out()
+    yield session
 
 
 def test_login_captive_os_user(guestmode_netldi):
@@ -239,41 +246,33 @@ def test_session_init_exception(guestmode_netldi):
         pass
 
 
-def test_session_abort_exception(guestmode_netldi):
+def test_session_abort_exception(invalid_session):
     try:
-        session = Session('DataCurator', 'swordfish')
-        session.log_out()
-        session.abort()
+        invalid_session.abort()
         assert False, 'expected an exception'
     except GemstoneError:
         pass
 
 
-def test_session_begin_exception(guestmode_netldi):
+def test_session_begin_exception(invalid_session):
     try:
-        session = Session('DataCurator', 'swordfish')
-        session.log_out()
-        session.begin()
+        invalid_session.begin()
         assert False, 'expected an exception'
     except GemstoneError:
         pass
 
 
-def test_session_commit_exception(guestmode_netldi):
+def test_session_commit_exception(invalid_session):
     try:
-        session = Session('DataCurator', 'swordfish')
-        session.log_out()
-        session.commit()
+        invalid_session.commit()
         assert False, 'expected an exception'
     except GemstoneError:
         pass
 
 
-def test_session_is_remote_exception(guestmode_netldi):
+def test_session_is_remote_exception(invalid_session):
     try:
-        session = Session('DataCurator', 'swordfish')
-        session.log_out()
-        session_is_remote = session.is_remote
+        broken_py_bool = invalid_session.is_remote
         assert False, 'expected an exception'
     except InvalidSession:
         pass
@@ -285,6 +284,23 @@ def test_session_from_py_exception(session):
         converted_not_implemented_type = session.from_py(py_not_implemented_type)
         assert False, 'expected an exception'
     except NotYetImplemented:
+        pass
+
+
+def test_session_py_to_string_exception(invalid_session):
+    try:
+        broken_object = invalid_session.py_to_string_('2')
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_session_py_to_float_exception(invalid_session):
+    try:
+        py_float = float('9' * 40 + '.' + '99')
+        broken_object = invalid_session.py_to_float_(py_float)
+        assert False, 'expected an exception'
+    except GemstoneError:
         pass
 
 
@@ -320,11 +336,9 @@ def test_session_resolve_symbol_exception(session):
         pass
 
 
-def test_session_log_out_exception(guestmode_netldi):
+def test_session_log_out_exception(invalid_session):
     try:
-        session = Session('DataCurator', 'swordfish')
-        session.log_out()
-        session.log_out()
+        invalid_session.log_out()
         assert False, 'expected an exception'
     except GemstoneError:
         pass
@@ -337,6 +351,45 @@ def test_gem_object_to_py_exception(session):
         assert False, 'expected an exception'
     except NotYetImplemented:
         pass
+
+
+def test_gem_object_small_integer_to_py_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        broken_py_int = date_symbol._small_integer_to_py()
+        assert False, 'expected an exception'
+    except GemstoneApiError:
+        pass
+
+
+def test_gem_object_float_to_py_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        broken_py_float = date_symbol._float_to_py()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+def test_gem_object_string_to_py_exception(session):
+    try:
+        date_symbol = session.resolve_symbol('Date')
+        broken_py_str = date_symbol._string_to_py()
+        assert False, 'expected an exception'
+    except GemstoneError:
+        pass
+
+
+# def test_gem_object_latin1_to_py_exception(guestmode_netldi):
+#     try:
+#         session = Session('DataCurator', 'swordfish')
+#         date_symbol = session.resolve_symbol('Date')
+#         session.log_out()
+#         broken_py_str = date_symbol._latin1_to_py()
+#         print(py_str)
+#         assert False, 'expected an exception'
+#     except GemstoneError:
+#         pass
 
 
 def test_gem_object_gemstone_class_exception(guestmode_netldi):
@@ -354,7 +407,7 @@ def test_gem_object_is_kind_of_exception(session):
     try:
         date_symbol = session.resolve_symbol('Date')
         converted_number = session.execute('2')
-        is_type_converted_number = date_symbol.is_kind_of(converted_number)
+        broken_py_bool = date_symbol.is_kind_of(converted_number)
         assert False, 'expected an exception'
     except GemstoneError:
         pass
@@ -363,8 +416,8 @@ def test_gem_object_is_kind_of_exception(session):
 def test_gem_object_perform_exception(session):
     try:
         date_symbol = session.resolve_symbol('Date')
-        date_symbol_as_float = date_symbol.perform('asFloat')
-        assert False, 'should not get here'
+        broken_object = date_symbol.perform('asFloat')
+        assert False, 'expected an exception'
     except GemstoneError:
         pass
 
