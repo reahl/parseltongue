@@ -199,9 +199,12 @@ cdef class Session:
     def as_current_session(self):
         cdef GciSessionIdType c_current_session_id = GciGetSessionId()
         self.set_as_current_session()
-        yield
-        GciSetSessionId(c_current_session_id)
+        try:
+            yield
+        finally:
+            GciSetSessionId(c_current_session_id)
 
+    @property
     def is_current_session(self):
         return self.c_session_id == GciGetSessionId()
 
