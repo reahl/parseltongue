@@ -1,7 +1,6 @@
 
 from contextlib import contextmanager
 
-from re import match
 import pytest
 
 from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
@@ -75,7 +74,7 @@ def expected(exception, test=None):
     if test and not callable(test):
         test_regex = test
         def check_message(ex):
-            assert match(test_regex, str(ex)), \
+            assert test_regex in str(ex), \
                 'Expected exception to match "%s", got "%s"' % (test_regex, str(ex))
         test = check_message
 
@@ -103,11 +102,8 @@ def test_login_captive_os_user(guestmode_netldi):
 
 def test_login_os_user(stone_fixture):
     with running_netldi(guest_mode=False):
-        try:
+        with expected(GemstoneError, test='Password validation failed for user vagrant'):
             Session('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
-        except GemstoneError as e:
-            # TODO: this can be done better : with expected() from reahl-tofu
-            assert 'Password validation failed for user vagrant' in e.message
             
         session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
         assert session.is_logged_in
@@ -130,6 +126,17 @@ def test_resolve_symbol_object(session):
     nil = session.resolve_symbol(nil_symbol) 
     assert isinstance(nil, GemObject)
     assert nil.oop == 20
+
+
+def test_gemstone_class(session, oop_true):
+    converted_boolean_class = session.execute('true').gemstone_class()
+    assert session.execute('self == Boolean', context=converted_boolean_class).oop == oop_true
+
+
+def test_is_kind_of(session, oop_true):
+    boolean_symbol = session.resolve_symbol('Boolean')
+    converted_bool = session.execute('true')
+    assert converted_bool.is_kind_of(boolean_symbol)
 
 
 def test_basic_perform_returns_value(session):
@@ -211,7 +218,7 @@ def test_translating_strings_to_python(session, multiplier, plus):
 
 def test_translating_py_none_to_gem_nil(session, oop_true):
     converted_none = session.from_py(None)
-    assert converted_none.gemstone_class().perform('name').to_py == 'UndefinedObject'
+    assert session.execute('self class == UndefinedObject', context=converted_none).oop == oop_true
     assert session.execute('self == nil', context=converted_none).oop == oop_true
 
 
@@ -277,22 +284,22 @@ def test_translating_python_string_to_gemstone(session, oop_true):
 
 
 def test_session_init_exception(guestmode_netldi):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         Session('DataCurator', 'wrong_password')
 
 
 def test_session_abort_exception(invalid_session):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.abort()
 
 
 def test_session_begin_exception(invalid_session):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.begin()
 
 
 def test_session_commit_exception(invalid_session):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.commit()
 
 
@@ -308,24 +315,24 @@ def test_session_from_py_exception(session):
 
 
 def test_session_py_to_string_exception(invalid_session):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.py_to_string_('2')
 
 
 def test_session_py_to_float_exception(invalid_session):
     py_float = float('9' * 40 + '.' + '99')
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.py_to_float_(py_float)
 
 
 def test_session_execute_exception(session):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='a CompileError occurred (error 1001), undefined symbol'):
         session.execute('invalid smalltalk code')
 
 
 def test_session_new_symbol_exception(session):
     py_string = 'a' * 2000
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='a ImproperOperation occurred (error 2402), Cannot create a Symbol'):
         session.new_symbol(py_string)
 
 
@@ -334,12 +341,12 @@ def test_session_resolve_symbol_exception(session):
     with expected(GemstoneApiError):
         session.resolve_symbol(2)
 
-    with expected(GemstoneError):
+    with expected(GemstoneError, test=''):
         session.resolve_symbol(py_string)
 
 
 def test_session_log_out_exception(invalid_session):
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.log_out()
 
 
@@ -357,19 +364,19 @@ def test_gem_object_small_integer_to_py_exception(session):
 
 def test_gem_object_float_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='class 802049 invalid for OopToDouble'):
         date_symbol._float_to_py()
 
 
 def test_gem_object_string_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='a ArgumentError occurred (error 2718)'):
         date_symbol._string_to_py()
 
 
 def test_gem_object_latin1_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='a ArgumentTypeError occurred (error 2103)'):
         date_symbol._latin1_to_py()
 
 
@@ -377,20 +384,20 @@ def test_gem_object_gemstone_class_exception(guestmode_netldi):
     session = Session('DataCurator', 'swordfish')
     date_symbol = session.resolve_symbol('Date')
     session.log_out()
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         date_symbol.gemstone_class()
 
 
 def test_gem_object_is_kind_of_exception(session):
     date_symbol = session.resolve_symbol('Date')
     converted_number = session.execute('2')
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='a ArgumentTypeError occurred (error 2094)'):
         date_symbol.is_kind_of(converted_number)
 
 
 def test_gem_object_perform_exception(session):
     date_symbol = session.resolve_symbol('Date')
-    with expected(GemstoneError):
+    with expected(GemstoneError, test='a MessageNotUnderstood occurred (error 2010)'):
         date_symbol.perform('asFloat')
 
 
