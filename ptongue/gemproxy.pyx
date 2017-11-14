@@ -231,8 +231,8 @@ cdef class GemstoneError(Exception):
         return self.c_error.argCount
 
     @property
-    def fatal(self):
-        return self.c_error.fatal
+    def is_fatal(self):
+        return <bint>self.c_error.fatal
 
     @property
     def reason(self):
@@ -277,13 +277,12 @@ cdef class GemObject:
 
     @property
     def to_py(self):
-        value = None
         try: 
             return well_known_instances[self.oop]
         except KeyError:
-            gem_class = self.gemstone_class()
+            gem_class_oop = self.gemstone_class().oop
             try:
-                gem_class_name = well_known_class_names[gem_class.oop]
+                gem_class_name = well_known_class_names[gem_class_oop]
             except KeyError:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
@@ -374,7 +373,7 @@ cdef class GemObject:
 
     def perform(self, selector, *args):
         cdef GciErrSType error
-        cdef OopType selector_oop = selector.c_oop if isinstance(selector, GemObject) else OOP_ILLEGAL
+        cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
 
         cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
@@ -533,7 +532,7 @@ cdef class Session:
             return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, 
                                             symbol_list.oop if symbol_list else OOP_NIL, &error)
         else:
-            assert None, 'I am unhappy'
+            raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)

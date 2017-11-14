@@ -1,10 +1,24 @@
 
 from contextlib import contextmanager
 
+from re import match
 import pytest
 
 from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
+
+#======================================================================================================================
+
+class NoExceptionRaised(Exception):
+    def __init__(self, expected):
+        self.expected = expected
+    def __str__(self):
+        return '%s was expected' % self.expected
+
+class NoException(Exception):
+    pass
+
+#======================================================================================================================
 
 @pytest.fixture(scope="module")
 def stone_fixture():
@@ -54,6 +68,30 @@ def invalid_session(guestmode_netldi):
     session.log_out()
     yield session
 
+
+@contextmanager
+def expected(exception, test=None):
+
+    if test and not callable(test):
+        test_regex = test
+        def check_message(ex):
+            assert match(test_regex, str(ex)), \
+                'Expected exception to match "%s", got "%s"' % (test_regex, str(ex))
+        test = check_message
+
+    if exception is NoException:
+        yield
+        return
+
+    try:
+        yield
+    except exception as ex:
+        if test:
+            test(ex)
+    else:
+        raise NoExceptionRaised(exception)
+
+#======================================================================================================================
 
 def test_login_captive_os_user(guestmode_netldi):
     session = Session('DataCurator', 'swordfish')
@@ -239,184 +277,138 @@ def test_translating_python_string_to_gemstone(session, oop_true):
 
 
 def test_session_init_exception(guestmode_netldi):
-    try:
-        broken_session = Session('DataCurator', 'wrong_password')
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    with expected(GemstoneError):
+        Session('DataCurator', 'wrong_password')
 
 
 def test_session_abort_exception(invalid_session):
-    try:
+    with expected(GemstoneError):
         invalid_session.abort()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
 
 
 def test_session_begin_exception(invalid_session):
-    try:
+    with expected(GemstoneError):
         invalid_session.begin()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
 
 
 def test_session_commit_exception(invalid_session):
-    try:
+    with expected(GemstoneError):
         invalid_session.commit()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
 
 
 def test_session_is_remote_exception(invalid_session):
-    try:
-        broken_py_bool = invalid_session.is_remote
-        assert False, 'expected an exception'
-    except InvalidSession:
-        pass
+    with expected(InvalidSession):
+        invalid_session.is_remote
 
 
 def test_session_from_py_exception(session):
-    try:
-        py_not_implemented_type = []
-        converted_not_implemented_type = session.from_py(py_not_implemented_type)
-        assert False, 'expected an exception'
-    except NotYetImplemented:
-        pass
+    py_not_implemented_type = []
+    with expected(NotYetImplemented):
+        session.from_py(py_not_implemented_type)
 
 
 def test_session_py_to_string_exception(invalid_session):
-    try:
-        broken_object = invalid_session.py_to_string_('2')
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    with expected(GemstoneError):
+        invalid_session.py_to_string_('2')
 
 
 def test_session_py_to_float_exception(invalid_session):
-    try:
-        py_float = float('9' * 40 + '.' + '99')
-        broken_object = invalid_session.py_to_float_(py_float)
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    py_float = float('9' * 40 + '.' + '99')
+    with expected(GemstoneError):
+        invalid_session.py_to_float_(py_float)
 
 
 def test_session_execute_exception(session):
-    try:
-        broken_object = session.execute('hallo')
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    with expected(GemstoneError):
+        session.execute('invalid smalltalk code')
 
 
 def test_session_new_symbol_exception(session):
-    try:
-        py_string = 'a' * 2000
-        broken_symbol = session.new_symbol(py_string)
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    py_string = 'a' * 2000
+    with expected(GemstoneError):
+        session.new_symbol(py_string)
 
 
 def test_session_resolve_symbol_exception(session):
-    try:
-        broken_symbol = session.resolve_symbol(2)
-        assert False, 'expected an exception'
-    except AssertionError:
-        pass
+    py_string = 'a' * 2000
+    with expected(GemstoneApiError):
+        session.resolve_symbol(2)
 
-    try:
-        py_string = 'a' * 2000
-        broken_symbol = session.resolve_symbol(py_string)
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    with expected(GemstoneError):
+        session.resolve_symbol(py_string)
 
 
 def test_session_log_out_exception(invalid_session):
-    try:
+    with expected(GemstoneError):
         invalid_session.log_out()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
 
 
 def test_gem_object_to_py_exception(session):
-    try:
-        date_symbol = session.resolve_symbol('Date')
-        py_not_implemented = date_symbol.to_py
-        assert False, 'expected an exception'
-    except NotYetImplemented:
-        pass
+    date_symbol = session.resolve_symbol('Date')
+    with expected(NotYetImplemented):
+        date_symbol.to_py
 
 
 def test_gem_object_small_integer_to_py_exception(session):
-    try:
-        date_symbol = session.resolve_symbol('Date')
-        broken_py_int = date_symbol._small_integer_to_py()
-        assert False, 'expected an exception'
-    except GemstoneApiError:
-        pass
+    date_symbol = session.resolve_symbol('Date')
+    with expected(GemstoneApiError):
+        date_symbol._small_integer_to_py()
 
 
 def test_gem_object_float_to_py_exception(session):
-    try:
-        date_symbol = session.resolve_symbol('Date')
-        broken_py_float = date_symbol._float_to_py()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    date_symbol = session.resolve_symbol('Date')
+    with expected(GemstoneError):
+        date_symbol._float_to_py()
 
 
 def test_gem_object_string_to_py_exception(session):
-    try:
-        date_symbol = session.resolve_symbol('Date')
-        broken_py_str = date_symbol._string_to_py()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    date_symbol = session.resolve_symbol('Date')
+    with expected(GemstoneError):
+        date_symbol._string_to_py()
 
 
 def test_gem_object_latin1_to_py_exception(session):
-    try:
-        date_symbol = session.resolve_symbol('Date')
-        broken_py_str = date_symbol._latin1_to_py()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    date_symbol = session.resolve_symbol('Date')
+    with expected(GemstoneError):
+        date_symbol._latin1_to_py()
 
 
 def test_gem_object_gemstone_class_exception(guestmode_netldi):
-    try:
-        session = Session('DataCurator', 'swordfish')
-        date_symbol = session.resolve_symbol('Date')
-        session.log_out()
-        broken_class = date_symbol.gemstone_class()
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    session = Session('DataCurator', 'swordfish')
+    date_symbol = session.resolve_symbol('Date')
+    session.log_out()
+    with expected(GemstoneError):
+        date_symbol.gemstone_class()
 
 
 def test_gem_object_is_kind_of_exception(session):
-    try:
-        date_symbol = session.resolve_symbol('Date')
-        converted_number = session.execute('2')
-        broken_py_bool = date_symbol.is_kind_of(converted_number)
-        assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    date_symbol = session.resolve_symbol('Date')
+    converted_number = session.execute('2')
+    with expected(GemstoneError):
+        date_symbol.is_kind_of(converted_number)
 
 
 def test_gem_object_perform_exception(session):
+    date_symbol = session.resolve_symbol('Date')
+    with expected(GemstoneError):
+        date_symbol.perform('asFloat')
+
+
+def test_raising_gemstone_exceptions(session, oop_true):
+    rt_err_generic_error = 2318
     try:
-        date_symbol = session.resolve_symbol('Date')
-        broken_object = date_symbol.perform('asFloat')
+        session.execute("System error: 'breaking intentionally'")
         assert False, 'expected an exception'
-    except GemstoneError:
-        pass
+    except GemstoneError as e:
+        assert session.execute('self class == SymbolDictionary', context=e.category).oop == oop_true
+        assert session.execute('self class == GsProcess', context=e.context).oop == oop_true
+        assert session.execute('self class == UserDefinedError', context=e.exception_obj).oop == oop_true
+        assert session.execute('self class == UndefinedObject', context=e.args[0]).oop == oop_true
+        assert e.number == rt_err_generic_error
+        assert e.arg_count == 1
+        assert e.is_fatal == False
+        assert e.reason == ''
+        assert e.message == 'a UserDefinedError occurred (error 2318), reason:halt, breaking intentionally'
 
 
 def test_transactions(session):
