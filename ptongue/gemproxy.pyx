@@ -383,14 +383,14 @@ cdef class GemObject:
                 cargs[i] = args[i].oop
 
             return_oop = GciTsPerform(self.session.c_session,
-                                                self.c_oop,
-                                                selector_oop,
-                                                selector_str,
-                                                cargs, 
-                                                len(args),
-                                                flags,
-                                                environment_id,
-                                                &error)
+                                      self.c_oop,
+                                      selector_oop,
+                                      selector_str,
+                                      cargs, 
+                                      len(args),
+                                      flags,
+                                      environment_id,
+                                      &error)
         finally:
             free(cargs)
         if return_oop == OOP_ILLEGAL:
