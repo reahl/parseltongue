@@ -374,24 +374,25 @@ cdef class GemObject:
         cdef GciErrSType error
         cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
-
+        cdef int flags = 1
+        cdef unsigned short environment_id = 0
+        cdef OopType return_oop
         cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
-        for i in xrange(len(args)):
-            cargs[i] = args[i].oop
+        try:
+            for i in xrange(len(args)):
+                cargs[i] = args[i].oop
 
-        flags = 1
-        environment_id = 0
-
-        cdef OopType return_oop = GciTsPerform(self.session.c_session,
-                                               self.c_oop,
-                                               selector_oop,
-                                               selector_str,
-                                               cargs, 
-                                               len(args),
-                                               flags,
-                                               environment_id,
-                                               &error)
-        free(cargs)
+            return_oop = GciTsPerform(self.session.c_session,
+                                                self.c_oop,
+                                                selector_oop,
+                                                selector_str,
+                                                cargs, 
+                                                len(args),
+                                                flags,
+                                                environment_id,
+                                                &error)
+        finally:
+            free(cargs)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self.session, error)
         return self.session.get_or_create_gem_object(return_oop)
