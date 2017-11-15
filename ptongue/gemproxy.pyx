@@ -280,9 +280,8 @@ cdef class GemObject:
         try: 
             return well_known_instances[self.oop]
         except KeyError:
-            gem_class_oop = self.gemstone_class().oop
             try:
-                gem_class_name = well_known_class_names[gem_class_oop]
+                gem_class_name = well_known_class_names[self.gemstone_class().oop]
             except KeyError:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
@@ -384,22 +383,23 @@ cdef class GemObject:
         environment_id = 0
 
         cdef OopType return_oop = GciTsPerform(self.session.c_session,
-                                            self.c_oop,
-                                            selector_oop,
-                                            selector_str,
-                                            cargs, 
-                                            len(args),
-                                            flags,
-                                            environment_id,
-                                            &error)
+                                               self.c_oop,
+                                               selector_oop,
+                                               selector_str,
+                                               cargs, 
+                                               len(args),
+                                               flags,
+                                               environment_id,
+                                               &error)
         free(cargs)
         if return_oop == OOP_ILLEGAL:
-           raise make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.session, error)
         return self.session.get_or_create_gem_object(return_oop)
 
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
+    
 #======================================================================================================================
 cdef class Session:
     cdef GciSession c_session
@@ -416,13 +416,13 @@ cdef class Session:
 
         self.instances = WeakValueDictionary()
         self.c_session = GciTsLogin(stone_name.encode('utf-8'),
-                            c_host_username,
-                            host_password.encode('utf-8'),
-                            0,
-                            netldi_task.encode('utf-8'),
-                            username.encode('utf-8'),
-                            password.encode('utf-8'),
-                            0, 0, &error)
+                                    c_host_username,
+                                    host_password.encode('utf-8'),
+                                    0,
+                                    netldi_task.encode('utf-8'),
+                                    username.encode('utf-8'),
+                                    password.encode('utf-8'),
+                                    0, 0, &error)
         if self.c_session == NULL:
             raise make_GemstoneError(self, error)
 
@@ -507,9 +507,9 @@ cdef class Session:
         if source_str:
             c_source_str = to_c_bytes(source_str)
         cdef OopType return_oop = GciTsExecute(self.c_session, c_source_str, OOP_CLASS_Utf8,
-                                            context.oop if context else OOP_NIL, 
-                                            symbol_list.oop if symbol_list else OOP_NIL,
-                                            0, 0,  &error)
+                                               context.oop if context else OOP_NIL, 
+                                               symbol_list.oop if symbol_list else OOP_NIL,
+                                               0, 0,  &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)

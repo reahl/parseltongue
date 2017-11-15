@@ -224,44 +224,49 @@ def test_translating_py_none_to_gem_nil(session, oop_true):
 
 def test_translating_py_bool_to_gem_boolean(session, oop_true):
     converted_true = session.from_py(True)
-    converted_false = session.from_py(False)
     assert session.execute('self class == Boolean', context=converted_true).oop == oop_true
-    assert session.execute('self class == Boolean', context=converted_false).oop == oop_true
     assert session.execute('self == true', context=converted_true).oop == oop_true
+
+    converted_false = session.from_py(False)
+    assert session.execute('self class == Boolean', context=converted_false).oop == oop_true
     assert session.execute('self == false', context=converted_false).oop == oop_true
 
 
 def test_translating_py_int_to_gem_small_integers(session, oop_true):
     py_zero = 0
-    py_positive_int = 123
     converted_zero = session.from_py(py_zero)
-    converted_positive_int = session.from_py(py_positive_int)
-    converted_negative_int = session.from_py(-py_positive_int)
     assert session.execute('self class == SmallInteger', context=converted_zero).oop == oop_true
-    assert session.execute('self class == SmallInteger', context=converted_positive_int).oop == oop_true    
-    assert session.execute('self class == SmallInteger', context=converted_negative_int).oop == oop_true
     assert session.execute('self == {}'.format(py_zero), context=converted_zero).oop == oop_true
+
+    py_positive_int = 123
+    converted_positive_int = session.from_py(py_positive_int)
+    assert session.execute('self class == SmallInteger', context=converted_positive_int).oop == oop_true    
     assert session.execute('self == {}'.format(py_positive_int), context=converted_positive_int).oop == oop_true
+
+    converted_negative_int = session.from_py(-py_positive_int)
+    assert session.execute('self class == SmallInteger', context=converted_negative_int).oop == oop_true
     assert session.execute('self == {}'.format(-py_positive_int), context=converted_negative_int).oop == oop_true
 
 
 def test_translating_py_int_to_gem_large_integers(session, oop_true):
     py_positive_int = int('9' * session.initial_fetch_size)
     converted_positive_int = session.from_py(py_positive_int)
-    converted_negative_int = session.from_py(-py_positive_int)
     assert session.execute('self class == LargeInteger', context=converted_positive_int).oop == oop_true
-    assert session.execute('self class == LargeInteger', context=converted_negative_int).oop == oop_true
     assert session.execute('self = {}'.format(py_positive_int), context=converted_positive_int).oop == oop_true
+
+    converted_negative_int = session.from_py(-py_positive_int)
+    assert session.execute('self class == LargeInteger', context=converted_negative_int).oop == oop_true
     assert session.execute('self = {}'.format(-py_positive_int), context=converted_negative_int).oop == oop_true
 
 
 def test_translating_py_float_to_gem_small_double(session, oop_true):
     py_positive_float = 123.123
     converted_positive_float = session.from_py(py_positive_float)
-    converted_negative_float = session.from_py(-py_positive_float)
     assert session.execute('self class == SmallDouble', context=converted_positive_float).oop == oop_true
-    assert session.execute('self class == SmallDouble', context=converted_negative_float).oop == oop_true
     assert session.execute('self = {}'.format(py_positive_float), context=converted_positive_float).oop == oop_true
+
+    converted_negative_float = session.from_py(-py_positive_float)
+    assert session.execute('self class == SmallDouble', context=converted_negative_float).oop == oop_true
     assert session.execute('self = {}'.format(-py_positive_float), context=converted_negative_float).oop == oop_true
 
 
@@ -269,10 +274,11 @@ def test_translating_py_float_to_gem_float(session, oop_true):
     py_positive_float_string = ('9' * 40) + '.' + ('9' * 40)
     py_positive_float = float(py_positive_float_string)
     converted_positive_float = session.from_py(py_positive_float)
-    converted_negative_float = session.from_py(-py_positive_float)
     assert session.execute('self class == Float', context=converted_positive_float).oop == oop_true
-    assert session.execute('self class == Float', context=converted_negative_float).oop == oop_true
     assert session.execute('self = {}'.format(py_positive_float_string), context=converted_positive_float).oop == oop_true
+    
+    converted_negative_float = session.from_py(-py_positive_float)
+    assert session.execute('self class == Float', context=converted_negative_float).oop == oop_true
     assert session.execute('self = -{}'.format(py_positive_float_string), context=converted_negative_float).oop == oop_true
 
 
@@ -283,22 +289,22 @@ def test_translating_python_string_to_gemstone(session, oop_true):
     assert session.execute("self = (((Unicode16 new) add:( Character codePoint: 0353); yourself), 'amas')", context=converted_str).oop == oop_true
 
 
-def test_session_init_exception(guestmode_netldi):
+def test_session_invalid_login(guestmode_netldi):
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         Session('DataCurator', 'wrong_password')
 
+def test_session_invalid_log_out(invalid_session):
+    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
+        invalid_session.log_out()
 
-def test_session_abort_exception(invalid_session):
+        
+def test_session_transactional_exceptions(invalid_session):
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.abort()
 
-
-def test_session_begin_exception(invalid_session):
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.begin()
 
-
-def test_session_commit_exception(invalid_session):
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         invalid_session.commit()
 
@@ -343,11 +349,6 @@ def test_session_resolve_symbol_exception(session):
 
     with expected(GemstoneError, test=''):
         session.resolve_symbol(py_string)
-
-
-def test_session_log_out_exception(invalid_session):
-    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
-        invalid_session.log_out()
 
 
 def test_gem_object_to_py_exception(session):
@@ -403,10 +404,7 @@ def test_gem_object_perform_exception(session):
 
 def test_raising_gemstone_exceptions(session, oop_true):
     rt_err_generic_error = 2318
-    try:
-        session.execute("System error: 'breaking intentionally'")
-        assert False, 'expected an exception'
-    except GemstoneError as e:
+    def check_error_details(e):
         assert session.execute('self class == SymbolDictionary', context=e.category).oop == oop_true
         assert session.execute('self class == GsProcess', context=e.context).oop == oop_true
         assert session.execute('self class == UserDefinedError', context=e.exception_obj).oop == oop_true
@@ -416,6 +414,9 @@ def test_raising_gemstone_exceptions(session, oop_true):
         assert e.is_fatal == False
         assert e.reason == ''
         assert e.message == 'a UserDefinedError occurred (error 2318), reason:halt, breaking intentionally'
+
+    with expected(GemstoneError, test=check_error_details):
+        session.execute("System error: 'breaking intentionally'")
 
 
 def test_transactions(session):
