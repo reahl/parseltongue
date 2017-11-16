@@ -155,7 +155,7 @@ def test_perform_passing_args(session):
     assert fetched_py_string.oop == converted_string.oop
 
 
-def test_perform_with_gem_oject(session):
+def test_perform_with_gem_object(session):
     date = session.resolve_symbol('Date')
     as_string_symbol = session.new_symbol('asString')
     date.perform(as_string_symbol)
@@ -166,13 +166,13 @@ def test_perform_with_gem_oject(session):
 
 
 def test_execute(session):
-    date_class = session.execute('^Date yourself')
+    date_class = session.execute('^Date')
     date_class_resolved = session.resolve_symbol('Date')
     assert date_class.oop == date_class_resolved.oop
 
 
-def test_execute_with_gem_oject(session):
-    string_to_execute = session.execute("'^Date yourself'")
+def test_execute_with_gem_object(session):
+    string_to_execute = session.execute("'^Date'")
     date_class = session.execute(string_to_execute)
     date_class_resolved = session.resolve_symbol('Date')
     assert date_class.oop == date_class_resolved.oop
