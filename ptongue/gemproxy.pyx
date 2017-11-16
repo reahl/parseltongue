@@ -231,8 +231,8 @@ cdef class GemstoneError(Exception):
         return self.c_error.argCount
 
     @property
-    def fatal(self):
-        return self.c_error.fatal
+    def is_fatal(self):
+        return <bint>self.c_error.fatal
 
     @property
     def reason(self):
@@ -277,13 +277,11 @@ cdef class GemObject:
 
     @property
     def to_py(self):
-        value = None
         try: 
             return well_known_instances[self.oop]
         except KeyError:
-            gem_class = self.gemstone_class()
             try:
-                gem_class_name = well_known_class_names[gem_class.oop]
+                gem_class_name = well_known_class_names[self.gemstone_class().oop]
             except KeyError:
                 raise NotYetImplemented()
             return getattr(self, '_{}_to_py'.format(gem_class_name))()
@@ -304,7 +302,7 @@ cdef class GemObject:
         cdef GciErrSType error
         cdef double result = 0
         if not GciTsOopToDouble(self.session.c_session, self.c_oop, &result, &error):
-            make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.session, error)
         return result
 
     def _string_to_py(self):
@@ -349,7 +347,7 @@ cdef class GemObject:
                 bytes_returned = GciTsFetchBytes(self.session.c_session, self.oop, start_index,
                                                         dest, num_bytes, &error);
                 if bytes_returned == -1:
-                    make_GemstoneError(self.session, error)
+                    raise make_GemstoneError(self.session, error)
 
                 dest[bytes_returned] = b'\0'
                 py_bytes = py_bytes + dest
@@ -374,7 +372,7 @@ cdef class GemObject:
 
     def perform(self, selector, *args):
         cdef GciErrSType error
-        cdef OopType selector_oop = selector.c_oop if isinstance(selector, GemObject) else OOP_ILLEGAL
+        cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
 
         cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
@@ -385,22 +383,23 @@ cdef class GemObject:
         environment_id = 0
 
         cdef OopType return_oop = GciTsPerform(self.session.c_session,
-                                            self.c_oop,
-                                            selector_oop,
-                                            selector_str,
-                                            cargs, 
-                                            len(args),
-                                            flags,
-                                            environment_id,
-                                            &error)
+                                               self.c_oop,
+                                               selector_oop,
+                                               selector_str,
+                                               cargs, 
+                                               len(args),
+                                               flags,
+                                               environment_id,
+                                               &error)
         free(cargs)
         if return_oop == OOP_ILLEGAL:
-           raise make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.session, error)
         return self.session.get_or_create_gem_object(return_oop)
 
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
+    
 #======================================================================================================================
 cdef class Session:
     cdef GciSession c_session
@@ -417,13 +416,13 @@ cdef class Session:
 
         self.instances = WeakValueDictionary()
         self.c_session = GciTsLogin(stone_name.encode('utf-8'),
-                            c_host_username,
-                            host_password.encode('utf-8'),
-                            0,
-                            netldi_task.encode('utf-8'),
-                            username.encode('utf-8'),
-                            password.encode('utf-8'),
-                            0, 0, &error)
+                                    c_host_username,
+                                    host_password.encode('utf-8'),
+                                    0,
+                                    netldi_task.encode('utf-8'),
+                                    username.encode('utf-8'),
+                                    password.encode('utf-8'),
+                                    0, 0, &error)
         if self.c_session == NULL:
             raise make_GemstoneError(self, error)
 
@@ -508,9 +507,9 @@ cdef class Session:
         if source_str:
             c_source_str = to_c_bytes(source_str)
         cdef OopType return_oop = GciTsExecute(self.c_session, c_source_str, OOP_CLASS_Utf8,
-                                            context.oop if context else OOP_NIL, 
-                                            symbol_list.oop if symbol_list else OOP_NIL,
-                                            0, 0,  &error)
+                                               context.oop if context else OOP_NIL, 
+                                               symbol_list.oop if symbol_list else OOP_NIL,
+                                               0, 0,  &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
@@ -533,7 +532,7 @@ cdef class Session:
             return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, 
                                             symbol_list.oop if symbol_list else OOP_NIL, &error)
         else:
-            assert None, 'I am unhappy'
+            raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)

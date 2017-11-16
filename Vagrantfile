@@ -16,6 +16,7 @@ Vagrant.configure("2") do |config|
   SHELL
 
   config.vm.provision "shell", privileged: false, inline: <<-SHELL
+   /vagrant/scripts/setupGit.sh
    /vagrant/gemstone/defineGemStoneEnvironment.sh
    mkdir -p ~/.reahlworkspace/dist-egg
    pip install cython
