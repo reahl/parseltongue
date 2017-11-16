@@ -145,11 +145,38 @@ def test_basic_perform_returns_value(session):
     assert date_class.oop == returned_object.oop
 
 
+def test_perform_passing_args(session):
+    py_string = 'a string used as argument'
+    hello_symbol = session.new_symbol('hello')
+    user_global_symbol = session.resolve_symbol('UserGlobals')
+    converted_string = session.execute("'{}'".format(py_string))
+    user_global_symbol.perform('at:put:', hello_symbol, converted_string)
+    fetched_py_string = session.resolve_symbol('hello')
+    assert fetched_py_string.oop == converted_string.oop
+
+
+def test_perform_with_gem_oject(session):
+    date = session.resolve_symbol('Date')
+    as_string_symbol = session.new_symbol('asString')
+    date.perform(as_string_symbol)
+
+    as_string_unicode = session.execute("'asString'")
+    with expected(GemstoneError, test='a ArgumentTypeError occurred (error 2094)'):
+        date.perform(as_string_unicode)
+
+
 def test_execute(session):
     date_class = session.execute('^Date yourself')
     date_class_resolved = session.resolve_symbol('Date')
     assert date_class.oop == date_class_resolved.oop
 
+
+def test_execute_with_gem_oject(session):
+    exec_string = session.execute("'^Date yourself'")
+    date_class = session.execute(exec_string)
+    date_class_resolved = session.resolve_symbol('Date')
+    assert date_class.oop == date_class_resolved.oop
+    
 
 def test_execute_in_context(session):
     date_class_resolved = session.resolve_symbol('Date')
