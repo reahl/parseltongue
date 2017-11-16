@@ -172,8 +172,8 @@ def test_execute(session):
 
 
 def test_execute_with_gem_oject(session):
-    exec_string = session.execute("'^Date yourself'")
-    date_class = session.execute(exec_string)
+    string_to_execute = session.execute("'^Date yourself'")
+    date_class = session.execute(string_to_execute)
     date_class_resolved = session.resolve_symbol('Date')
     assert date_class.oop == date_class_resolved.oop
     
