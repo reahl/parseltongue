@@ -48,7 +48,7 @@ def oop_true(session):
     yield session.resolve_symbol('true').oop
 
 
-def test_XX_login_linked(guestmode_netldi):
+def test_singlethread_login_linked(guestmode_netldi):
     session = Session('DataCurator', 'swordfish')
     assert session.is_logged_in
     assert not session.is_remote #NOTE: this is to check that the default gives you a linked session
@@ -56,13 +56,15 @@ def test_XX_login_linked(guestmode_netldi):
     session.log_out()
     assert not session.is_logged_in
 
-def test_XX_login_linked(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
-    assert session.is_logged_in
-    assert not session.is_remote #NOTE: this is to check that the default gives you a linked session
 
-    session.log_out()
-    assert not session.is_logged_in
+# def test_singlethread_login_linked(guestmode_netldi):
+#     session = Session('DataCurator', 'swordfish')
+#     assert session.is_logged_in
+#     assert not session.is_remote #NOTE: this is to check that the default gives you a linked session
+
+#     session.log_out()
+#     assert not session.is_logged_in
+
     
 def test_login_captive_os_user(guestmode_netldi):
     session = Session('DataCurator', 'swordfish', netldi_task='gemnetobject')    #NOTE: XX this is different
@@ -76,12 +78,12 @@ def test_login_captive_os_user(guestmode_netldi):
 def test_login_os_user(stone_fixture):
     with running_netldi(guest_mode=False):
         try:
-            Session('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
+            Session('DataCurator', 'swordfish', netldi_task='gemnetobject', host_username='vagrant', host_password='wrongvagrant')
         except GemstoneError as e:
             # TODO: this can be done better : with expected() from reahl-tofu
             assert 'Password validation failed for user vagrant' in e.message
             
-        session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
+        session = Session('DataCurator', 'swordfish', netldi_task='gemnetobject', host_username='vagrant', host_password='vagrant')
         assert session.is_logged_in
 
         session.log_out()
@@ -103,12 +105,14 @@ def test_resolve_symbol_object(session):
     assert isinstance(nil, GemObject)
     assert nil.oop == 20
 
+
 def test_basic_perform_returns_value(session):
     date_class = session.resolve_symbol('Date')
     returned_object = date_class.perform('yourself')
     assert date_class.oop == returned_object.oop
+    
 
-def test_XX_session_switching(session):
+def test_singlethread_session_switching(session):
     session2 = Session('DataCurator', 'swordfish')
     session2.set_as_current_session()
     assert session2.is_current_session
@@ -117,8 +121,9 @@ def test_XX_session_switching(session):
         assert not session2.is_current_session
         assert session.is_current_session
     assert session2.is_current_session
-    assert not session.is_current_session
-    
+    session2.log_out()
+    # assert session.is_current_session
+
 
 def test_execute(session):
     date_class = session.execute('^Date yourself')
@@ -148,22 +153,22 @@ def test_identity_of_objects_stay_same(session):
     assert my_symbol is my_symbol_again
 
     
-def test_transactions(session):
+def test_transactions(session, oop_true):
     some_object = session.resolve_symbol('Date')
     my_symbol = session.new_symbol('my_symbol')
     user_globals = session.resolve_symbol('UserGlobals')
 
     user_globals.perform('at:put:', my_symbol, some_object) 
-    assert user_globals.perform('includesKey:', my_symbol).to_py
+    assert user_globals.perform('includesKey:', my_symbol).oop == oop_true
     session.abort()
-    assert not user_globals.perform('includesKey:', my_symbol).to_py
+    assert not user_globals.perform('includesKey:', my_symbol).oop == oop_true
 
     try:
        user_globals.perform('at:put:', my_symbol, some_object) 
-       assert user_globals.perform('includesKey:', my_symbol).to_py
+       assert user_globals.perform('includesKey:', my_symbol).oop == oop_true
        session.commit()
        session.abort()
-       assert user_globals.perform('includesKey:', my_symbol).to_py
+       assert user_globals.perform('includesKey:', my_symbol).oop == oop_true
     finally:
        user_globals.perform('removeKey:', my_symbol) 
        session.commit()
