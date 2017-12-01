@@ -2,6 +2,7 @@ from libc.stdlib cimport *
 from libc.stdint cimport int32_t, int64_t, uint64_t
 from libc.string cimport memcpy
 from weakref import WeakValueDictionary
+import functools
 
 ctypedef void* GciSession
 ctypedef unsigned char ByteType
@@ -369,6 +370,19 @@ cdef class GemObject:
         if is_kind_of_result == -1:
             raise make_GemstoneError(self.session, error)
         return <bint>is_kind_of_result
+
+    def __getattr__(self, name):
+        return functools.partial(self.perform_mapped_selector, name)
+
+    def perform_mapped_selector(self, selector, *args):
+        smalltalk_selector = selector.replace('_', ':')
+        if args or '_' in selector:
+           smalltalk_selector += ':'
+        expected_args = smalltalk_selector.count(':')
+        if len(args) != expected_args:
+            raise TypeError('%s() takes exactly %s arguments (%s given)' % (selector, expected_args, len(args)))
+        selector_symbol = self.session.new_symbol(smalltalk_selector)
+        return self.perform(selector_symbol, *args)
 
     def perform(self, selector, *args):
         cdef GciErrSType error

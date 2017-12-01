@@ -402,6 +402,27 @@ def test_gem_object_perform_exception(session):
         date_symbol.perform('asFloat')
 
 
+def test_mapping_method_names(session):
+    user_globals = session.resolve_symbol('UserGlobals')
+    some_key = session.new_symbol('akey')
+
+    user_globals.at_put(some_key, session.from_py(123))
+    assert user_globals.at(some_key).to_py == 123
+    assert user_globals.yourself() is user_globals
+
+    with expected(GemstoneError, test='a SymbolDictionary does not understand  #\'methodthatdoesnotexist\''):
+        user_globals.methodthatdoesnotexist()
+
+    with expected(TypeError, test='at_put() takes exactly 2 arguments (0 given)'):
+        user_globals.at_put()
+
+    with expected(TypeError, test='at_put() takes exactly 2 arguments (1 given)'):
+        user_globals.at_put(some_key)
+
+    with expected(GemstoneError, test='a SymbolDictionary does not understand  #\'at\''):
+        user_globals.at()
+        
+
 def test_raising_gemstone_exceptions(session, oop_true):
     rt_err_generic_error = 2318
     def check_error_details(e):
