@@ -2,6 +2,10 @@
 
 #install in ~/bin/ mby?
 
+VERSION=3.3.3
+#VERSION=3.4.0
+ARCH=x86_64
+
 #Download and unzip gemstone
 mkdir -p /opt/gemstone
 
@@ -9,17 +13,18 @@ mkdir -p /opt/gemstone
 
 export VAGRANT_HOME=/home/vagrant
 
-if [ ! -e $VAGRANT_HOME/testdownloads/GemStone64Bit3.3.3-x86_64.Linux.zip ]; then
- wget -nv -O  $VAGRANT_HOME/testdownloads/GemStone64Bit3.3.3-x86_64.Linux.zip 'https://downloads.gemtalksystems.com/pub/GemStone64/3.3.3/GemStone64Bit3.3.3-x86_64.Linux.zip'
+DOWNLOADED=$VAGRANT_HOME/testdownloads/GemStone64Bit${VERSION}-${ARCH}.Linux.zip
+if [ ! -e $DOWNLOADED ]; then
+ wget -nv -O  $DOWNLOADED "https://downloads.gemtalksystems.com/pub/GemStone64/${VERSION}/GemStone64Bit${VERSION}-${ARCH}.Linux.zip"
 fi 
 
-unzip $VAGRANT_HOME/testdownloads/GemStone64Bit3.3.3-x86_64.Linux.zip -d /opt/gemstone
+unzip $DOWNLOADED -d /opt/gemstone
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Set the Environment
 #echo ""  >> /etc/environment
 #echo "GEMSTONE=/opt/gemstone/GemStone64Bit3.3.3-x86_64.Linux" >> /etc/environment
-export GEMSTONE=/opt/gemstone/GemStone64Bit3.3.3-x86_64.Linux
+export GEMSTONE=/opt/gemstone/GemStone64Bit${VERSION}-${ARCH}.Linux
 
 #setup key file
 cp $GEMSTONE/sys/community.starter.key $GEMSTONE/sys/gemstone.key
