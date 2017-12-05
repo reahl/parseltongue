@@ -114,13 +114,11 @@ cdef extern from "gci.hf":
 
 #======================================================================================================================
 cdef bint is_init = False
+cdef bint is_logged_in = False
 
 #======================================================================================================================
 cdef gembuilder_init():
     cdef GciErrSType error
-    # cdef char *GsErrBuf = <char*> malloc(200 * sizeof(char))
-    # if not GciRtlLoad(False, NULL, GsErrBuf, sizeof(GsErrBuf)) and GciErr(&error):
-    #     raise make_GemstoneError(None, error)
     if not GciInit() and GciErr(&error):
         raise make_GemstoneError(None, error)
     is_init = True
@@ -131,11 +129,6 @@ def gembuilder_dealoc():
     GciShutdown();
     if GciErr(&error):
         raise make_GemstoneError(None, error)
-    # if GciRtlIsLoaded():
-    #     GciRtlUnload()
-    # if GciErr(&error):
-    #     raise make_GemstoneError(None, error)
-    # is_init = False
 
 cdef make_GemstoneError(Session session, GciErrSType e):
     error = GemstoneError(session)
@@ -235,31 +228,33 @@ cdef class GemObject:
     def is_kind_of(self, GemObject a_class):
         cdef GciErrSType error
         cdef int is_kind_of_result
-        with self.session.as_current_session():
-            is_kind_of_result = GciIsKindOf(self.c_oop, a_class.c_oop)
-            if is_kind_of_result == False and GciErr(&error):
-                raise make_GemstoneError(self.session, error)
-            return <bint>is_kind_of_result
+        if not self.session.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        is_kind_of_result = GciIsKindOf(self.c_oop, a_class.c_oop)
+        if is_kind_of_result == False and GciErr(&error):
+            raise make_GemstoneError(self.session, error)
+        return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
         assert isinstance(selector, (str, GemObject)), 'Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__)
         cdef GciErrSType error
         cdef OopType* cargs
         cdef OopType return_oop = OOP_NIL
-        with self.session.as_current_session():
-            cargs = <OopType *>malloc(len(args) * sizeof(OopType))
-            try:
-                for i in xrange(len(args)):
-                    cargs[i] = args[i].oop
-                if isinstance(selector, str):
-                    return_oop = GciPerform(self.c_oop, selector.encode('utf-8'), cargs, len(args))
-                else:
-                    return_oop = GciPerformSymDbg(self.c_oop, selector, cargs, len(args), False)
-            finally:
-                free(cargs)
-            if return_oop == OOP_NIL and GciErr(&error):  #TODO: check this logic: how do we know an error ocurred? should we always call this to check?
-                raise make_GemstoneError(self, error)
-            return self.session.get_or_create_gem_object(return_oop)
+        if not self.session.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        cargs = <OopType *>malloc(len(args) * sizeof(OopType))
+        try:
+            for i in xrange(len(args)):
+                cargs[i] = args[i].oop
+            if isinstance(selector, str):
+                return_oop = GciPerform(self.c_oop, selector.encode('utf-8'), cargs, len(args))
+            else:
+                return_oop = GciPerformSymDbg(self.c_oop, selector, cargs, len(args), False)
+        finally:
+            free(cargs)
+        if return_oop == OOP_NIL and GciErr(&error):  #TODO: check this logic: how do we know an error ocurred? should we always call this to check?
+            raise make_GemstoneError(self, error)
+        return self.session.get_or_create_gem_object(return_oop)
 
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
@@ -269,9 +264,7 @@ cdef class Session:
     cdef GciSessionIdType c_session_id
     cdef object instances
     cdef int32 initial_fetch_size
-    def __cinit__(self, str username, str password, str stone_name='gs64stone',
-                  str host_username=None, str host_password='',
-                  str netldi_task=''):
+    def __cinit__(self, str username, str password):
         self.initial_fetch_size = 200
         cdef GciErrSType error
         cdef char* c_host_username = NULL
@@ -284,11 +277,11 @@ cdef class Session:
 
         self.instances = WeakValueDictionary()
 
-        if netldi_task != '':
-            GciSetNet(stone_name.encode('utf-8'),
-                      c_host_username,    
-                      host_password.encode('utf-8'),
-                      netldi_task.encode('utf-8'))
+        global is_logged_in
+        if is_logged_in:
+            raise GemstoneApiError('There is an active linked session. Can not create another session.')
+
+        is_logged_in = True
 
         if GciErr(&error):
             raise make_GemstoneError(self, error)
@@ -304,32 +297,37 @@ cdef class Session:
 
     def abort(self):
         cdef GciErrSType error
-        with self.as_current_session():
-            GciAbort()
-            if GciErr(&error):
-                raise make_GemstoneError(self, error)
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        GciAbort()
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
 
     def begin(self):
         cdef GciErrSType error
-        with self.as_current_session():
-            GciBegin()
-            if GciErr(&error):
-                raise make_GemstoneError(self, error)
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        GciBegin()
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
 
     def commit(self):
         cdef GciErrSType error
-        with self.as_current_session():
-            if not GciCommit() and GciErr(&error):
-                raise make_GemstoneError(self, error)
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        if not GciCommit() and GciErr(&error):
+            raise make_GemstoneError(self, error)
 
     @property
     def is_remote(self):
-        with self.as_current_session():
-            return GciSessionIsRemote()
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        return GciSessionIsRemote()
 
     @property
     def is_logged_in(self):
-        return self.c_session_id != 0
+        global is_logged_in
+        return is_logged_in
 
     @property
     def initial_fetch_size(self):
@@ -343,88 +341,61 @@ cdef class Session:
             self.instances[oop] = new_gem_object
             return new_gem_object
 
-    @contextmanager
-    def as_current_session(self):
-        cdef GciErrSType error
-        cdef bint is_current_session = True
-        cdef bint invalid_session = False
-        cdef GciSessionIdType c_current_session_id = GciGetSessionId()
-        if GciErr(&error):
-            if 'The given session ID is invalid' in error.message.decode('utf-8'):
-                GciClearStack(error.context) # not working??
-                invalid_session = True
-                error.init()
-            else:
-                raise make_GemstoneError(self, error)
-        if c_current_session_id != self.c_session_id:
-            is_current_session = False
-            self.set_as_current_session()
-        try:
-            yield
-        finally:
-            if not is_current_session and not invalid_session:
-                GciSetSessionId(c_current_session_id)
-                if GciErr(&error):
-                    if 'The given session ID is invalid' in error.message.decode('utf-8'): # Remove mby should check when GciClearStack works
-                        GciClearStack(error.context)
-                    else:
-                        raise make_GemstoneError(self, error)
-
     @property
     def is_current_session(self):
         return self.c_session_id == GciGetSessionId()
 
-    def set_as_current_session(self):
-        cdef GciErrSType error
-        GciSetSessionId(self.c_session_id)
-        if GciErr(&error):
-            raise make_GemstoneError(self, error)
-
     def execute(self, source, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop 
-        with self.as_current_session():
-            if isinstance(source, str):
-                return_oop = GciExecuteStrFromContext(source.encode('utf-8'), context.oop if context else OOP_NO_CONTEXT, 
-                                                               symbol_list.oop if symbol_list else OOP_NIL)
-            elif isinstance(source, GemObject):
-                return_oop = GciExecuteFromContext(source.oop, context.oop if context else OOP_NO_CONTEXT, 
-                                                               symbol_list.oop if symbol_list else OOP_NIL)
-            else:
-                raise GemstoneApiError('Source is type {}.Expected source to be a str or GemObject'.format(source.__class__.__name__))
-            if return_oop == OOP_NIL and GciErr(&error):  #TODO: check this logic: how do we know an error ocurred? should we always call this to check?
-                raise make_GemstoneError(self, error)
-            return self.get_or_create_gem_object(return_oop)
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        if isinstance(source, str):
+            return_oop = GciExecuteStrFromContext(source.encode('utf-8'), context.oop if context else OOP_NO_CONTEXT, 
+                                                           symbol_list.oop if symbol_list else OOP_NIL)
+        elif isinstance(source, GemObject):
+            return_oop = GciExecuteFromContext(source.oop, context.oop if context else OOP_NO_CONTEXT, 
+                                                           symbol_list.oop if symbol_list else OOP_NIL)
+        else:
+            raise GemstoneApiError('Source is type {}.Expected source to be a str or GemObject'.format(source.__class__.__name__))
+        if return_oop == OOP_NIL and GciErr(&error):  #TODO: check this logic: how do we know an error ocurred? should we always call this to check?
+            raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
 
     def new_symbol(self, str py_string):
         cdef GciErrSType error
         cdef OopType return_oop
-        with self.as_current_session():
-            return_oop = GciNewSymbol(py_string.encode('utf-8'))
-            if GciErr(&error):
-                raise make_GemstoneError(self, error)
-            return self.get_or_create_gem_object(return_oop)
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        return_oop = GciNewSymbol(py_string.encode('utf-8'))
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
 
     def resolve_symbol(self, symbol, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop = OOP_NIL
-        with self.as_current_session():
-            if isinstance(symbol, str):
-                return_oop = GciResolveSymbol(symbol.encode('utf-8') , symbol_list.oop if symbol_list else OOP_NIL)
-            elif isinstance(symbol, GemObject):
-                return_oop = GciResolveSymbolObj(symbol.oop, symbol_list.oop if symbol_list else OOP_NIL)
-            else:
-                raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))
-            if return_oop == OOP_ILLEGAL and GciErr(&error):
-                raise make_GemstoneError(self, error)
-            return self.get_or_create_gem_object(return_oop)
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        if isinstance(symbol, str):
+            return_oop = GciResolveSymbol(symbol.encode('utf-8') , symbol_list.oop if symbol_list else OOP_NIL)
+        elif isinstance(symbol, GemObject):
+            return_oop = GciResolveSymbolObj(symbol.oop, symbol_list.oop if symbol_list else OOP_NIL)
+        else:
+            raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))
+        if return_oop == OOP_ILLEGAL and GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
         
     def log_out(self):
         cdef GciErrSType error
-        with self.as_current_session():
-            GciLogout()
-            if GciErr(&error):
-                raise make_GemstoneError(self, error)
-            self.c_session_id = GCI_INVALID_SESSION_ID
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        GciLogout()
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
+        self.c_session_id = GCI_INVALID_SESSION_ID
+        global is_logged_in
+        is_logged_in = False
 
 #======================================================================================================================

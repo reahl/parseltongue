@@ -66,28 +66,28 @@ def test_singlethread_login_linked(guestmode_netldi):
 #     assert not session.is_logged_in
 
     
-def test_login_captive_os_user(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish', netldi_task='gemnetobject')    #NOTE: XX this is different
-    assert session.is_logged_in
-    assert session.is_remote #NOTE: XX added!! TODO: add on the other one too
+# def test_login_captive_os_user(guestmode_netldi):
+#     session = Session('DataCurator', 'swordfish', netldi_task='gemnetobject')    #NOTE: XX this is different
+#     assert session.is_logged_in
+#     assert not session.is_remote #NOTE: XX added!! TODO: add on the other one too
 
-    session.log_out()
-    assert not session.is_logged_in
+#     session.log_out()
+#     assert not session.is_logged_in
 
 
-def test_login_os_user(stone_fixture):
-    with running_netldi(guest_mode=False):
-        try:
-            Session('DataCurator', 'swordfish', netldi_task='gemnetobject', host_username='vagrant', host_password='wrongvagrant')
-        except GemstoneError as e:
-            # TODO: this can be done better : with expected() from reahl-tofu
-            assert 'Password validation failed for user vagrant' in e.message
+# def test_login_os_user(stone_fixture):
+#     with running_netldi(guest_mode=False):
+#         try:
+#             Session('DataCurator', 'swordfish', netldi_task='gemnetobject', host_username='vagrant', host_password='wrongvagrant')
+#         except GemstoneError as e:
+#             # TODO: this can be done better : with expected() from reahl-tofu
+#             assert 'Password validation failed for user vagrant' in e.message
             
-        session = Session('DataCurator', 'swordfish', netldi_task='gemnetobject', host_username='vagrant', host_password='vagrant')
-        assert session.is_logged_in
+#         session = Session('DataCurator', 'swordfish', netldi_task='gemnetobject', host_username='vagrant', host_password='vagrant')
+#         assert session.is_logged_in
 
-        session.log_out()
-        assert not session.is_logged_in
+#         session.log_out()
+#         assert not session.is_logged_in
 
 
 def test_resolve_string_symbol(session):
@@ -112,17 +112,17 @@ def test_basic_perform_returns_value(session):
     assert date_class.oop == returned_object.oop
     
 
-def test_singlethread_session_switching(session):
-    session2 = Session('DataCurator', 'swordfish')
-    session2.set_as_current_session()
-    assert session2.is_current_session
-    assert not session.is_current_session
-    with session.as_current_session():
-        assert not session2.is_current_session
-        assert session.is_current_session
-    assert session2.is_current_session
-    session2.log_out()
-    # assert session.is_current_session
+# def test_singlethread_session_switching(session):
+#     session2 = Session('DataCurator', 'swordfish')
+#     session2.set_as_current_session()
+#     assert session2.is_current_session
+#     assert not session.is_current_session
+#     with session.as_current_session():
+#         assert not session2.is_current_session
+#         assert session.is_current_session
+#     assert session2.is_current_session
+#     session2.log_out()
+#     # assert session.is_current_session
 
 
 def test_execute(session):
