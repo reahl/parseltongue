@@ -269,9 +269,6 @@ cdef class Session:
         cdef GciErrSType error
         cdef char* c_host_username = NULL
 
-        if host_username:
-            c_host_username = to_c_bytes(host_username)
-
         if not is_init:
             gembuilder_init()
 
