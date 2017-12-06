@@ -199,8 +199,8 @@ cdef class Session:
 
         self.instances = WeakValueDictionary()
 
-        global current_session
-        if current_session != None:
+        global current_linked_session
+        if current_linked_session != None:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
 
         is_logged_in = True
@@ -217,7 +217,7 @@ cdef class Session:
             else:
                 warnings.warn(('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', ''),GemstoneWarning)
 
-        current_session = self
+        current_linked_session = self
 
     def abort(self):
         cdef GciErrSType error
@@ -318,7 +318,7 @@ cdef class Session:
         if GciErr(&error):
             raise make_GemstoneError(self, error)
         self.c_session_id = GCI_INVALID_SESSION_ID
-        global current_session
-        current_session = None
+        global current_linked_session
+        current_linked_session = None
 
 #======================================================================================================================
