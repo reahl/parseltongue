@@ -36,7 +36,7 @@ cdef extern from "gci.hf":
 
 #======================================================================================================================
 cdef bint is_init = False
-cdef Session current_session = None
+cdef Session current_linked_session = None
 
 #======================================================================================================================
 cdef gembuilder_init():
