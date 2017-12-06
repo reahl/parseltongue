@@ -1,92 +1,14 @@
 from libc.stdlib cimport *
-from libc.stdint cimport int32_t, int64_t, uint64_t
 from libc.string cimport memcpy
 from weakref import WeakValueDictionary
 from contextlib import contextmanager
 from atexit import register
+import warnings
 
-ctypedef uint64_t OopType
-ctypedef int32_t int32
-ctypedef int64_t int64
-
-ctypedef bint BoolType
-ctypedef void* GciSession
-ctypedef unsigned char ByteType
-ctypedef int32 GciSessionIdType
-
-cdef enum:
-    AUTH_NONE = 0 
-    AUTH_READ = 1
-    AUTH_WRITE = 2 
-cdef enum:
-    implem_mask    = 0x03
-    indexable_mask = 0x04
-    invariant_mask = 0x08
-    partial_mask   = 0x10
-    overlay_mask   = 0x20
-    is_placeholder = 0x40 # object is place holder for unsatisfied forward reference
-    swiz_kind_mask = 0x300
-    swiz_kind_shift = 8
-ctypedef enum GciByteSwizEType:
-    # How to swizzle body of a byte format object for conversion
-    # between big and little endian, used for large integers, DoubleByteString,
-    # Float, QuadByteString , etc
-    gci_byte_swiz_none = 0
-    gci_byte_swiz_2_bytes = 1 
-    gci_byte_swiz_4_bytes = 2
-    gci_byte_swiz_8_bytes = 3
-
-GCI_ERR_STR_SIZE      =  1024
-GCI_ERR_reasonSize    =  GCI_ERR_STR_SIZE
-GCI_MAX_ERR_ARGS      =  10
+from gembuildertypes cimport *
 
 #======================================================================================================================
-
 cdef extern from "gci.hf":
-    GciSessionIdType GCI_INVALID_SESSION_ID
-    OopType OOP_NO_CONTEXT
-    OopType OOP_NIL
-    OopType OOP_ILLEGAL
-    OopType OOP_FALSE
-    OopType OOP_TRUE
-    OopType OOP_CLASS_INTEGER
-    OopType OOP_CLASS_SMALL_INTEGER
-    OopType OOP_CLASS_LargeInteger
-    OopType OOP_CLASS_SMALL_DOUBLE 
-    OopType OOP_CLASS_Float
-    OopType OOP_CLASS_SYMBOL
-    OopType OOP_CLASS_STRING
-    OopType OOP_CLASS_DoubleByteString
-    OopType OOP_CLASS_DoubleByteSymbol
-    OopType OOP_CLASS_QuadByteString
-    OopType OOP_CLASS_QuadByteSymbol
-    OopType OOP_CLASS_CHARACTER
-    OopType OOP_CLASS_Utf8
-    OopType OOP_CLASS_Unicode7
-    OopType OOP_CLASS_Unicode16
-    OopType OOP_CLASS_Unicode32
-    uint64_t OOP_TAG_SMALLINT
-    uint64_t OOP_NUM_TAG_BITS
-    int64 MIN_SMALL_INT
-    int64 MAX_SMALL_INT
-
-    cdef cppclass GciErrSType:
-        OopType         category
-        OopType         context
-        OopType         exceptionObj
-        OopType         args[]
-        int             number
-        int             argCount
-        unsigned char   fatal
-        char            message[]
-        char            reason[]
-        inline void init()
-        void setError(int errNum, const char* msg)
-        void setFatalError(int errNum, const char* msg)
-    
-    bint GciRtlLoad(bint useRpc, const char *path, char errBuf[], size_t errBufSize);
-    void GciRtlUnload()
-    bint GciRtlIsLoaded()
     void GciInitAppName(const char *applicationName, bint logWarnings)
     void GciSetNet(const char StoneName[], const char HostUserId[], const char HostPassword[], const char GemService[])
     bint GciInit()
@@ -114,7 +36,7 @@ cdef extern from "gci.hf":
 
 #======================================================================================================================
 cdef bint is_init = False
-cdef bint is_logged_in = False
+cdef Session current_session = None
 
 #======================================================================================================================
 cdef gembuilder_init():
@@ -204,6 +126,9 @@ class NotYetImplemented(Exception):
 class GemstoneApiError(Exception):
     pass
 
+class GemstoneWarning(Warning):
+    pass
+
 #======================================================================================================================
 cdef class GemObject:
     cdef OopType c_oop
@@ -274,8 +199,8 @@ cdef class Session:
 
         self.instances = WeakValueDictionary()
 
-        global is_logged_in
-        if is_logged_in:
+        global current_session
+        if current_session != None:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
 
         is_logged_in = True
@@ -290,7 +215,9 @@ cdef class Session:
             if self.c_session_id == GCI_INVALID_SESSION_ID:
                 raise make_GemstoneError(self, error)
             else:
-                raise GemstoneApiError('Something went wrong with the login.')
+                warnings.warn(('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', ''),GemstoneWarning)
+
+        current_session = self
 
     def abort(self):
         cdef GciErrSType error
@@ -323,8 +250,7 @@ cdef class Session:
 
     @property
     def is_logged_in(self):
-        global is_logged_in
-        return is_logged_in
+        return self.c_session_id != GCI_INVALID_SESSION_ID
 
     @property
     def initial_fetch_size(self):
@@ -355,7 +281,7 @@ cdef class Session:
                                                            symbol_list.oop if symbol_list else OOP_NIL)
         else:
             raise GemstoneApiError('Source is type {}.Expected source to be a str or GemObject'.format(source.__class__.__name__))
-        if return_oop == OOP_NIL and GciErr(&error):  #TODO: check this logic: how do we know an error ocurred? should we always call this to check?
+        if return_oop == OOP_NIL and GciErr(&error):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
@@ -392,7 +318,7 @@ cdef class Session:
         if GciErr(&error):
             raise make_GemstoneError(self, error)
         self.c_session_id = GCI_INVALID_SESSION_ID
-        global is_logged_in
-        is_logged_in = False
+        global current_session
+        current_session = None
 
 #======================================================================================================================

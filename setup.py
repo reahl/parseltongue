@@ -20,8 +20,7 @@ setup(
                     Extension('ptongue.gemproxysinglethread',
                     include_dirs = ['{}/include'.format(gemstone_dir)],
                     library_dirs=['.', '{}/lib'.format(gemstone_dir)],
-                    libraries=["gcilnk-3.3.3-64", "gbjgci313-3.3.3-64", "icuuc.54.1", "icui18n.54.1", "icudata.54.1", "gcsi-3.3.3-64"],#'gcirpc-3.3.3-64', 'gcilnk_noop-3.3.3-64', 'gcilnk_slow-3.3.3-64', 'gcsi-3.3.3-64', 'gcilnk-3.3.3-64'
-                    #'gcilnk-3.3.3-64', 'gcilnk_noop-3.3.3-64', 'gcilnk_slow-3.3.3-64', 'gcirpc-3.3.3-64'
+                    libraries=["gcilnk-3.3.3-64", "gbjgci313-3.3.3-64", "icuuc.54.1", "icui18n.54.1", "icudata.54.1", "gcsi-3.3.3-64"],
                     language="c++",
                     sources = ['ptongue/gemproxysinglethread.pyx'],
                     extra_compile_args=[ "-fmessage-length=0", "-fcheck-new", "-ggdb", "-m64", "-pipe", "-D_REENTRANT", "-D_GNU_SOURCE", "-fno-strict-aliasing", "-fno-exceptions"],
