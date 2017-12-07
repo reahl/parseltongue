@@ -77,3 +77,76 @@ cdef extern from "gci.hf":
         void setFatalError(int errNum, const char* msg)
 
     GciSessionIdType GCI_INVALID_SESSION_ID
+
+#======================================================================================================================
+# well_known_class_names = { 
+#     OOP_CLASS_SMALL_INTEGER: 'small_integer',
+#     OOP_CLASS_LargeInteger: 'large_integer',
+#     OOP_CLASS_SMALL_DOUBLE: 'float',
+#     OOP_CLASS_Float: 'float',
+#     OOP_CLASS_STRING: 'string',
+#     OOP_CLASS_SYMBOL: 'string',
+#     OOP_CLASS_DoubleByteString: 'string',
+#     OOP_CLASS_DoubleByteSymbol: 'string',
+#     OOP_CLASS_QuadByteString: 'string',
+#     OOP_CLASS_QuadByteSymbol: 'string',
+#     OOP_CLASS_CHARACTER: 'string',
+#     OOP_CLASS_Utf8: 'string',
+#     OOP_CLASS_Unicode7: 'string',
+#     OOP_CLASS_Unicode16: 'string',
+#     OOP_CLASS_Unicode32: 'string'
+#  }
+
+# well_known_instances = {
+#     OOP_TRUE: True,
+#     OOP_FALSE: False,
+#     OOP_NIL: None
+# }
+
+# well_known_python_instances = {
+#     True: OOP_TRUE,
+#     False: OOP_FALSE,
+#     None: OOP_NIL
+# }
+
+# implemented_python_types = {
+#     'NoneType': "boolean_or_none",
+#     'bool': "boolean_or_none",
+#     'str': "string",
+#     'int': "integer",
+#     'float': "float"
+# }
+
+#======================================================================================================================
+cdef object make_GemstoneError(session, GciErrSType c_error)
+
+cdef OopType compute_small_integer_oop(int64 py_int)
+
+cdef char* to_c_bytes(object py_string)
+
+# #======================================================================================================================
+# cdef class GemstoneError(Exception):
+#     cdef object category
+#     cdef object context
+#     cdef object exception_obj
+#     cdef object args
+#     cdef object number
+#     cdef object arg_count
+#     cdef object fatal
+#     cdef object reason
+#     cdef object message
+cdef class GemstoneError(Exception):
+    cdef GciErrSType c_error
+    cdef object session
+    cdef void set_error(self, GciErrSType error)
+
+
+#======================================================================================================================
+cdef class GemObject:
+    cdef object __weakref__
+
+
+cdef class GemstoneSession:
+    cdef object instances
+    # def __init__(self)
+    # def get_or_create_gem_object(self, oop)

@@ -1,11 +1,11 @@
 from libc.stdlib cimport *
 from libc.string cimport memcpy
-from weakref import WeakValueDictionary
 from contextlib import contextmanager
 from atexit import register
 import warnings
 
 from gembuildertypes cimport *
+from gembuildertypes import GemstoneApiError, GemstoneWarning
 
 #======================================================================================================================
 cdef extern from "gci.hf":
@@ -36,7 +36,7 @@ cdef extern from "gci.hf":
 
 #======================================================================================================================
 cdef bint is_init = False
-cdef Session current_linked_session = None
+cdef LinkedSession current_linked_session = None
 
 #======================================================================================================================
 cdef gembuilder_init():
@@ -52,89 +52,11 @@ def gembuilder_dealoc():
     if GciErr(&error):
         raise make_GemstoneError(None, error)
 
-cdef make_GemstoneError(Session session, GciErrSType e):
-    error = GemstoneError(session)
-    error.set_error(e)
-    return error
-
-cdef compute_small_integer_oop(int64 py_int):
-    cdef OopType return_oop
-    if py_int <= MAX_SMALL_INT and py_int >= MIN_SMALL_INT:
-        return <OopType>(((<int64>py_int) << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT)
-    else:
-        raise OverflowError
-
-cdef char* to_c_bytes(py_string):
-    return py_string.encode('utf-8')
-
 #======================================================================================================================
-cdef class GemstoneError(Exception):
-    cdef GciErrSType c_error
-    cdef Session session
-    def __cinit__(self, sess):
-        self.c_error.init()
-        self.session = sess
-
-    cdef set_error(self, GciErrSType error):
-        self.c_error = error
-
-    @property
-    def category(self):
-        return self.session.get_or_create_gem_object(self.c_error.category)   
-
-    @property
-    def context(self):
-        return self.session.get_or_create_gem_object(self.c_error.context)
-
-    @property
-    def exception_obj(self):
-        return self.session.get_or_create_gem_object(self.c_error.exceptionObj)
-
-    @property
-    def args(self):
-        return [self.session.get_or_create_gem_object(a) for a in self.c_error.args[:self.c_error.argCount]]
-
-    @property
-    def number(self):
-        return self.c_error.number
-
-    @property
-    def arg_count(self):
-        return self.c_error.argCount
-
-    @property
-    def fatal(self):
-        return self.c_error.fatal
-
-    @property
-    def reason(self):
-        return self.c_error.reason.decode('utf-8')
-
-    @property
-    def message(self):
-        return self.c_error.message.decode('utf-8')
-
-    def __str__(self):
-        return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
-
-class InvalidSession(Exception):
-    pass
-
-class NotYetImplemented(Exception):
-    pass
-
-class GemstoneApiError(Exception):
-    pass
-
-class GemstoneWarning(Warning):
-    pass
-
-#======================================================================================================================
-cdef class GemObject:
+cdef class LinkedGemObject(GemObject):
     cdef OopType c_oop
-    cdef Session session
-    cdef object __weakref__
-    def __cinit__(self, Session session, OopType oop):
+    cdef LinkedSession session
+    def __cinit__(self, LinkedSession session, OopType oop):
         self.session = session
         self.c_oop = oop
 
@@ -150,7 +72,7 @@ cdef class GemObject:
     def is_symbol(self):
         return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
 
-    def is_kind_of(self, GemObject a_class):
+    def is_kind_of(self, LinkedGemObject a_class):
         cdef GciErrSType error
         cdef int is_kind_of_result
         if not self.session.is_current_session:
@@ -161,7 +83,7 @@ cdef class GemObject:
         return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
-        assert isinstance(selector, (str, GemObject)), 'Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__)
+        assert isinstance(selector, (str, LinkedGemObject)), 'Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__)
         cdef GciErrSType error
         cdef OopType* cargs
         cdef OopType return_oop = OOP_NIL
@@ -185,9 +107,8 @@ cdef class GemObject:
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
 #======================================================================================================================
-cdef class Session:
+cdef class LinkedSession(GemstoneSession):
     cdef GciSessionIdType c_session_id
-    cdef object instances
     cdef int32 initial_fetch_size
     def __cinit__(self, str username, str password):
         self.initial_fetch_size = 200
@@ -196,8 +117,6 @@ cdef class Session:
 
         if not is_init:
             gembuilder_init()
-
-        self.instances = WeakValueDictionary()
 
         global current_linked_session
         if current_linked_session != None:
@@ -256,11 +175,12 @@ cdef class Session:
     def initial_fetch_size(self):
         return self.initial_fetch_size
 
-    def get_or_create_gem_object(self, oop):
+    def get_or_create_gem_object(self, OopType oop):
         try:
+            print (oop)
             return self.instances[oop]
         except KeyError:
-            new_gem_object = GemObject(self, oop)
+            new_gem_object = LinkedGemObject(self, oop)
             self.instances[oop] = new_gem_object
             return new_gem_object
 
@@ -268,7 +188,7 @@ cdef class Session:
     def is_current_session(self):
         return self.c_session_id == GciGetSessionId()
 
-    def execute(self, source, GemObject context=None, GemObject symbol_list=None):
+    def execute(self, source, LinkedGemObject context=None, LinkedGemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop 
         if not self.is_current_session:
@@ -276,7 +196,7 @@ cdef class Session:
         if isinstance(source, str):
             return_oop = GciExecuteStrFromContext(source.encode('utf-8'), context.oop if context else OOP_NO_CONTEXT, 
                                                            symbol_list.oop if symbol_list else OOP_NIL)
-        elif isinstance(source, GemObject):
+        elif isinstance(source, LinkedGemObject):
             return_oop = GciExecuteFromContext(source.oop, context.oop if context else OOP_NO_CONTEXT, 
                                                            symbol_list.oop if symbol_list else OOP_NIL)
         else:
@@ -295,14 +215,14 @@ cdef class Session:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
-    def resolve_symbol(self, symbol, GemObject symbol_list=None):
+    def resolve_symbol(self, symbol, LinkedGemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop = OOP_NIL
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         if isinstance(symbol, str):
             return_oop = GciResolveSymbol(symbol.encode('utf-8') , symbol_list.oop if symbol_list else OOP_NIL)
-        elif isinstance(symbol, GemObject):
+        elif isinstance(symbol, LinkedGemObject):
             return_oop = GciResolveSymbolObj(symbol.oop, symbol_list.oop if symbol_list else OOP_NIL)
         else:
             raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))

@@ -3,7 +3,8 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxysinglethread import Session, GemObject, GemstoneError, NotYetImplemented
+from ptongue.gembuildertypes import GemstoneError, NotYetImplemented
+from ptongue.gemproxysinglethread import LinkedSession, LinkedGemObject
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 @pytest.fixture(scope="module")
@@ -34,7 +35,7 @@ def guestmode_netldi(stone_fixture):
 
 @pytest.fixture
 def session(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
+    session = LinkedSession('DataCurator', 'swordfish')
     try:
        session.begin()
        yield session
@@ -49,7 +50,7 @@ def oop_true(session):
 
 
 def test_singlethread_login_linked(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
+    session = LinkedSession('DataCurator', 'swordfish')
     assert session.is_logged_in
     assert not session.is_remote #NOTE: this is to check that the default gives you a linked session
 
@@ -92,17 +93,17 @@ def test_singlethread_login_linked(guestmode_netldi):
 
 def test_resolve_string_symbol(session):
     nil = session.resolve_symbol('nil') 
-    assert isinstance(nil, GemObject)
+    assert isinstance(nil, LinkedGemObject)
     assert nil.oop == 20
     assert nil.is_nil
 
 
 def test_resolve_symbol_object(session):
     nil_symbol = session.new_symbol('nil')
-    assert isinstance(nil_symbol, GemObject)
+    assert isinstance(nil_symbol, LinkedGemObject)
     assert nil_symbol.is_symbol
     nil = session.resolve_symbol(nil_symbol) 
-    assert isinstance(nil, GemObject)
+    assert isinstance(nil, LinkedGemObject)
     assert nil.oop == 20
 
 

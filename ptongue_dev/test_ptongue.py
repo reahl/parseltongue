@@ -3,7 +3,8 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import Session, GemObject, GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
+from ptongue.gemproxy import RPCSession, RPCGemObject 
+from ptongue.gembuildertypes import GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
@@ -47,7 +48,7 @@ def guestmode_netldi(stone_fixture):
 
 @pytest.fixture
 def session(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
+    session = RPCSession('DataCurator', 'swordfish')
     try:
        session.begin()
        yield session
@@ -63,7 +64,7 @@ def oop_true(session):
 
 @pytest.fixture
 def invalid_session(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
+    session = RPCSession('DataCurator', 'swordfish')
     session.log_out()
     yield session
 
@@ -93,7 +94,7 @@ def expected(exception, test=None):
 #======================================================================================================================
 
 def test_login_captive_os_user(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
+    session = RPCSession('DataCurator', 'swordfish')
     assert session.is_logged_in
 
     session.log_out()
@@ -103,9 +104,9 @@ def test_login_captive_os_user(guestmode_netldi):
 def test_login_os_user(stone_fixture):
     with running_netldi(guest_mode=False):
         with expected(GemstoneError, test='Password validation failed for user vagrant'):
-            Session('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
+            RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
             
-        session = Session('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
+        session = RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
         assert session.is_logged_in
 
         session.log_out()
@@ -114,17 +115,17 @@ def test_login_os_user(stone_fixture):
 
 def test_resolve_string_symbol(session):
     nil = session.resolve_symbol('nil') 
-    assert isinstance(nil, GemObject)
+    assert isinstance(nil, RPCGemObject)
     assert nil.oop == 20
     assert nil.is_nil
 
 
 def test_resolve_symbol_object(session):
     nil_symbol = session.new_symbol('nil')
-    assert isinstance(nil_symbol, GemObject)
+    assert isinstance(nil_symbol, RPCGemObject)
     assert nil_symbol.is_symbol
     nil = session.resolve_symbol(nil_symbol) 
-    assert isinstance(nil, GemObject)
+    assert isinstance(nil, RPCGemObject)
     assert nil.oop == 20
 
 
@@ -291,7 +292,7 @@ def test_translating_python_string_to_gemstone(session, oop_true):
 
 def test_session_invalid_login(guestmode_netldi):
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
-        Session('DataCurator', 'wrong_password')
+        RPCSession('DataCurator', 'wrong_password')
 
 def test_session_invalid_log_out(invalid_session):
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
@@ -382,7 +383,7 @@ def test_gem_object_latin1_to_py_exception(session):
 
 
 def test_gem_object_gemstone_class_exception(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
+    session = RPCSession('DataCurator', 'swordfish')
     date_symbol = session.resolve_symbol('Date')
     session.log_out()
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
