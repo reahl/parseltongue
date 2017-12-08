@@ -116,6 +116,7 @@ cdef class GemstoneApiError(Exception):
 cdef class GemObject:
     def __cinit__(self, GemstoneSession session, OopType oop):
         self.c_oop = oop
+        self.session = session
 
     @property
     def oop(self):

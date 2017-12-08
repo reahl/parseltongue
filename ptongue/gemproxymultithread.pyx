@@ -57,13 +57,10 @@ cdef extern from "gcits.hf":
 
 #======================================================================================================================
 cdef class RPCGemObject(GemObject):
-    cdef RPCSession rpc_session
-    def __cinit__(self, GemstoneSession session, OopType oop):
-        self.rpc_session = session
 
     @property
     def is_symbol(self):
-        return self.is_kind_of(self.rpc_session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
+        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
 
     @property
     def to_py(self):
@@ -91,15 +88,15 @@ cdef class RPCGemObject(GemObject):
     def _float_to_py(self):
         cdef GciErrSType error
         cdef double result = 0
-        if not GciTsOopToDouble(self.rpc_session.c_session, self.c_oop, &result, &error):
-            raise make_GemstoneError(self.rpc_session, error)
+        if not GciTsOopToDouble((<RPCSession>self.session).c_session, self.c_oop, &result, &error):
+            raise make_GemstoneError(self.session, error)
         return result
 
     def _string_to_py(self):
         cdef GciErrSType error
         cdef int64 max_bytes
         cdef ByteType *c_string
-        cdef int64 required_size = self.rpc_session.initial_fetch_size
+        cdef int64 required_size = self.session.initial_fetch_size
         cdef int64 bytes_returned
         cdef bytes py_bytes
         cdef int64 tries = 0
@@ -111,11 +108,11 @@ cdef class RPCGemObject(GemObject):
             max_bytes = required_size
             c_string = <ByteType *>malloc((max_bytes + 1) *sizeof(ByteType))
             try:
-                bytes_returned = GciTsFetchUtf8(self.rpc_session.c_session,
+                bytes_returned = GciTsFetchUtf8((<RPCSession>self.session).c_session,
                          self.c_oop, c_string, max_bytes, &required_size, &error)
 
                 if bytes_returned == -1:
-                    raise make_GemstoneError(self.rpc_session, error)
+                    raise make_GemstoneError(self.session, error)
 
                 c_string[bytes_returned] = '\0'
                 py_bytes = c_string
@@ -126,7 +123,7 @@ cdef class RPCGemObject(GemObject):
 
     def _latin1_to_py(self):
         cdef int64 start_index = 1
-        cdef int64 num_bytes  = self.rpc_session.initial_fetch_size
+        cdef int64 num_bytes  = self.session.initial_fetch_size
         cdef int64 bytes_returned = num_bytes
         cdef GciErrSType error
         cdef bytes py_bytes = b''
@@ -134,10 +131,10 @@ cdef class RPCGemObject(GemObject):
         while bytes_returned == num_bytes:
             dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
             try:
-                bytes_returned = GciTsFetchBytes(self.rpc_session.c_session, self.oop, start_index,
+                bytes_returned = GciTsFetchBytes((<RPCSession>self.session).c_session, self.oop, start_index,
                                                         dest, num_bytes, &error);
                 if bytes_returned == -1:
-                    raise make_GemstoneError(self.rpc_session, error)
+                    raise make_GemstoneError(self.session, error)
 
                 dest[bytes_returned] = b'\0'
                 py_bytes = py_bytes + dest
@@ -148,16 +145,16 @@ cdef class RPCGemObject(GemObject):
 
     def gemstone_class(self):
         cdef GciErrSType error
-        cdef OopType return_oop = GciTsFetchClass(self.rpc_session.c_session, self.c_oop, &error)
+        cdef OopType return_oop = GciTsFetchClass((<RPCSession>self.session).c_session, self.c_oop, &error)
         if return_oop == OOP_ILLEGAL:
-           raise make_GemstoneError(self.rpc_session, error)
-        return self.rpc_session.get_or_create_gem_object(return_oop)
+           raise make_GemstoneError(self.session, error)
+        return self.session.get_or_create_gem_object(return_oop)
 
     def is_kind_of(self, RPCGemObject a_class):
         cdef GciErrSType error
-        cdef int is_kind_of_result = GciTsIsKindOf(self.rpc_session.c_session, self.c_oop, a_class.c_oop, &error)
+        cdef int is_kind_of_result = GciTsIsKindOf((<RPCSession>self.session).c_session, self.c_oop, a_class.c_oop, &error)
         if is_kind_of_result == -1:
-            raise make_GemstoneError(self.rpc_session, error)
+            raise make_GemstoneError(self.session, error)
         return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
@@ -172,7 +169,7 @@ cdef class RPCGemObject(GemObject):
         flags = 1
         environment_id = 0
 
-        cdef OopType return_oop = GciTsPerform(self.rpc_session.c_session,
+        cdef OopType return_oop = GciTsPerform((<RPCSession>self.session).c_session,
                                                self.c_oop,
                                                selector_oop,
                                                selector_str,
@@ -183,8 +180,8 @@ cdef class RPCGemObject(GemObject):
                                                &error)
         free(cargs)
         if return_oop == OOP_ILLEGAL:
-            raise make_GemstoneError(self.rpc_session, error)
-        return self.rpc_session.get_or_create_gem_object(return_oop)
+            raise make_GemstoneError(self.session, error)
+        return self.session.get_or_create_gem_object(return_oop)
     
 #======================================================================================================================
 cdef class RPCSession(GemstoneSession):

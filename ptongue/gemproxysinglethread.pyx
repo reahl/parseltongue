@@ -57,22 +57,19 @@ class GemstoneWarning(Warning):
 
 #======================================================================================================================
 cdef class LinkedGemObject(GemObject):
-    cdef LinkedSession linked_session
-    def __cinit__(self, LinkedSession session, OopType oop):
-        self.linked_session = session
 
     @property
     def is_symbol(self):
-        return self.is_kind_of(self.linked_session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
+        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
 
     def is_kind_of(self, LinkedGemObject a_class):
         cdef GciErrSType error
         cdef int is_kind_of_result
-        if not self.linked_session.is_current_session:
+        if not self.session.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         is_kind_of_result = GciIsKindOf(self.c_oop, a_class.c_oop)
         if is_kind_of_result == False and GciErr(&error):
-            raise make_GemstoneError(self.linked_session, error)
+            raise make_GemstoneError(self.session, error)
         return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
@@ -81,7 +78,7 @@ cdef class LinkedGemObject(GemObject):
         cdef GciErrSType error
         cdef OopType* cargs
         cdef OopType return_oop = OOP_NIL
-        if not self.linked_session.is_current_session:
+        if not self.session.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         cargs = <OopType *>malloc(len(args) * sizeof(OopType))
         try:
@@ -95,7 +92,7 @@ cdef class LinkedGemObject(GemObject):
             free(cargs)
         if return_oop == OOP_NIL and GciErr(&error):
             raise make_GemstoneError(self, error)
-        return self.linked_session.get_or_create_gem_object(return_oop)
+        return self.session.get_or_create_gem_object(return_oop)
 
 #======================================================================================================================
 cdef class LinkedSession(GemstoneSession):
