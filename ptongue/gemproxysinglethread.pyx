@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from atexit import register
 import warnings
 
-from gembuildertypes cimport *
+from gemproxy cimport *
 
 #======================================================================================================================
 cdef extern from "gci.hf":
@@ -57,19 +57,9 @@ class GemstoneWarning(Warning):
 
 #======================================================================================================================
 cdef class LinkedGemObject(GemObject):
-    cdef OopType c_oop
     cdef LinkedSession linked_session
     def __cinit__(self, LinkedSession session, OopType oop):
         self.linked_session = session
-        self.c_oop = oop
-
-    @property
-    def oop(self):
-        return self.c_oop
-
-    @property
-    def is_nil(self):
-        return self.c_oop == OOP_NIL
 
     @property
     def is_symbol(self):
@@ -107,15 +97,10 @@ cdef class LinkedGemObject(GemObject):
             raise make_GemstoneError(self, error)
         return self.linked_session.get_or_create_gem_object(return_oop)
 
-    def __str__(self):
-        return '<%s object with oop %s>' % (self.__class__, self.c_oop)
-
 #======================================================================================================================
 cdef class LinkedSession(GemstoneSession):
     cdef GciSessionIdType c_session_id
-    cdef int32 initial_fetch_size
     def __cinit__(self, str username, str password):
-        self.initial_fetch_size = 200
         cdef GciErrSType error
         cdef char* c_host_username = NULL
 
@@ -174,10 +159,6 @@ cdef class LinkedSession(GemstoneSession):
     @property
     def is_logged_in(self):
         return self.c_session_id != GCI_INVALID_SESSION_ID
-
-    @property
-    def initial_fetch_size(self):
-        return self.initial_fetch_size
 
     def get_or_create_gem_object(self, OopType oop):
         try:

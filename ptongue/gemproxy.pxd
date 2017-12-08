@@ -103,6 +103,8 @@ cdef class GemstoneApiError(Exception):
 #======================================================================================================================
 cdef class GemObject:
     cdef object __weakref__
+    cdef OopType c_oop
 
 cdef class GemstoneSession:
     cdef object instances
+    cdef int32 initial_fetch_size

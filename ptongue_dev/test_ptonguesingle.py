@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gembuildertypes import GemstoneError, NotYetImplemented
+from ptongue.gemproxy import GemstoneError, NotYetImplemented
 from ptongue.gemproxysinglethread import LinkedSession, LinkedGemObject
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 

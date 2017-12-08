@@ -3,8 +3,8 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import RPCSession, RPCGemObject 
-from ptongue.gembuildertypes import GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
+from ptongue.gemproxymultithread import RPCSession, RPCGemObject 
+from ptongue.gemproxy import GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
