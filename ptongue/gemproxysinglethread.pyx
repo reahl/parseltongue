@@ -5,7 +5,6 @@ from atexit import register
 import warnings
 
 from gembuildertypes cimport *
-from gembuildertypes import GemstoneApiError, GemstoneWarning
 
 #======================================================================================================================
 cdef extern from "gci.hf":
@@ -53,11 +52,15 @@ def gembuilder_dealoc():
         raise make_GemstoneError(None, error)
 
 #======================================================================================================================
+class GemstoneWarning(Warning):
+    pass
+
+#======================================================================================================================
 cdef class LinkedGemObject(GemObject):
     cdef OopType c_oop
-    cdef LinkedSession session
+    cdef LinkedSession linked_session
     def __cinit__(self, LinkedSession session, OopType oop):
-        self.session = session
+        self.linked_session = session
         self.c_oop = oop
 
     @property
@@ -70,24 +73,25 @@ cdef class LinkedGemObject(GemObject):
 
     @property
     def is_symbol(self):
-        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
+        return self.is_kind_of(self.linked_session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
 
     def is_kind_of(self, LinkedGemObject a_class):
         cdef GciErrSType error
         cdef int is_kind_of_result
-        if not self.session.is_current_session:
+        if not self.linked_session.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         is_kind_of_result = GciIsKindOf(self.c_oop, a_class.c_oop)
         if is_kind_of_result == False and GciErr(&error):
-            raise make_GemstoneError(self.session, error)
+            raise make_GemstoneError(self.linked_session, error)
         return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
-        assert isinstance(selector, (str, LinkedGemObject)), 'Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__)
+        if not isinstance(selector, (str, LinkedGemObject)):
+            raise GemstoneApiError('Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__))
         cdef GciErrSType error
         cdef OopType* cargs
         cdef OopType return_oop = OOP_NIL
-        if not self.session.is_current_session:
+        if not self.linked_session.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         cargs = <OopType *>malloc(len(args) * sizeof(OopType))
         try:
@@ -99,9 +103,9 @@ cdef class LinkedGemObject(GemObject):
                 return_oop = GciPerformSymDbg(self.c_oop, selector, cargs, len(args), False)
         finally:
             free(cargs)
-        if return_oop == OOP_NIL and GciErr(&error):  #TODO: check this logic: how do we know an error ocurred? should we always call this to check?
+        if return_oop == OOP_NIL and GciErr(&error):
             raise make_GemstoneError(self, error)
-        return self.session.get_or_create_gem_object(return_oop)
+        return self.linked_session.get_or_create_gem_object(return_oop)
 
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
