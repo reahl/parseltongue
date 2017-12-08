@@ -56,41 +56,6 @@ class GemstoneWarning(Warning):
     pass
 
 #======================================================================================================================
-cdef class LinkedGemObject(GemObject):
-
-    def is_kind_of(self, GemObject a_class):
-        cdef GciErrSType error
-        cdef int is_kind_of_result
-        if not self.session.is_current_session:
-            raise GemstoneApiError('Expected session to be the current session.')
-        is_kind_of_result = GciIsKindOf(self.c_oop, a_class.c_oop)
-        if is_kind_of_result == False and GciErr(&error):
-            raise make_GemstoneError(self.session, error)
-        return <bint>is_kind_of_result
-
-    def perform(self, selector, *args):
-        if not isinstance(selector, (str, GemObject)):
-            raise GemstoneApiError('Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__))
-        cdef GciErrSType error
-        cdef OopType* cargs
-        cdef OopType return_oop = OOP_NIL
-        if not self.session.is_current_session:
-            raise GemstoneApiError('Expected session to be the current session.')
-        cargs = <OopType *>malloc(len(args) * sizeof(OopType))
-        try:
-            for i in xrange(len(args)):
-                cargs[i] = args[i].oop
-            if isinstance(selector, str):
-                return_oop = GciPerform(self.c_oop, selector.encode('utf-8'), cargs, len(args))
-            else:
-                return_oop = GciPerformSymDbg(self.c_oop, selector, cargs, len(args), False)
-        finally:
-            free(cargs)
-        if return_oop == OOP_NIL and GciErr(&error):
-            raise make_GemstoneError(self, error)
-        return self.session.get_or_create_gem_object(return_oop)
-
-#======================================================================================================================
 cdef class LinkedSession(GemstoneSession):
     cdef GciSessionIdType c_session_id
     def __cinit__(self, str username, str password):
@@ -153,15 +118,6 @@ cdef class LinkedSession(GemstoneSession):
     def is_logged_in(self):
         return self.c_session_id != GCI_INVALID_SESSION_ID
 
-    def get_or_create_gem_object(self, OopType oop):
-        try:
-            print (oop)
-            return self.instances[oop]
-        except KeyError:
-            new_gem_object = LinkedGemObject(self, oop)
-            self.instances[oop] = new_gem_object
-            return new_gem_object
-
     @property
     def is_current_session(self):
         return self.c_session_id == GciGetSessionId()
@@ -218,5 +174,37 @@ cdef class LinkedSession(GemstoneSession):
         self.c_session_id = GCI_INVALID_SESSION_ID
         global current_linked_session
         current_linked_session = None
+
+    def object_is_kind_of(self, GemObject instance, GemObject a_class):
+        cdef GciErrSType error
+        cdef int is_kind_of_result
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        is_kind_of_result = GciIsKindOf(instance.c_oop, a_class.c_oop)
+        if is_kind_of_result == False and GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return <bint>is_kind_of_result
+
+    def object_perform(self, GemObject instance, selector, *args):
+        if not isinstance(selector, (str, GemObject)):
+            raise GemstoneApiError('Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__))
+        cdef GciErrSType error
+        cdef OopType* cargs
+        cdef OopType return_oop = OOP_NIL
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        cargs = <OopType *>malloc(len(args) * sizeof(OopType))
+        try:
+            for i in xrange(len(args)):
+                cargs[i] = args[i].oop
+            if isinstance(selector, str):
+                return_oop = GciPerform(instance.c_oop, selector.encode('utf-8'), cargs, len(args))
+            else:
+                return_oop = GciPerformSymDbg(instance.c_oop, selector, cargs, len(args), False)
+        finally:
+            free(cargs)
+        if return_oop == OOP_NIL and GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
 
 #======================================================================================================================

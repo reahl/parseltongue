@@ -133,6 +133,13 @@ cdef class GemObject:
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
+    def is_kind_of(self, GemObject a_class):
+        return self.session.object_is_kind_of(self, a_class)
+
+    def perform(self, selector, *args):
+        return self.session.object_perform(self, selector, *args)
+
+
 cdef class GemstoneSession:
     def __init__(self, *args, **kwargs):
         self.instances = WeakValueDictionary()
@@ -141,3 +148,13 @@ cdef class GemstoneSession:
     @property
     def initial_fetch_size(self):
         return self.initial_fetch_size
+
+    def get_or_create_gem_object(self, OopType oop):
+        try:
+            print (oop)
+            return self.instances[oop]
+        except KeyError:
+            new_gem_object = GemObject(self, oop)
+            self.instances[oop] = new_gem_object
+            return new_gem_object
+

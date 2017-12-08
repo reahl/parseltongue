@@ -146,38 +146,6 @@ cdef class RPCGemObject(GemObject):
            raise make_GemstoneError(self.session, error)
         return self.session.get_or_create_gem_object(return_oop)
 
-    def is_kind_of(self, GemObject a_class):
-        cdef GciErrSType error
-        cdef int is_kind_of_result = GciTsIsKindOf((<RPCSession>self.session).c_session, self.c_oop, a_class.c_oop, &error)
-        if is_kind_of_result == -1:
-            raise make_GemstoneError(self.session, error)
-        return <bint>is_kind_of_result
-
-    def perform(self, selector, *args):
-        cdef GciErrSType error
-        cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
-        cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
-
-        cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
-        for i in xrange(len(args)):
-            cargs[i] = args[i].oop
-
-        flags = 1
-        environment_id = 0
-
-        cdef OopType return_oop = GciTsPerform((<RPCSession>self.session).c_session,
-                                               self.c_oop,
-                                               selector_oop,
-                                               selector_str,
-                                               cargs, 
-                                               len(args),
-                                               flags,
-                                               environment_id,
-                                               &error)
-        free(cargs)
-        if return_oop == OOP_ILLEGAL:
-            raise make_GemstoneError(self.session, error)
-        return self.session.get_or_create_gem_object(return_oop)
     
 #======================================================================================================================
 cdef class RPCSession(GemstoneSession):
@@ -312,5 +280,39 @@ cdef class RPCSession(GemstoneSession):
         cdef GciErrSType error
         if not GciTsLogout(self.c_session, &error):
             raise make_GemstoneError(self, error)
+
+    def object_is_kind_of(self, GemObject instance, GemObject a_class):
+        cdef GciErrSType error
+        cdef int is_kind_of_result = GciTsIsKindOf(self.c_session, instance.c_oop, a_class.c_oop, &error)
+        if is_kind_of_result == -1:
+            raise make_GemstoneError(self, error)
+        return <bint>is_kind_of_result
+
+    def object_perform(self, GemObject instance, selector, *args):
+        cdef GciErrSType error
+        cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
+        cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
+
+        cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
+        for i in xrange(len(args)):
+            cargs[i] = args[i].oop
+
+        flags = 1
+        environment_id = 0
+
+        cdef OopType return_oop = GciTsPerform(self.c_session,
+                                               instance.c_oop,
+                                               selector_oop,
+                                               selector_str,
+                                               cargs, 
+                                               len(args),
+                                               flags,
+                                               environment_id,
+                                               &error)
+        free(cargs)
+        if return_oop == OOP_ILLEGAL:
+            raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
+
 
 #======================================================================================================================

@@ -3,8 +3,8 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import GemstoneError, NotYetImplemented
-from ptongue.gemproxysinglethread import LinkedSession, LinkedGemObject
+from ptongue.gemproxy import GemstoneError, NotYetImplemented, GemObject
+from ptongue.gemproxysinglethread import LinkedSession
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 @pytest.fixture(scope="module")
@@ -93,17 +93,17 @@ def test_singlethread_login_linked(guestmode_netldi):
 
 def test_resolve_string_symbol(session):
     nil = session.resolve_symbol('nil') 
-    assert isinstance(nil, LinkedGemObject)
+    assert isinstance(nil, GemObject)
     assert nil.oop == 20
     assert nil.is_nil
 
 
 def test_resolve_symbol_object(session):
     nil_symbol = session.new_symbol('nil')
-    assert isinstance(nil_symbol, LinkedGemObject)
+    assert isinstance(nil_symbol, GemObject)
     assert nil_symbol.is_symbol
     nil = session.resolve_symbol(nil_symbol) 
-    assert isinstance(nil, LinkedGemObject)
+    assert isinstance(nil, GemObject)
     assert nil.oop == 20
 
 
