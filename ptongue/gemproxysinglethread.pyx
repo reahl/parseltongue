@@ -58,11 +58,7 @@ class GemstoneWarning(Warning):
 #======================================================================================================================
 cdef class LinkedGemObject(GemObject):
 
-    @property
-    def is_symbol(self):
-        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
-
-    def is_kind_of(self, LinkedGemObject a_class):
+    def is_kind_of(self, GemObject a_class):
         cdef GciErrSType error
         cdef int is_kind_of_result
         if not self.session.is_current_session:
@@ -73,7 +69,7 @@ cdef class LinkedGemObject(GemObject):
         return <bint>is_kind_of_result
 
     def perform(self, selector, *args):
-        if not isinstance(selector, (str, LinkedGemObject)):
+        if not isinstance(selector, (str, GemObject)):
             raise GemstoneApiError('Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__))
         cdef GciErrSType error
         cdef OopType* cargs
@@ -170,7 +166,7 @@ cdef class LinkedSession(GemstoneSession):
     def is_current_session(self):
         return self.c_session_id == GciGetSessionId()
 
-    def execute(self, source, LinkedGemObject context=None, LinkedGemObject symbol_list=None):
+    def execute(self, source, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop 
         if not self.is_current_session:
@@ -178,7 +174,7 @@ cdef class LinkedSession(GemstoneSession):
         if isinstance(source, str):
             return_oop = GciExecuteStrFromContext(source.encode('utf-8'), context.oop if context else OOP_NO_CONTEXT, 
                                                            symbol_list.oop if symbol_list else OOP_NIL)
-        elif isinstance(source, LinkedGemObject):
+        elif isinstance(source, GemObject):
             return_oop = GciExecuteFromContext(source.oop, context.oop if context else OOP_NO_CONTEXT, 
                                                            symbol_list.oop if symbol_list else OOP_NIL)
         else:
@@ -197,14 +193,14 @@ cdef class LinkedSession(GemstoneSession):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
-    def resolve_symbol(self, symbol, LinkedGemObject symbol_list=None):
+    def resolve_symbol(self, symbol, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop = OOP_NIL
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         if isinstance(symbol, str):
             return_oop = GciResolveSymbol(symbol.encode('utf-8') , symbol_list.oop if symbol_list else OOP_NIL)
-        elif isinstance(symbol, LinkedGemObject):
+        elif isinstance(symbol, GemObject):
             return_oop = GciResolveSymbolObj(symbol.oop, symbol_list.oop if symbol_list else OOP_NIL)
         else:
             raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))

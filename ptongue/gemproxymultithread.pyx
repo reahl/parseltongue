@@ -59,10 +59,6 @@ cdef extern from "gcits.hf":
 cdef class RPCGemObject(GemObject):
 
     @property
-    def is_symbol(self):
-        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
-
-    @property
     def to_py(self):
         try: 
             return well_known_instances[self.oop]
@@ -150,7 +146,7 @@ cdef class RPCGemObject(GemObject):
            raise make_GemstoneError(self.session, error)
         return self.session.get_or_create_gem_object(return_oop)
 
-    def is_kind_of(self, RPCGemObject a_class):
+    def is_kind_of(self, GemObject a_class):
         cdef GciErrSType error
         cdef int is_kind_of_result = GciTsIsKindOf((<RPCSession>self.session).c_session, self.c_oop, a_class.c_oop, &error)
         if is_kind_of_result == -1:
@@ -159,7 +155,7 @@ cdef class RPCGemObject(GemObject):
 
     def perform(self, selector, *args):
         cdef GciErrSType error
-        cdef OopType selector_oop = selector.oop if isinstance(selector, RPCGemObject) else OOP_ILLEGAL
+        cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL
 
         cdef OopType* cargs = <OopType *>malloc(len(args) * sizeof(OopType))
@@ -276,7 +272,7 @@ cdef class RPCSession(GemstoneSession):
             raise make_GemstoneError(self, error)
         return return_oop
 
-    def execute(self, str source_str, RPCGemObject context=None, RPCGemObject symbol_list=None):
+    def execute(self, str source_str, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef char *c_source_str = NULL
         if source_str:
@@ -297,13 +293,13 @@ cdef class RPCSession(GemstoneSession):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
-    def resolve_symbol(self, symbol, RPCGemObject symbol_list=None):
+    def resolve_symbol(self, symbol, GemObject symbol_list=None):
         cdef GciErrSType error
         cdef OopType return_oop = OOP_NIL
         if isinstance(symbol, str):
             return_oop = GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
                                             symbol_list.oop if symbol_list else OOP_NIL, &error)
-        elif isinstance(symbol, RPCGemObject):
+        elif isinstance(symbol, GemObject):
             return_oop = GciTsResolveSymbolObj(self.c_session, symbol.oop, 
                                             symbol_list.oop if symbol_list else OOP_NIL, &error)
         else:

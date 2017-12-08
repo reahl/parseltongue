@@ -126,6 +126,10 @@ cdef class GemObject:
     def is_nil(self):
         return self.c_oop == OOP_NIL
 
+    @property
+    def is_symbol(self):
+        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
+
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
