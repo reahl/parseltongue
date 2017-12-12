@@ -3,8 +3,8 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxymultithread import RPCSession, RPCGemObject 
-from ptongue.gemproxy import GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
+from ptongue.gemproxymultithread import RPCSession 
+from ptongue.gemproxy import GemObject, GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
@@ -115,17 +115,17 @@ def test_login_os_user(stone_fixture):
 
 def test_resolve_string_symbol(session):
     nil = session.resolve_symbol('nil') 
-    assert isinstance(nil, RPCGemObject)
+    assert isinstance(nil, GemObject)
     assert nil.oop == 20
     assert nil.is_nil
 
 
 def test_resolve_symbol_object(session):
     nil_symbol = session.new_symbol('nil')
-    assert isinstance(nil_symbol, RPCGemObject)
+    assert isinstance(nil_symbol, GemObject)
     assert nil_symbol.is_symbol
     nil = session.resolve_symbol(nil_symbol) 
-    assert isinstance(nil, RPCGemObject)
+    assert isinstance(nil, GemObject)
     assert nil.oop == 20
 
 
@@ -361,25 +361,25 @@ def test_gem_object_to_py_exception(session):
 def test_gem_object_small_integer_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
     with expected(GemstoneApiError):
-        date_symbol._small_integer_to_py()
+        session.object_small_integer_to_py(date_symbol)
 
 
 def test_gem_object_float_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
     with expected(GemstoneError, test='class 802049 invalid for OopToDouble'):
-        date_symbol._float_to_py()
+        session.object_float_to_py(date_symbol)
 
 
 def test_gem_object_string_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
     with expected(GemstoneError, test='a ArgumentError occurred (error 2718)'):
-        date_symbol._string_to_py()
+        session.object_string_to_py(date_symbol)
 
 
 def test_gem_object_latin1_to_py_exception(session):
     date_symbol = session.resolve_symbol('Date')
     with expected(GemstoneError, test='a ArgumentTypeError occurred (error 2103)'):
-        date_symbol._latin1_to_py()
+        session.object_latin1_to_py(date_symbol)
 
 
 def test_gem_object_gemstone_class_exception(guestmode_netldi):

@@ -56,98 +56,6 @@ cdef extern from "gcits.hf":
     bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
-cdef class RPCGemObject(GemObject):
-
-    @property
-    def to_py(self):
-        try: 
-            return well_known_instances[self.oop]
-        except KeyError:
-            try:
-                gem_class_name = well_known_class_names[self.gemstone_class().oop]
-            except KeyError:
-                raise NotYetImplemented()
-            return getattr(self, '_{}_to_py'.format(gem_class_name))()
-
-    def _small_integer_to_py(self):
-        cdef int64 return_value 
-        if GCI_OOP_IS_SMALL_INT(self.c_oop):
-            return_value = <int64>self.c_oop >> <int64>OOP_NUM_TAG_BITS
-            return return_value
-        else:
-            raise GemstoneApiError('Expected oop to represent a Small Integer.')
-
-    def _large_integer_to_py(self):
-        string_result = self.perform('asString')._latin1_to_py()
-        return int(string_result)
-
-    def _float_to_py(self):
-        cdef GciErrSType error
-        cdef double result = 0
-        if not GciTsOopToDouble((<RPCSession>self.session).c_session, self.c_oop, &result, &error):
-            raise make_GemstoneError(self.session, error)
-        return result
-
-    def _string_to_py(self):
-        cdef GciErrSType error
-        cdef int64 max_bytes
-        cdef ByteType *c_string
-        cdef int64 required_size = self.session.initial_fetch_size
-        cdef int64 bytes_returned
-        cdef bytes py_bytes
-        cdef int64 tries = 0
-
-        while required_size > max_bytes:
-            tries = tries + 1
-            if tries > 2:
-                raise GemstoneApiError('Expected GciTsFetchUtf8 to fetch all bytes on a second call.')
-            max_bytes = required_size
-            c_string = <ByteType *>malloc((max_bytes + 1) *sizeof(ByteType))
-            try:
-                bytes_returned = GciTsFetchUtf8((<RPCSession>self.session).c_session,
-                         self.c_oop, c_string, max_bytes, &required_size, &error)
-
-                if bytes_returned == -1:
-                    raise make_GemstoneError(self.session, error)
-
-                c_string[bytes_returned] = '\0'
-                py_bytes = c_string
-            finally:
-                free (c_string)
-
-        return py_bytes.decode('utf-8')
-
-    def _latin1_to_py(self):
-        cdef int64 start_index = 1
-        cdef int64 num_bytes  = self.session.initial_fetch_size
-        cdef int64 bytes_returned = num_bytes
-        cdef GciErrSType error
-        cdef bytes py_bytes = b''
-        cdef ByteType* dest
-        while bytes_returned == num_bytes:
-            dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
-            try:
-                bytes_returned = GciTsFetchBytes((<RPCSession>self.session).c_session, self.oop, start_index,
-                                                        dest, num_bytes, &error);
-                if bytes_returned == -1:
-                    raise make_GemstoneError(self.session, error)
-
-                dest[bytes_returned] = b'\0'
-                py_bytes = py_bytes + dest
-                start_index = start_index + num_bytes
-            finally:
-                free(dest)
-        return py_bytes.decode('latin-1')
-
-    def gemstone_class(self):
-        cdef GciErrSType error
-        cdef OopType return_oop = GciTsFetchClass((<RPCSession>self.session).c_session, self.c_oop, &error)
-        if return_oop == OOP_ILLEGAL:
-           raise make_GemstoneError(self.session, error)
-        return self.session.get_or_create_gem_object(return_oop)
-
-    
-#======================================================================================================================
 cdef class RPCSession(GemstoneSession):
     cdef GciSession c_session
     def __cinit__(self, str username, str password, str stone_name='gs64stone',
@@ -200,7 +108,7 @@ cdef class RPCSession(GemstoneSession):
         try:
             return self.instances[oop]
         except KeyError:
-            new_gem_object = RPCGemObject(self, oop)
+            new_gem_object = GemObject(self, oop)
             self.instances[oop] = new_gem_object
             return new_gem_object
 
@@ -287,6 +195,83 @@ cdef class RPCSession(GemstoneSession):
         if is_kind_of_result == -1:
             raise make_GemstoneError(self, error)
         return <bint>is_kind_of_result
+
+    def object_gemstone_class(self, GemObject instance):
+        cdef GciErrSType error
+        cdef OopType return_oop = GciTsFetchClass(self.c_session, instance.c_oop, &error)
+        if return_oop == OOP_ILLEGAL:
+           raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
+
+    def object_small_integer_to_py(self, GemObject instance):
+        cdef int64 return_value 
+        if GCI_OOP_IS_SMALL_INT(instance.c_oop):
+            return_value = <int64>instance.c_oop >> <int64>OOP_NUM_TAG_BITS
+            return return_value
+        else:
+            raise GemstoneApiError('Expected oop to represent a Small Integer.')
+
+    def object_large_integer_to_py(self, GemObject instance):
+        string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
+        return int(string_result)
+
+    def object_float_to_py(self, GemObject instance):
+        cdef GciErrSType error
+        cdef double result = 0
+        if not GciTsOopToDouble(self.c_session, instance.c_oop, &result, &error):
+            raise make_GemstoneError(self, error)
+        return result
+
+    def object_string_to_py(self, GemObject instance):
+        cdef GciErrSType error
+        cdef int64 max_bytes
+        cdef ByteType *c_string
+        cdef int64 required_size = self.initial_fetch_size
+        cdef int64 bytes_returned
+        cdef bytes py_bytes
+        cdef int64 tries = 0
+
+        while required_size > max_bytes:
+            tries = tries + 1
+            if tries > 2:
+                raise GemstoneApiError('Expected GciTsFetchUtf8 to fetch all bytes on a second call.')
+            max_bytes = required_size
+            c_string = <ByteType *>malloc((max_bytes + 1) *sizeof(ByteType))
+            try:
+                bytes_returned = GciTsFetchUtf8(self.c_session,
+                         instance.c_oop, c_string, max_bytes, &required_size, &error)
+
+                if bytes_returned == -1:
+                    raise make_GemstoneError(self, error)
+
+                c_string[bytes_returned] = '\0'
+                py_bytes = c_string
+            finally:
+                free (c_string)
+
+        return py_bytes.decode('utf-8')
+
+    def object_latin1_to_py(self, GemObject instance):
+        cdef int64 start_index = 1
+        cdef int64 num_bytes  = self.initial_fetch_size
+        cdef int64 bytes_returned = num_bytes
+        cdef GciErrSType error
+        cdef bytes py_bytes = b''
+        cdef ByteType* dest
+        while bytes_returned == num_bytes:
+            dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
+            try:
+                bytes_returned = GciTsFetchBytes(self.c_session, instance.oop, start_index,
+                                                        dest, num_bytes, &error);
+                if bytes_returned == -1:
+                    raise make_GemstoneError(self, error)
+
+                dest[bytes_returned] = b'\0'
+                py_bytes = py_bytes + dest
+                start_index = start_index + num_bytes
+            finally:
+                free(dest)
+        return py_bytes.decode('latin-1')
 
     def object_perform(self, GemObject instance, selector, *args):
         cdef GciErrSType error

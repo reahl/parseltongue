@@ -5,6 +5,7 @@ from atexit import register
 import warnings
 
 from gemproxy cimport *
+from gemproxy import well_known_class_names, well_known_instances, well_known_python_instances, implemented_python_types
 
 #======================================================================================================================
 cdef extern from "gci.hf":
@@ -22,6 +23,7 @@ cdef extern from "gci.hf":
     bint GciCommit()
     GciSessionIdType GciGetSessionId()
     void GciSetSessionId(GciSessionIdType sessionId)
+    void GciReleaseOops(const OopType theOops[], int numOops)
     bint GciIsRemote()
     bint GciSessionIsRemote()
     bint GciIsKindOf(OopType anObj, OopType aClassHistory)
@@ -32,6 +34,13 @@ cdef extern from "gci.hf":
     OopType GciNewSymbol(const char *cString)
     OopType GciResolveSymbol(const char *cString , OopType symbolList)
     OopType GciResolveSymbolObj(OopType aString, OopType symbolList)
+    OopType GciFetchClass(OopType theObject)
+    int64 GciFetchBytes_(OopType theObject, int64 startIndex, ByteType theBytes[], int64 numBytes)
+    int64 GciFetchUtf8Bytes_(OopType aString, int64 startIndex, ByteType *buf, int64 bufSize, OopType *utf8String, int flags)
+    double GciOopToFlt(OopType theObject)
+    bint GCI_OOP_IS_SMALL_INT(OopType oop)
+    OopType GciNewUtf8String(const char* utf8data, bint convertToUnicode)
+    OopType GciFltToOop(double aReal)
 
 #======================================================================================================================
 cdef bint is_init = False
@@ -110,9 +119,13 @@ cdef class LinkedSession(GemstoneSession):
 
     @property
     def is_remote(self):
+        cdef GciErrSType error
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
-        return GciSessionIsRemote()
+        cdef bint session_is_remote = GciSessionIsRemote()
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return session_is_remote
 
     @property
     def is_logged_in(self):
@@ -121,6 +134,42 @@ cdef class LinkedSession(GemstoneSession):
     @property
     def is_current_session(self):
         return self.c_session_id == GciGetSessionId()
+
+    def from_py(self, py_object):
+        cdef OopType return_oop
+        try:
+            method_name = implemented_python_types[py_object.__class__.__name__]
+            return_oop = getattr(self, 'py_to_{}_'.format(method_name))(py_object)
+        except KeyError:
+            raise NotYetImplemented()
+        return self.get_or_create_gem_object(return_oop)
+
+    def py_to_boolean_or_none_(self, py_object):
+        return well_known_python_instances[py_object]
+
+    def py_to_string_(self, str py_str):
+        cdef GciErrSType error
+        cdef OopType return_oop
+        return_oop = GciNewUtf8String(py_str.encode('utf-8'), True)
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return return_oop
+
+    def py_to_integer_(self, py_int):
+        cdef OopType return_oop = OOP_NIL
+        try:
+            return_oop = compute_small_integer_oop(py_int)
+        except OverflowError:    
+            return_oop = self.execute('^{}'.format(py_int)).oop
+        return return_oop
+
+    def py_to_float_(self, py_float):
+        cdef GciErrSType error
+        cdef OopType return_oop = OOP_NIL
+        return_oop = GciFltToOop(py_float)
+        if return_oop == OOP_NIL and GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return return_oop
 
     def execute(self, source, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
@@ -185,6 +234,79 @@ cdef class LinkedSession(GemstoneSession):
             raise make_GemstoneError(self, error)
         return <bint>is_kind_of_result
 
+    def object_gemstone_class(self, GemObject instance):
+        cdef GciErrSType error
+        cdef OopType return_oop = GciFetchClass(instance.c_oop)
+        if return_oop == OOP_NIL and GciErr(&error):
+           raise make_GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
+
+    def object_small_integer_to_py(self, GemObject instance):
+        cdef int64 return_value 
+        if GCI_OOP_IS_SMALL_INT(instance.c_oop):
+            return_value = <int64>instance.c_oop >> <int64>OOP_NUM_TAG_BITS
+            return return_value
+        else:
+            raise GemstoneApiError('Expected oop to represent a Small Integer.')
+
+    def object_large_integer_to_py(self, GemObject instance):
+        string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
+        return int(string_result)
+
+    def object_float_to_py(self, GemObject instance):
+        cdef GciErrSType error
+        cdef double result = GciOopToFlt(instance.c_oop)
+        if GciErr(&error): # result == PlusQuietNaN???  isnan(result)??
+            raise make_GemstoneError(self, error)
+        return result
+
+    def object_string_to_py(self, GemObject instance):
+        cdef int64 start_index = 1
+        cdef int64 num_bytes  = self.initial_fetch_size
+        cdef int64 bytes_returned = num_bytes
+        cdef GciErrSType error
+        cdef bytes py_bytes = b''
+        cdef ByteType* dest
+        cdef OopType utf8_string = OOP_NIL
+        while bytes_returned == num_bytes:
+            dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
+            try:
+                bytes_returned = GciFetchUtf8Bytes_(instance.oop, start_index, dest, num_bytes, &utf8_string, 0)
+                if bytes_returned == 0 and GciErr(&error):
+                    raise make_GemstoneError(self, error)
+
+                dest[bytes_returned] = b'\0'
+                py_bytes = py_bytes + dest
+                start_index = start_index + num_bytes
+            finally:
+                free(dest)
+        if utf8_string != OOP_NIL:
+            GciReleaseOops(&utf8_string, 1)
+            if GciErr(&error):
+                raise make_GemstoneError(self, error)
+        return py_bytes.decode('utf-8')
+
+    def object_latin1_to_py(self, GemObject instance):
+        cdef int64 start_index = 1
+        cdef int64 num_bytes  = self.initial_fetch_size
+        cdef int64 bytes_returned = num_bytes
+        cdef GciErrSType error
+        cdef bytes py_bytes = b''
+        cdef ByteType* dest
+        while bytes_returned == num_bytes:
+            dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
+            try:
+                bytes_returned = GciFetchBytes_(instance.oop, start_index, dest, num_bytes)
+                if bytes_returned == 0 and GciErr(&error):
+                    raise make_GemstoneError(self, error)
+
+                dest[bytes_returned] = b'\0'
+                py_bytes = py_bytes + dest
+                start_index = start_index + num_bytes
+            finally:
+                free(dest)
+        return py_bytes.decode('latin-1')
+
     def object_perform(self, GemObject instance, selector, *args):
         if not isinstance(selector, (str, GemObject)):
             raise GemstoneApiError('Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__))
@@ -200,7 +322,7 @@ cdef class LinkedSession(GemstoneSession):
             if isinstance(selector, str):
                 return_oop = GciPerform(instance.c_oop, selector.encode('utf-8'), cargs, len(args))
             else:
-                return_oop = GciPerformSymDbg(instance.c_oop, selector, cargs, len(args), False)
+                return_oop = GciPerformSymDbg(instance.c_oop, selector.oop, cargs, len(args), False)
         finally:
             free(cargs)
         if return_oop == OOP_NIL and GciErr(&error):

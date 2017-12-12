@@ -130,15 +130,28 @@ cdef class GemObject:
     def is_symbol(self):
         return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
 
-    def __str__(self):
-        return '<%s object with oop %s>' % (self.__class__, self.c_oop)
+    @property
+    def to_py(self):
+        try: 
+            return well_known_instances[self.oop]
+        except KeyError:
+            try:
+                gem_class_name = well_known_class_names[self.gemstone_class().oop]
+            except KeyError:
+                raise NotYetImplemented()
+            return getattr(self.session, 'object_{}_to_py'.format(gem_class_name))(self)
 
     def is_kind_of(self, GemObject a_class):
         return self.session.object_is_kind_of(self, a_class)
+    
+    def gemstone_class(self):
+        return self.session.object_gemstone_class(self)
 
     def perform(self, selector, *args):
         return self.session.object_perform(self, selector, *args)
 
+    def __str__(self):
+        return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
 cdef class GemstoneSession:
     def __init__(self, *args, **kwargs):
