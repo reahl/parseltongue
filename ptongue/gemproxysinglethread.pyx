@@ -47,10 +47,10 @@ cdef bint is_init = False
 cdef LinkedSession current_linked_session = None
 
 #======================================================================================================================
-cdef gembuilder_init():
+cdef gembuilder_init(GemstoneSession session):
     cdef GciErrSType error
     if not GciInit() and GciErr(&error):
-        raise make_GemstoneError(None, error)
+        raise make_GemstoneError(session, error)
     is_init = True
 
 @register
@@ -72,16 +72,11 @@ cdef class LinkedSession(GemstoneSession):
         cdef char* c_host_username = NULL
 
         if not is_init:
-            gembuilder_init()
+            gembuilder_init(self)
 
         global current_linked_session
         if current_linked_session != None:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
-
-        is_logged_in = True
-
-        if GciErr(&error):
-            raise make_GemstoneError(self, error)
 
         clean_login = GciLogin(username.encode('utf-8'), password.encode('utf-8'))
         self.c_session_id = GciGetSessionId()
@@ -90,7 +85,7 @@ cdef class LinkedSession(GemstoneSession):
             if self.c_session_id == GCI_INVALID_SESSION_ID:
                 raise make_GemstoneError(self, error)
             else:
-                warnings.warn(('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', ''),GemstoneWarning)
+                warnings.warn(('{}: {}, {}'.format(error.exceptionObj, error.message, error.reason)).replace('\\n', ''),GemstoneWarning)
 
         current_linked_session = self
 

@@ -148,15 +148,21 @@ cdef class RPCSession(GemstoneSession):
             raise make_GemstoneError(self, error)
         return return_oop
 
-    def execute(self, str source_str, GemObject context=None, GemObject symbol_list=None):
+    def execute(self, source, GemObject context=None, GemObject symbol_list=None):
         cdef GciErrSType error
-        cdef char *c_source_str = NULL
-        if source_str:
-            c_source_str = to_c_bytes(source_str)
-        cdef OopType return_oop = GciTsExecute(self.c_session, c_source_str, OOP_CLASS_Utf8,
+        cdef OopType return_oop
+        if isinstance(source, str):
+            return_oop = GciTsExecute(self.c_session, source.encode('utf-8'), OOP_CLASS_Utf8,
                                                context.oop if context else OOP_NIL, 
                                                symbol_list.oop if symbol_list else OOP_NIL,
                                                0, 0,  &error)
+        elif isinstance(source, GemObject):
+            return_oop = GciTsExecute(self.c_session, NULL, source.oop,
+                                               context.oop if context else OOP_NIL, 
+                                               symbol_list.oop if symbol_list else OOP_NIL,
+                                               0, 0,  &error)
+        else:
+            raise GemstoneApiError('Source is type {}.Expected source to be a str or GemObject'.format(source.__class__.__name__))
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
@@ -274,6 +280,8 @@ cdef class RPCSession(GemstoneSession):
         return py_bytes.decode('latin-1')
 
     def object_perform(self, GemObject instance, selector, *args):
+        if not isinstance(selector, (str, GemObject)):
+            raise GemstoneApiError('Selector is type {}.Expected selector to be a str or GemObject'.format(selector.__class__.__name__))
         cdef GciErrSType error
         cdef OopType selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         cdef char* selector_str = to_c_bytes(selector) if isinstance(selector, str) else NULL

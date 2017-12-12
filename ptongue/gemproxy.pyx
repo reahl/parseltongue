@@ -1,5 +1,6 @@
 from gemproxy cimport int32, int64, OopType, GciErrSType, MAX_SMALL_INT, MIN_SMALL_INT, OOP_NUM_TAG_BITS, OOP_TAG_SMALLINT
 from weakref import WeakValueDictionary
+import functools
 
 #======================================================================================================================
 well_known_class_names = { 
@@ -146,6 +147,19 @@ cdef class GemObject:
     
     def gemstone_class(self):
         return self.session.object_gemstone_class(self)
+
+    def __getattr__(self, name):
+        return functools.partial(self.perform_mapped_selector, name)
+
+    def perform_mapped_selector(self, selector, *args):
+        smalltalk_selector = selector.replace('_', ':')
+        if args or '_' in selector:
+           smalltalk_selector += ':'
+        expected_args = smalltalk_selector.count(':')
+        if len(args) != expected_args:
+            raise TypeError('%s() takes exactly %s arguments (%s given)' % (selector, expected_args, len(args)))
+        selector_symbol = self.session.new_symbol(smalltalk_selector)
+        return self.perform(selector_symbol, *args)
 
     def perform(self, selector, *args):
         return self.session.object_perform(self, selector, *args)
