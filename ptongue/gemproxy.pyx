@@ -168,7 +168,7 @@ cdef class GemObject:
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
 cdef class GemstoneSession:
-    def __init__(self, *args, **kwargs):
+    def __cinit__(self, *args, **kwargs):
         self.instances = WeakValueDictionary()
         self.initial_fetch_size = 200
 
@@ -178,7 +178,6 @@ cdef class GemstoneSession:
 
     def get_or_create_gem_object(self, OopType oop):
         try:
-            print (oop)
             return self.instances[oop]
         except KeyError:
             new_gem_object = GemObject(self, oop)

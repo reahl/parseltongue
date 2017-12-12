@@ -104,8 +104,8 @@ def test_singlethread_login_linked(stone_fixture):
     session.log_out()
     assert not session.is_logged_in
 
-    with expected(GemstoneError): #, test='the userId/password combination is invalid or expired'
-        session = Session('DataCurator', 'wrong_password')
+    with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
+        Session('DataCurator', 'wrong_password')
 
     with expected(GemstoneError, test='The given session ID is invalid.'):
         session.log_out()
