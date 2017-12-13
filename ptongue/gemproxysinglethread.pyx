@@ -251,7 +251,7 @@ cdef class LinkedSession(GemstoneSession):
     def object_float_to_py(self, GemObject instance):
         cdef GciErrSType error
         cdef double result = GciOopToFlt(instance.c_oop)
-        if GciErr(&error): # result == PlusQuietNaN???  isnan(result)??
+        if result != result and GciErr(&error):
             raise make_GemstoneError(self, error)
         return result
 

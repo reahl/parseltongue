@@ -3,7 +3,6 @@ from libc.string cimport memcpy
 
 from gemproxy cimport *
 from gemproxy import well_known_class_names, well_known_instances, well_known_python_instances, implemented_python_types
-# from gembuildertypes import *
 
 #======================================================================================================================
 cdef extern from "gcits.hf":
@@ -306,6 +305,5 @@ cdef class RPCSession(GemstoneSession):
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
-
 
 #======================================================================================================================

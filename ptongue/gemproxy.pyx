@@ -56,6 +56,7 @@ cdef OopType compute_small_integer_oop(int64 py_int):
 
 cdef char* to_c_bytes(object py_string):
     return py_string.encode('utf-8')
+    
 #======================================================================================================================
 cdef class GemstoneError(Exception):
     def __cinit__(self, sess):
@@ -184,3 +185,4 @@ cdef class GemstoneSession:
             self.instances[oop] = new_gem_object
             return new_gem_object
 
+#======================================================================================================================
