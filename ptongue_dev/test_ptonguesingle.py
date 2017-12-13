@@ -97,11 +97,14 @@ def invalid_session(stone_fixture):
 #--[ logging in and out ]------------------------------------------------------------
 
 def test_login_linked(stone_fixture):
-    session = Session('DataCurator', 'swordfish')
-    assert session.is_logged_in
-    assert not session.is_remote 
+    try:
+        session = Session('DataCurator', 'swordfish')
+        assert session.is_logged_in
+        assert not session.is_remote 
 
-    session.log_out()
+    finally:
+        session.log_out()
+
     assert not session.is_logged_in
 
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
@@ -111,11 +114,17 @@ def test_login_linked(stone_fixture):
         session.log_out()
 
 
-def test_login_linked_with_netldi(guestmode_netldi):
-    session = Session('DataCurator', 'swordfish')
-    assert session.is_logged_in
+def test_login_linked_once_only(stone_fixture):
+    try:
+        session = Session('DataCurator', 'swordfish')
+        assert session.is_logged_in
 
-    session.log_out()
+        with expected(GemstoneApiError, test='There is an active linked session. Can not create another session.'):
+            Session('DataCurator', 'swordfish')
+
+    finally:
+        session.log_out()
+        
     assert not session.is_logged_in
 
 

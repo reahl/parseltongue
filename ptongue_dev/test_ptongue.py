@@ -99,6 +99,7 @@ def invalid_session(guestmode_netldi):
 def test_login_captive_os_user(guestmode_netldi):
     session = Session('DataCurator', 'swordfish')
     assert session.is_logged_in
+    assert session.is_remote 
 
     session.log_out()
     assert not session.is_logged_in
