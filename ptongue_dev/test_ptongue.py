@@ -117,10 +117,11 @@ def invalid_linked_session(stone_fixture):
 
 def test_rpc_session_login_captive_os_user(guestmode_netldi):
     session = RPCSession('DataCurator', 'swordfish')
-    assert session.is_logged_in
-
-    session.log_out()
-    assert not session.is_logged_in
+    try:
+        assert session.is_logged_in
+    finally:
+        session.log_out()
+        assert not session.is_logged_in
 
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         RPCSession('DataCurator', 'wrong_password')
@@ -135,20 +136,22 @@ def test_rpc_session_login_os_user(stone_fixture):
             RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
             
         session = RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
-        assert session.is_logged_in
-        assert session.is_remote
-
-        session.log_out()
-        assert not session.is_logged_in
+        try:
+            assert session.is_logged_in
+            assert session.is_remote
+        finally:
+            session.log_out()
+            assert not session.is_logged_in
 
 
 def test_linked_session_login(stone_fixture):
     linked_session = LinkedSession('DataCurator', 'swordfish')
-    assert linked_session.is_logged_in
-    assert not linked_session.is_remote 
-
-    linked_session.log_out()
-    assert not linked_session.is_logged_in
+    try:
+        assert linked_session.is_logged_in
+        assert not linked_session.is_remote 
+    finally:
+        linked_session.log_out()
+        assert not linked_session.is_logged_in
 
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         LinkedSession('DataCurator', 'wrong_password')
@@ -159,10 +162,11 @@ def test_linked_session_login(stone_fixture):
 
 def test_linked_session_login_with_netldi(guestmode_netldi):
     linked_session = LinkedSession('DataCurator', 'swordfish')
-    assert linked_session.is_logged_in
-
-    linked_session.log_out()
-    assert not linked_session.is_logged_in
+    try:
+        assert linked_session.is_logged_in
+    finally:
+        linked_session.log_out()
+        assert not linked_session.is_logged_in
 
 
 def test_rpc_session_is_remote_exception(invalid_rpc_session):
@@ -463,8 +467,10 @@ def test_linked_session_gemstone_class(linked_session, oop_true):
     
 def test_rpc_session_gemstone_class_exception(guestmode_netldi):
     rpc_session = RPCSession('DataCurator', 'swordfish')
-    today = rpc_session.execute('Date today')
-    rpc_session.log_out()
+    try:
+        today = rpc_session.execute('Date today')
+    finally:
+        rpc_session.log_out()
     
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         today.gemstone_class()
@@ -472,8 +478,10 @@ def test_rpc_session_gemstone_class_exception(guestmode_netldi):
 
 def test_linked_session_gemstone_class_exception(stone_fixture):
     linked_session = LinkedSession('DataCurator', 'swordfish')
-    today = linked_session.execute('Date today')
-    linked_session.log_out()
+    try:
+        today = linked_session.execute('Date today')
+    finally:
+        linked_session.log_out()
     
     with expected(GemstoneError, test='The given session ID is invalid.'):
         today.gemstone_class()
