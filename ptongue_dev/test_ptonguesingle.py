@@ -96,7 +96,7 @@ def invalid_session(stone_fixture):
 
 #--[ logging in and out ]------------------------------------------------------------
 
-def test_singlethread_login_linked(stone_fixture):
+def test_login_linked(stone_fixture):
     session = Session('DataCurator', 'swordfish')
     assert session.is_logged_in
     assert not session.is_remote 
@@ -111,7 +111,7 @@ def test_singlethread_login_linked(stone_fixture):
         session.log_out()
 
 
-def test_netldi_login_linked(guestmode_netldi):
+def test_login_linked_with_netldi(guestmode_netldi):
     session = Session('DataCurator', 'swordfish')
     assert session.is_logged_in
 
