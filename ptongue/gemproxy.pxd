@@ -82,8 +82,6 @@ cdef extern from "gci.hf":
 #======================================================================================================================
 cdef GemstoneError make_GemstoneError(session, GciErrSType c_error)
 
-cdef OopType compute_small_integer_oop(int64 py_int)
-
 cdef char* to_c_bytes(object py_string)
 
 #======================================================================================================================

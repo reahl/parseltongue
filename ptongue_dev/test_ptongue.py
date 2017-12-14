@@ -181,6 +181,9 @@ def test_linked_singleton_error(invalid_linked_session):
         date_symbol = other_session.resolve_symbol('Date')
         date_string = date_symbol.perform('asString')
         converted_float = other_session.execute('123.123')
+        
+        with expected(GemstoneApiError, test='There is an active linked session. Can not create another session.'):
+            LinkedSession('DataCurator', 'swordfish')
 
         with expected(GemstoneApiError, test='Expected session to be the current session.'):
             invalid_linked_session.abort()
