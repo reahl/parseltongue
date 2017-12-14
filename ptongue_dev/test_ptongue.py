@@ -3,9 +3,9 @@ from contextlib import contextmanager
 
 import pytest
 
-from ptongue.gemproxy import GemObject, GemstoneError, NotYetImplemented, InvalidSession, GemstoneApiError
+from ptongue.gemproxy import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError
 from ptongue.gemproxyrpc import RPCSession
-from ptongue.gemproxylinked import LinkedSession
+from ptongue.gemproxylinked import LinkedSession, get_current_linked_session
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
@@ -129,7 +129,7 @@ def test_rpc_session_login_captive_os_user(guestmode_netldi):
     with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
         session.log_out()
 
-        
+
 def test_rpc_session_login_os_user(stone_fixture):
     with running_netldi(guest_mode=False):
         with expected(GemstoneError, test='Password validation failed for user vagrant'):
@@ -145,28 +145,22 @@ def test_rpc_session_login_os_user(stone_fixture):
 
 
 def test_linked_session_login(stone_fixture):
+    assert not get_current_linked_session()
     linked_session = LinkedSession('DataCurator', 'swordfish')
     try:
         assert linked_session.is_logged_in
         assert not linked_session.is_remote 
+        assert get_current_linked_session() is linked_session
     finally:
         linked_session.log_out()
         assert not linked_session.is_logged_in
+        assert not get_current_linked_session()
 
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         LinkedSession('DataCurator', 'wrong_password')
 
     with expected(GemstoneError, test='The given session ID is invalid.'):
         linked_session.log_out()
-
-
-def test_linked_session_login_with_netldi(guestmode_netldi):
-    linked_session = LinkedSession('DataCurator', 'swordfish')
-    try:
-        assert linked_session.is_logged_in
-    finally:
-        linked_session.log_out()
-        assert not linked_session.is_logged_in
 
 
 def test_rpc_session_is_remote_exception(invalid_rpc_session):
@@ -177,6 +171,66 @@ def test_rpc_session_is_remote_exception(invalid_rpc_session):
 def test_lined_session_is_remote_exception(invalid_linked_session):
     with expected(GemstoneError, test='The given session ID is invalid.'):
         invalid_linked_session.is_remote
+
+
+#--[ singleton linked session ]------------------------------------------------------------
+
+def test_linked_singleton_error(invalid_linked_session):
+    other_session = LinkedSession('DataCurator', 'swordfish')  # so something is logged in globally
+    try: 
+        date_symbol = other_session.resolve_symbol('Date')
+        date_string = date_symbol.perform('asString')
+        converted_float = other_session.execute('123.123')
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.abort()
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.begin()
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.commit()
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.is_remote
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.py_to_string_('String')
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.py_to_float_(123.123)
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.execute('2')
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.new_symbol('newSymbol')
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.resolve_symbol('Date')
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.log_out()
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.object_is_kind_of(date_symbol, date_symbol)
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.object_gemstone_class(date_symbol)
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.object_float_to_py(converted_float)
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.object_string_to_py(date_string)
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.object_latin1_to_py(date_string)
+
+        with expected(GemstoneApiError, test='Expected session to be the current session.'):
+            invalid_linked_session.object_perform(date_symbol, 'asString')
+    finally:
+        other_session.log_out()
 
         
 #--[ getting a hold of objects and symbols ]------------------------------------------------------------
@@ -464,26 +518,19 @@ def test_rpc_session_gemstone_class(rpc_session, oop_true):
 def test_linked_session_gemstone_class(linked_session, oop_true):
     check_gemstone_class(linked_session, oop_true)
 
-    
-def test_rpc_session_gemstone_class_exception(guestmode_netldi):
-    rpc_session = RPCSession('DataCurator', 'swordfish')
-    try:
-        today = rpc_session.execute('Date today')
-    finally:
-        rpc_session.log_out()
-    
-    with expected(GemstoneError, test='argument is not a valid GciSession pointer'):
-        today.gemstone_class()
 
-
-def test_linked_session_gemstone_class_exception(stone_fixture):
-    linked_session = LinkedSession('DataCurator', 'swordfish')
+@pytest.mark.parametrize('session_class, expected_error_message',[
+    (RPCSession, 'argument is not a valid GciSession pointer'),
+    (LinkedSession, 'The given session ID is invalid.'),
+    ])
+def test_gemstone_class_exception(guestmode_netldi, session_class, expected_error_message):
+    session = session_class('DataCurator', 'swordfish')
     try:
-        today = linked_session.execute('Date today')
+        today = session.execute('Date today')
     finally:
-        linked_session.log_out()
-    
-    with expected(GemstoneError, test='The given session ID is invalid.'):
+        session.log_out()
+
+    with expected(GemstoneError, test=expected_error_message):
         today.gemstone_class()
 
         
@@ -702,11 +749,11 @@ def test_linked_session_translating_python_string_exception(invalid_linked_sessi
         
 def check_translating_unsupported_object_types(session):
     py_not_implemented_type = []
-    with expected(NotYetImplemented):
+    with expected(NotSupported):
         session.from_py(py_not_implemented_type)
 
     date_symbol = session.resolve_symbol('Date')
-    with expected(NotYetImplemented):
+    with expected(NotSupported):
         date_symbol.to_py
 
 

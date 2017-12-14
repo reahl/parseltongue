@@ -1,6 +1,7 @@
-from gemproxy cimport int32, int64, OopType, GciErrSType, MAX_SMALL_INT, MIN_SMALL_INT, OOP_NUM_TAG_BITS, OOP_TAG_SMALLINT
+from gemproxy cimport int32, int64, OopType, GciErrSType, MAX_SMALL_INT, MIN_SMALL_INT, OOP_NUM_TAG_BITS, OOP_TAG_SMALLINT, GCI_OOP_IS_SMALL_INT
 from weakref import WeakValueDictionary
 import functools
+import warnings
 
 #======================================================================================================================
 well_known_class_names = { 
@@ -42,7 +43,7 @@ implemented_python_types = {
 }
 
 #======================================================================================================================
-cdef object make_GemstoneError(session, GciErrSType c_error):
+cdef GemstoneError make_GemstoneError(session, GciErrSType c_error):
     error = GemstoneError(session)
     error.set_error(c_error)
     return error
@@ -108,10 +109,13 @@ cdef class GemstoneError(Exception):
 cdef class InvalidSession(Exception):
     pass
 
-cdef class NotYetImplemented(Exception):
+cdef class NotSupported(Exception):
     pass
 
 cdef class GemstoneApiError(Exception):
+    pass
+
+class GemstoneWarning(Warning):
     pass
 
 #======================================================================================================================
@@ -140,7 +144,7 @@ cdef class GemObject:
             try:
                 gem_class_name = well_known_class_names[self.gemstone_class().oop]
             except KeyError:
-                raise NotYetImplemented()
+                raise NotSupported()
             return getattr(self.session, 'object_{}_to_py'.format(gem_class_name))(self)
 
     def is_kind_of(self, GemObject a_class):
@@ -184,5 +188,37 @@ cdef class GemstoneSession:
             new_gem_object = GemObject(self, oop)
             self.instances[oop] = new_gem_object
             return new_gem_object
+
+    def from_py(self, py_object):
+        cdef OopType return_oop
+        try:
+            method_name = implemented_python_types[py_object.__class__.__name__]
+            return_oop = getattr(self, 'py_to_{}_'.format(method_name))(py_object)
+        except KeyError:
+            raise NotSupported()
+        return self.get_or_create_gem_object(return_oop)
+
+    def py_to_boolean_or_none_(self, py_object):
+        return well_known_python_instances[py_object]
+
+    def py_to_integer_(self, py_int):
+        cdef OopType return_oop = OOP_NIL
+        try:
+            return_oop = compute_small_integer_oop(py_int)
+        except OverflowError:    
+            return_oop = self.execute('^{}'.format(py_int)).oop
+        return return_oop
+
+    def object_small_integer_to_py(self, GemObject instance):
+        cdef int64 return_value 
+        if GCI_OOP_IS_SMALL_INT(instance.c_oop):
+            return_value = <int64>instance.c_oop >> <int64>OOP_NUM_TAG_BITS
+            return return_value
+        else:
+            raise GemstoneApiError('Expected oop to represent a Small Integer.')
+
+    def object_large_integer_to_py(self, GemObject instance):
+        string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
+        return int(string_result)
 
 #======================================================================================================================

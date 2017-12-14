@@ -2,7 +2,6 @@ from libc.stdlib cimport *
 from libc.string cimport memcpy
 
 from gemproxy cimport *
-from gemproxy import well_known_class_names, well_known_instances, well_known_python_instances, implemented_python_types
 
 #======================================================================================================================
 cdef extern from "gcits.hf":
@@ -52,7 +51,6 @@ cdef extern from "gcits.hf":
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
         bint convertToUnicode, GciErrSType *err)
     OopType GCI_I32_TO_OOP(int64 arg)
-    bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
 cdef class RPCSession(GemstoneSession):
@@ -103,40 +101,12 @@ cdef class RPCSession(GemstoneSession):
         cdef int remote = GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
-    def get_or_create_gem_object(self, oop):
-        try:
-            return self.instances[oop]
-        except KeyError:
-            new_gem_object = GemObject(self, oop)
-            self.instances[oop] = new_gem_object
-            return new_gem_object
-
-    def from_py(self, py_object):
-        cdef OopType return_oop
-        try:
-            method_name = implemented_python_types[py_object.__class__.__name__]
-            return_oop = getattr(self, 'py_to_{}_'.format(method_name))(py_object)
-        except KeyError:
-            raise NotYetImplemented()
-        return self.get_or_create_gem_object(return_oop)
-
-    def py_to_boolean_or_none_(self, py_object):
-        return well_known_python_instances[py_object]
-
     def py_to_string_(self, str py_str):
         cdef GciErrSType error
         cdef OopType return_oop
         return_oop = GciTsNewUtf8String(self.c_session, py_str.encode('utf-8'), True, &error)
         if return_oop == OOP_ILLEGAL:
             raise make_GemstoneError(self, error)
-        return return_oop
-
-    def py_to_integer_(self, py_int):
-        cdef OopType return_oop = OOP_NIL
-        try:
-            return_oop = compute_small_integer_oop(py_int)
-        except OverflowError:    
-            return_oop = self.execute('^{}'.format(py_int)).oop
         return return_oop
 
     def py_to_float_(self, py_float):
@@ -207,18 +177,6 @@ cdef class RPCSession(GemstoneSession):
         if return_oop == OOP_ILLEGAL:
            raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
-
-    def object_small_integer_to_py(self, GemObject instance):
-        cdef int64 return_value 
-        if GCI_OOP_IS_SMALL_INT(instance.c_oop):
-            return_value = <int64>instance.c_oop >> <int64>OOP_NUM_TAG_BITS
-            return return_value
-        else:
-            raise GemstoneApiError('Expected oop to represent a Small Integer.')
-
-    def object_large_integer_to_py(self, GemObject instance):
-        string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
-        return int(string_result)
 
     def object_float_to_py(self, GemObject instance):
         cdef GciErrSType error

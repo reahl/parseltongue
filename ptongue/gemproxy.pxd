@@ -77,9 +77,10 @@ cdef extern from "gci.hf":
         void setFatalError(int errNum, const char* msg)
 
     GciSessionIdType GCI_INVALID_SESSION_ID
+    bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
-cdef object make_GemstoneError(session, GciErrSType c_error)
+cdef GemstoneError make_GemstoneError(session, GciErrSType c_error)
 
 cdef OopType compute_small_integer_oop(int64 py_int)
 
@@ -94,7 +95,7 @@ cdef class GemstoneError(Exception):
 cdef class InvalidSession(Exception):
     pass
 
-cdef class NotYetImplemented(Exception):
+cdef class NotSupported(Exception):
     pass
 
 cdef class GemstoneApiError(Exception):
