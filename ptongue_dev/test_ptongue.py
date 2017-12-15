@@ -182,15 +182,19 @@ def test_lined_session_is_remote_exception(invalid_linked_session):
 
 #--[ singleton linked session ]------------------------------------------------------------
 
-def test_linked_singleton_error(stone_fixture):
+
+def test_linked_singleton_error(linked_session):
+    assert linked_session.is_logged_in
+    with expected(GemstoneApiError, test='There is an active linked session. Can not create another session.'):
+        LinkedSession('DataCurator', 'swordfish')
+
+
+def test_linked_session_mismatch_error(stone_fixture):
     linked_session = LinkedSession('DataCurator', 'swordfish')  # so something is logged in globally
     try: 
         date_symbol = linked_session.resolve_symbol('Date')
         date_string = date_symbol.perform('asString')
         converted_float = linked_session.execute('123.123')
-
-        with expected(GemstoneApiError, test='There is an active linked session. Can not create another session.'):
-            LinkedSession('DataCurator', 'swordfish')
     finally:
         linked_session.log_out()
 
@@ -542,6 +546,7 @@ def test_gemstone_class_exception(guestmode_netldi, session_class, expected_erro
 
     with expected(GemstoneError, test=expected_error_message):
         today.gemstone_class()
+
         
 def check_is_kind_of(session, oop_true):
     boolean = session.resolve_symbol('Boolean')
@@ -798,7 +803,7 @@ def test_linked_session_exceptions_when_translating_wrong_gemstone_type(linked_s
     check_exceptions_when_translating_wrong_gemstone_type(linked_session, 'The given object is not a float.')
 
 
-#--[ pythonic method names ]------------------------------------------------------------
+#--[ pythonic niceties ]------------------------------------------------------------
 
 def check_mapping_method_names(session):
     user_globals = session.resolve_symbol('UserGlobals')
@@ -827,3 +832,23 @@ def test_rpc_session_mapping_method_names(rpc_session):
 
 def test_linked_session_mapping_method_names(linked_session):
     check_mapping_method_names(linked_session)
+
+    
+def check_resolving_and_making_symbols(session):
+    # Case: resolving symbols
+    #   TODO: need to pick one here.... only one can survive, but I am not sure yet which is better:
+    assert session.UserGlobals is session.resolve_symbol('UserGlobals')
+    assert session.n.UserGlobals is session.resolve_symbol('UserGlobals')
+
+    # Case: making symbols
+    assert session.s.someNewSymbol.is_symbol
+    assert session.s.someNewSymbol is session.new_symbol('someNewSymbol')
+
+    
+def test_rpc_session_mapping_symbols(rpc_session):
+    check_resolving_and_making_symbols(rpc_session)
+
+
+def test_linked_session_mapping_symbols(linked_session):
+    check_resolving_and_making_symbols(linked_session)
+
