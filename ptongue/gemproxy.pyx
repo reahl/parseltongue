@@ -1,7 +1,19 @@
-from gemproxy cimport int32, int64, OopType, GciErrSType, MAX_SMALL_INT, MIN_SMALL_INT, OOP_NUM_TAG_BITS, OOP_TAG_SMALLINT, GCI_OOP_IS_SMALL_INT
+from gemproxy cimport int32, int64, OopType, GciErrSType
 from weakref import WeakValueDictionary
 import functools
 import warnings
+
+#======================================================================================================================
+cdef extern from "gcioop.ht":
+    OopType OOP_FALSE
+    OopType OOP_TRUE
+    uint64_t OOP_TAG_SMALLINT
+    uint64_t OOP_NUM_TAG_BITS
+    int64 MIN_SMALL_INT
+    int64 MAX_SMALL_INT
+
+cdef extern from "gci.hf":
+    bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
 well_known_class_names = { 
@@ -172,6 +184,7 @@ cdef class GemObject:
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
+#======================================================================================================================
 cdef class GemstoneSession:
     def __cinit__(self, *args, **kwargs):
         self.instances = WeakValueDictionary()

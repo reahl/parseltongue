@@ -50,7 +50,6 @@ cdef extern from "gcits.hf":
     OopType GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err)
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
         bint convertToUnicode, GciErrSType *err)
-    OopType GCI_I32_TO_OOP(int64 arg)
 
 #======================================================================================================================
 cdef class RPCSession(GemstoneSession):

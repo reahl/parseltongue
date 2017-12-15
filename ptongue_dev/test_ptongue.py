@@ -2,12 +2,19 @@
 from contextlib import contextmanager
 
 import pytest
+import warnings
 
-from ptongue.gemproxy import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError
+from ptongue.gemproxy import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError, GemstoneWarning
 from ptongue.gemproxyrpc import RPCSession
-from ptongue.gemproxylinked import LinkedSession, get_current_linked_session
-import ptongue.gemproxylinked
+from ptongue.gemproxylinked import LinkedSession
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
+
+#======================================================================================================================
+
+class InvalidLinkedSession(LinkedSession):
+    @property
+    def is_current_session(self):
+        return True
 
 #======================================================================================================================
 
@@ -106,13 +113,9 @@ def invalid_rpc_session(guestmode_netldi):
 
 @pytest.fixture
 def invalid_linked_session(stone_fixture):
-    linked_session = LinkedSession('DataCurator', 'swordfish')
-    linked_session.log_out()
-    ptongue.gemproxylinked.current_linked_session = linked_session
-    try:
-        yield linked_session
-    finally:
-        ptongue.gemproxylinked.current_linked_session = None
+    invalid_linked_session = InvalidLinkedSession('DataCurator', 'swordfish')
+    invalid_linked_session.log_out()
+    yield invalid_linked_session
 
 
 #======================================================================================================================
@@ -150,16 +153,15 @@ def test_rpc_session_login_os_user(stone_fixture):
 
 
 def test_linked_session_login(stone_fixture):
-    assert not get_current_linked_session()
     linked_session = LinkedSession('DataCurator', 'swordfish')
     try:
         assert linked_session.is_logged_in
         assert not linked_session.is_remote 
-        assert get_current_linked_session() is linked_session
+        assert linked_session.is_current_session
     finally:
         linked_session.log_out()
         assert not linked_session.is_logged_in
-        assert not get_current_linked_session()
+        assert not linked_session.is_current_session
 
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         LinkedSession('DataCurator', 'wrong_password')
@@ -529,7 +531,7 @@ def test_linked_session_gemstone_class(linked_session, oop_true):
 
 @pytest.mark.parametrize('session_class, expected_error_message',[
     (RPCSession, 'argument is not a valid GciSession pointer'),
-    (LinkedSession, 'The given session ID is invalid.'),
+    (InvalidLinkedSession, 'The given session ID is invalid.'),
     ])
 def test_gemstone_class_exception(guestmode_netldi, session_class, expected_error_message):
     session = session_class('DataCurator', 'swordfish')
@@ -538,16 +540,8 @@ def test_gemstone_class_exception(guestmode_netldi, session_class, expected_erro
     finally:
         session.log_out()
 
-    if isinstance(session, LinkedSession):
-        try:
-            ptongue.gemproxylinked.current_linked_session = session
-            with expected(GemstoneError, test=expected_error_message):
-                today.gemstone_class()
-        finally:
-            ptongue.gemproxylinked.current_linked_session = None
-    else:
-        with expected(GemstoneError, test=expected_error_message):
-            today.gemstone_class()
+    with expected(GemstoneError, test=expected_error_message):
+        today.gemstone_class()
         
 def check_is_kind_of(session, oop_true):
     boolean = session.resolve_symbol('Boolean')

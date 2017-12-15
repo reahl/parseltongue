@@ -38,8 +38,6 @@ cdef extern from "gcioop.ht":
     OopType OOP_NO_CONTEXT
     OopType OOP_NIL
     OopType OOP_ILLEGAL
-    OopType OOP_FALSE
-    OopType OOP_TRUE
     OopType OOP_CLASS_INTEGER
     OopType OOP_CLASS_SMALL_INTEGER
     OopType OOP_CLASS_LargeInteger
@@ -56,10 +54,6 @@ cdef extern from "gcioop.ht":
     OopType OOP_CLASS_Unicode7
     OopType OOP_CLASS_Unicode16
     OopType OOP_CLASS_Unicode32
-    uint64_t OOP_TAG_SMALLINT
-    uint64_t OOP_NUM_TAG_BITS
-    int64 MIN_SMALL_INT
-    int64 MAX_SMALL_INT
 
 cdef extern from "gci.hf":
     cdef cppclass GciErrSType:
@@ -77,7 +71,6 @@ cdef extern from "gci.hf":
         void setFatalError(int errNum, const char* msg)
 
     GciSessionIdType GCI_INVALID_SESSION_ID
-    bint GCI_OOP_IS_SMALL_INT(OopType oop)
 
 #======================================================================================================================
 cdef GemstoneError make_GemstoneError(session, GciErrSType c_error)
