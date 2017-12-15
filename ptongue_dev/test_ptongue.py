@@ -6,6 +6,7 @@ import pytest
 from ptongue.gemproxy import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError
 from ptongue.gemproxyrpc import RPCSession
 from ptongue.gemproxylinked import LinkedSession, get_current_linked_session
+import ptongue.gemproxylinked
 from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
@@ -107,7 +108,11 @@ def invalid_rpc_session(guestmode_netldi):
 def invalid_linked_session(stone_fixture):
     linked_session = LinkedSession('DataCurator', 'swordfish')
     linked_session.log_out()
-    yield linked_session
+    ptongue.gemproxylinked.current_linked_session = linked_session
+    try:
+        yield linked_session
+    finally:
+        ptongue.gemproxylinked.current_linked_session = None
 
 
 #======================================================================================================================
@@ -159,7 +164,7 @@ def test_linked_session_login(stone_fixture):
     with expected(GemstoneError, test='the userId/password combination is invalid or expired'):
         LinkedSession('DataCurator', 'wrong_password')
 
-    with expected(GemstoneError, test='The given session ID is invalid.'):
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
         linked_session.log_out()
 
 
@@ -175,65 +180,65 @@ def test_lined_session_is_remote_exception(invalid_linked_session):
 
 #--[ singleton linked session ]------------------------------------------------------------
 
-def test_linked_singleton_error(invalid_linked_session):
-    other_session = LinkedSession('DataCurator', 'swordfish')  # so something is logged in globally
+def test_linked_singleton_error(stone_fixture):
+    linked_session = LinkedSession('DataCurator', 'swordfish')  # so something is logged in globally
     try: 
-        date_symbol = other_session.resolve_symbol('Date')
+        date_symbol = linked_session.resolve_symbol('Date')
         date_string = date_symbol.perform('asString')
-        converted_float = other_session.execute('123.123')
-        
+        converted_float = linked_session.execute('123.123')
+
         with expected(GemstoneApiError, test='There is an active linked session. Can not create another session.'):
             LinkedSession('DataCurator', 'swordfish')
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.abort()
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.begin()
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.commit()
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.is_remote
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.py_to_string_('String')
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.py_to_float_(123.123)
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.execute('2')
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.new_symbol('newSymbol')
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.resolve_symbol('Date')
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.log_out()
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.object_is_kind_of(date_symbol, date_symbol)
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.object_gemstone_class(date_symbol)
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.object_float_to_py(converted_float)
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.object_string_to_py(date_string)
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.object_latin1_to_py(date_string)
-
-        with expected(GemstoneApiError, test='Expected session to be the current session.'):
-            invalid_linked_session.object_perform(date_symbol, 'asString')
     finally:
-        other_session.log_out()
+        linked_session.log_out()
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.abort()
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.begin()
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.commit()
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.is_remote
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.py_to_string_('String')
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.py_to_float_(123.123)
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.execute('2')
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.new_symbol('newSymbol')
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.resolve_symbol('Date')
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.log_out()
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.object_is_kind_of(date_symbol, date_symbol)
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.object_gemstone_class(date_symbol)
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.object_float_to_py(converted_float)
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.object_string_to_py(date_string)
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.object_latin1_to_py(date_string)
+
+    with expected(GemstoneApiError, test='Expected session to be the current session.'):
+        linked_session.object_perform(date_symbol, 'asString')
 
         
 #--[ getting a hold of objects and symbols ]------------------------------------------------------------
@@ -533,9 +538,16 @@ def test_gemstone_class_exception(guestmode_netldi, session_class, expected_erro
     finally:
         session.log_out()
 
-    with expected(GemstoneError, test=expected_error_message):
-        today.gemstone_class()
-
+    if isinstance(session, LinkedSession):
+        try:
+            ptongue.gemproxylinked.current_linked_session = session
+            with expected(GemstoneError, test=expected_error_message):
+                today.gemstone_class()
+        finally:
+            ptongue.gemproxylinked.current_linked_session = None
+    else:
+        with expected(GemstoneError, test=expected_error_message):
+            today.gemstone_class()
         
 def check_is_kind_of(session, oop_true):
     boolean = session.resolve_symbol('Boolean')

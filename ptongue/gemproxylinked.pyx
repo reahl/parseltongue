@@ -127,7 +127,8 @@ cdef class LinkedSession(GemstoneSession):
 
     @property
     def is_current_session(self):
-        return self.c_session_id == GciGetSessionId()
+        global current_linked_session
+        return self is current_linked_session
 
     def py_to_string_(self, str py_str):
         if not self.is_current_session:
