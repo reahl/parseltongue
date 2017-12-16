@@ -13,3 +13,4 @@ build
 *.so
 __pycache__
 
+ptongue/gembuildertypes.c

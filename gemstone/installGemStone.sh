@@ -35,3 +35,7 @@ cd $GEMSTONE/install
 #group and urser
 chgrp -R vagrant $GEMSTONE
 chown -R vagrant $GEMSTONE
+
+ln -s $GEMSTONE/lib/libicudata.54.1.so $GEMSTONE/lib/libicudata.so.54
+ln -s $GEMSTONE/lib/libicui18n.54.1.so $GEMSTONE/lib/libicui18n.so.54
+ln -s $GEMSTONE/lib/libicuuc.54.1.so $GEMSTONE/lib/libicuuc.so.54
