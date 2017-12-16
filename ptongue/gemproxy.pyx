@@ -185,11 +185,6 @@ cdef class GemObject:
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
 #======================================================================================================================
-class DelegatedNamespace(object):
-    def __init__(self, delegating_method):
-        self.delegating_method = delegating_method
-    def __getattr__(self, name):
-        return self.delegating_method(name)
 
 cdef class GemstoneSession:
     def __cinit__(self, *args, **kwargs):
@@ -240,15 +235,5 @@ cdef class GemstoneSession:
         string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
         return int(string_result)
 
-    def __getattr__(self, name):
-        return self.resolve_symbol(name)
-
-    @property
-    def s(self):
-        return DelegatedNamespace(self.new_symbol)
-
-    @property
-    def n(self):
-        return DelegatedNamespace(self.resolve_symbol)
     
 #======================================================================================================================

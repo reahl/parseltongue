@@ -834,21 +834,3 @@ def test_linked_session_mapping_method_names(linked_session):
     check_mapping_method_names(linked_session)
 
     
-def check_resolving_and_making_symbols(session):
-    # Case: resolving symbols
-    #   TODO: need to pick one here.... only one can survive, but I am not sure yet which is better:
-    assert session.UserGlobals is session.resolve_symbol('UserGlobals')
-    assert session.n.UserGlobals is session.resolve_symbol('UserGlobals')
-
-    # Case: making symbols
-    assert session.s.someNewSymbol.is_symbol
-    assert session.s.someNewSymbol is session.new_symbol('someNewSymbol')
-
-    
-def test_rpc_session_mapping_symbols(rpc_session):
-    check_resolving_and_making_symbols(rpc_session)
-
-
-def test_linked_session_mapping_symbols(linked_session):
-    check_resolving_and_making_symbols(linked_session)
-
