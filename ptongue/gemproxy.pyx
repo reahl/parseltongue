@@ -150,14 +150,7 @@ cdef class GemObject:
 
     @property
     def to_py(self):
-        try: 
-            return well_known_instances[self.oop]
-        except KeyError:
-            try:
-                gem_class_name = well_known_class_names[self.gemstone_class().oop]
-            except KeyError:
-                raise NotSupported()
-            return getattr(self.session, 'object_{}_to_py'.format(gem_class_name))(self)
+        return self.session.object_to_py(self)
 
     def is_kind_of(self, GemObject a_class):
         return self.session.object_is_kind_of(self, a_class)
@@ -223,6 +216,16 @@ cdef class GemstoneSession:
             return_oop = self.execute('^{}'.format(py_int)).oop
         return return_oop
 
+    def object_to_py(self, GemObject instance):
+        try: 
+            return well_known_instances[instance.oop]
+        except KeyError:
+            try:
+                gem_class_name = well_known_class_names[instance.gemstone_class().oop]
+            except KeyError:
+                raise NotSupported()
+            return getattr(self, 'object_{}_to_py'.format(gem_class_name))(instance)
+    
     def object_small_integer_to_py(self, GemObject instance):
         cdef int64 return_value 
         if GCI_OOP_IS_SMALL_INT(instance.c_oop):
