@@ -14,7 +14,8 @@ cdef extern from "gci.hf":
     bint GciInit()
     void GciShutdown()
     void GciUnload()
-    bint GciLogin(const char gemstoneUsername[], const char gemstonePassword[])
+    char* GciEncrypt(const char* password, char outBuff[], unsigned int outBuffSize)
+    bint GciLoginEx(const char gemstoneUsername[], const char gemstonePassword[], unsigned int loginFlags, int haltOnErrNum)
     void GciLogout()
     bint GciErr(GciErrSType *errorReport)
     void GciClearStack(OopType aGsProcess)
@@ -77,7 +78,23 @@ cdef class LinkedSession(GemstoneSession):
         if current_linked_session != None:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
 
-        clean_login = GciLogin(username.encode('utf-8'), password.encode('utf-8'))
+        cdef bint password_is_encrypted = False
+        cdef char *out_buff
+        cdef bytes encrypted_password
+        cdef unsigned int out_buff_size = 0
+        cdef char *encrypted_char = NULL
+        while(encrypted_char == NULL):
+            out_buff_size = out_buff_size + self.initial_fetch_size
+            out_buff = <char *>malloc((out_buff_size) * sizeof(char))
+            try:
+                encrypted_char = GciEncrypt(password.encode('utf-8'), out_buff, out_buff_size)
+                if encrypted_char != NULL:
+                    encrypted_password = out_buff
+            finally:
+                free(out_buff)
+            
+
+        clean_login = GciLoginEx(username.encode('utf-8'), encrypted_password, GCI_LOGIN_PW_ENCRYPTED, 0)
         self.c_session_id = GciGetSessionId()
         if not clean_login:
             GciErr(&error)

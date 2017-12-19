@@ -29,6 +29,15 @@ ctypedef enum GciByteSwizEType:
     gci_byte_swiz_2_bytes = 1 
     gci_byte_swiz_4_bytes = 2
     gci_byte_swiz_8_bytes = 3
+ctypedef enum:
+    GCI_LOGIN_PW_ENCRYPTED = 1,
+    GCI_LOGIN_IS_SUBORDINATE = 2,
+    GCI_LOGIN_FULL_COMPRESSION_ENABLED = 4, 
+    GCI_LOGIN_ERRS_USE_REF_SET = 8,
+    GCI_LOGIN_QUIET = 0x10,
+    GCI_CLIENT_DOES_SESSION_INIT = 0x20,
+    GCI_TS_CLIENT = 0x40,
+    GCI_LOGIN_ALL_FLAGS = 0x7F 
 
 GCI_ERR_STR_SIZE      =  1024
 GCI_ERR_reasonSize    =  GCI_ERR_STR_SIZE

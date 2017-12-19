@@ -5,6 +5,7 @@ from gemproxy cimport *
 
 #======================================================================================================================
 cdef extern from "gcits.hf":
+    char* GciTsEncrypt(const char* password, char *outBuf, size_t outBuffSize)
     GciSession GciTsLogin(
         const char *StoneNameNrs,
         const char *HostUserId, 
@@ -62,14 +63,29 @@ cdef class RPCSession(GemstoneSession):
         if host_username:
             c_host_username = to_c_bytes(host_username)
 
+        cdef bint password_is_encrypted = False
+        cdef char *out_buff
+        cdef bytes encrypted_password
+        cdef unsigned int out_buff_size = 0
+        cdef char *encrypted_char = NULL
+        while(encrypted_char == NULL):
+            out_buff_size = out_buff_size + self.initial_fetch_size
+            out_buff = <char *>malloc((out_buff_size) * sizeof(char))
+            try:
+                encrypted_char = GciTsEncrypt(password.encode('utf-8'), out_buff, out_buff_size)
+                if encrypted_char != NULL:
+                    encrypted_password = out_buff
+            finally:
+                free(out_buff)
+
         self.c_session = GciTsLogin(stone_name.encode('utf-8'),
                                     c_host_username,
                                     host_password.encode('utf-8'),
                                     0,
                                     netldi_task.encode('utf-8'),
                                     username.encode('utf-8'),
-                                    password.encode('utf-8'),
-                                    0, 0, &error)
+                                    encrypted_password,
+                                    GCI_LOGIN_PW_ENCRYPTED, 0, &error)
         if self.c_session == NULL:
             raise make_GemstoneError(self, error)
 
