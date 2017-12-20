@@ -178,7 +178,7 @@ def test_gemstone_session_password_encryption(guestmode_netldi, session_class):
     password = 'swordfish'
     session = session_class('DataCurator', password)
     try:
-        assert password.encode('utf-8') != session.encrypt_password(password)
+        assert not password.encode('utf-8') in session.encrypt_password(password)
     finally:
         session.log_out()
 
