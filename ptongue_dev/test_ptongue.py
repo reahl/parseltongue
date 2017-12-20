@@ -170,6 +170,19 @@ def test_linked_session_login(stone_fixture):
         linked_session.log_out()
 
 
+@pytest.mark.parametrize('session_class',[
+    RPCSession,
+    InvalidLinkedSession,
+    ])
+def test_gemstone_session_password_encryption(guestmode_netldi, session_class):
+    password = 'swordfish'
+    session = session_class('DataCurator', password)
+    try:
+        assert password.encode('utf-8') != session.encrypt_password(password)
+    finally:
+        session.log_out()
+
+
 def test_rpc_session_is_remote_exception(invalid_rpc_session):
     with expected(InvalidSession):
         invalid_rpc_session.is_remote
