@@ -65,8 +65,8 @@ cdef class RPCSession(GemstoneSession):
 
         self.c_session = GciTsLogin(stone_name.encode('utf-8'),
                                     c_host_username,
-                                    host_password.encode('utf-8'),
-                                    0,
+                                    self.encrypt_password(host_password),
+                                    True,
                                     netldi_task.encode('utf-8'),
                                     username.encode('utf-8'),
                                     self.encrypt_password(password),
