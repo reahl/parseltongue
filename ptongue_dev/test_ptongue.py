@@ -503,6 +503,22 @@ def test_rpc_session_identity_of_objects_stay_same(rpc_session):
 def test_linked_session_identity_of_objects_stay_same(linked_session):
     check_identity_of_objects_stay_same(linked_session)
 
+
+def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
+    obj_id = id(session.resolve_symbol('Date'))
+    # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
+    # that the recent object's address will be free in the following code.
+    large_object_to_prevent_python_from_reusing_obj_id = '123'*2000
+    assert id(session.resolve_symbol('Date')) != obj_id
+
+
+def test_rpc_session_identity_of_objects_not_guaranteed_if_not_referenced(rpc_session):
+    check_identity_of_objects_not_guaranteed_if_not_referenced(rpc_session)
+
+
+def test_linked_session_identity_of_objects_not_guaranteed_if_not_referenced(linked_session):
+    check_identity_of_objects_not_guaranteed_if_not_referenced(linked_session)
+
     
 def check_raising_of_gemstone_exceptions(session, oop_true):
     rt_err_generic_error = 2318
