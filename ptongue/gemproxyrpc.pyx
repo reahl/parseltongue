@@ -51,6 +51,7 @@ cdef extern from "gcits.hf":
     OopType GciTsI64ToOop(GciSession sess, int64 arg, GciErrSType *err)
     OopType GciTsNewUtf8String(GciSession sess, const char* utf8data, 
         bint convertToUnicode, GciErrSType *err)
+    bint GciTsReleaseObjs(GciSession sess, OopType *buf, int count, GciErrSType *err)
 
 #======================================================================================================================
 cdef class RPCSession(GemstoneSession):
@@ -89,6 +90,26 @@ cdef class RPCSession(GemstoneSession):
             finally:
                 free(out_buff)
         return encrypted_password
+
+    def remove_dead_gemstone_objects(self):
+        cdef GciErrSType error
+        cdef object dead_oops = []
+        cdef OopType *c_dead_oops
+        for oop in self.possibly_dead_gemstone_objects:
+            try:
+                self.instances[oop]
+            except KeyError:
+                dead_oops.append(oop)
+        if dead_oops:
+            c_dead_oops = <OopType *>malloc(len(dead_oops) * sizeof(OopType))
+            try:
+                for index in xrange(0, len(dead_oops)):
+                    c_dead_oops[index] = dead_oops[index] 
+                if not GciTsReleaseObjs(self.c_session, c_dead_oops, len(dead_oops), &error):
+                    raise make_GemstoneError(self, error)
+            finally:
+                free(c_dead_oops)
+        self.possibly_dead_gemstone_objects = []
 
     def abort(self):
         cdef GciErrSType error

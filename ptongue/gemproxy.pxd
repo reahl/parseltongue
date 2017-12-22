@@ -109,6 +109,7 @@ cdef class GemObject:
 
 cdef class GemstoneSession:
     cdef object instances
+    cdef object possibly_dead_gemstone_objects
     cdef int32 initial_fetch_size
 
 #======================================================================================================================

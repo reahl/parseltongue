@@ -177,11 +177,19 @@ cdef class GemObject:
     def __str__(self):
         return '<%s object with oop %s>' % (self.__class__, self.c_oop)
 
+    def __dealloc__(self):
+        if self.session.is_logged_in:
+            if len(self.session.possibly_dead_gemstone_objects) > 10:
+                self.session.remove_dead_gemstone_objects()
+            if not self.c_oop in self.session.possibly_dead_gemstone_objects:
+                self.session.possibly_dead_gemstone_objects.append(self.c_oop)
+
 #======================================================================================================================
 
 cdef class GemstoneSession:
     def __cinit__(self, *args, **kwargs):
         self.instances = WeakValueDictionary()
+        self.possibly_dead_gemstone_objects = []
         self.initial_fetch_size = 200
 
     @property

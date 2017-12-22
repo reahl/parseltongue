@@ -195,7 +195,6 @@ def test_lined_session_is_remote_exception(invalid_linked_session):
 
 #--[ singleton linked session ]------------------------------------------------------------
 
-
 def test_linked_singleton_error(linked_session):
     assert linked_session.is_logged_in
     with expected(GemstoneApiError, test='There is an active linked session. Can not create another session.'):
@@ -518,6 +517,22 @@ def test_rpc_session_identity_of_objects_not_guaranteed_if_not_referenced(rpc_se
 
 def test_linked_session_identity_of_objects_not_guaranteed_if_not_referenced(linked_session):
     check_identity_of_objects_not_guaranteed_if_not_referenced(linked_session)
+
+
+def test_linked_session_remove_object_from_gemstone_set(linked_session):
+    today = linked_session.resolve_symbol('Date').perform('today')
+    linked_session.execute('SystemRepository markForCollection')
+    linked_session.execute('SystemRepository reclaimAll')
+    del(today)
+    linked_session.remove_dead_gemstone_objects()
+
+
+def test_rpc_session_remove_object_from_gemstone_set(rpc_session, linked_session):
+    today = rpc_session.resolve_symbol('Date').perform('today')
+    linked_session.execute('SystemRepository markForCollection')
+    linked_session.execute('SystemRepository reclaimAll')
+    del(today)
+    rpc_session.remove_dead_gemstone_objects()
 
     
 def check_raising_of_gemstone_exceptions(session, oop_true):
