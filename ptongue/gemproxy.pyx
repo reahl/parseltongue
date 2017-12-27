@@ -180,16 +180,15 @@ cdef class GemObject:
     def __dealloc__(self):
         if self.session.is_logged_in:
             if len(self.session.possibly_dead_gemstone_objects) > 10:
-                self.session.remove_dead_gemstone_objects()
-            if not self.c_oop in self.session.possibly_dead_gemstone_objects:
-                self.session.possibly_dead_gemstone_objects.append(self.c_oop)
+                self.session.remove_dead_gemstone_objects(self.c_oop)
+            self.session.possibly_dead_gemstone_objects.add(self.c_oop)
 
 #======================================================================================================================
 
 cdef class GemstoneSession:
     def __cinit__(self, *args, **kwargs):
         self.instances = WeakValueDictionary()
-        self.possibly_dead_gemstone_objects = []
+        self.possibly_dead_gemstone_objects = set()
         self.initial_fetch_size = 200
 
     @property

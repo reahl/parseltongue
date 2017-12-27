@@ -95,11 +95,8 @@ cdef class RPCSession(GemstoneSession):
         cdef GciErrSType error
         cdef object dead_oops = []
         cdef OopType *c_dead_oops
-        for oop in self.possibly_dead_gemstone_objects:
-            try:
-                self.instances[oop]
-            except KeyError:
-                dead_oops.append(oop)
+        definitely_dead_gemstone_objects = [oop for oop in self.possibly_dead_gemstone_objects if oop not in self.instances]
+        dead_oops.extend(definitely_dead_gemstone_objects)
         if dead_oops:
             c_dead_oops = <OopType *>malloc(len(dead_oops) * sizeof(OopType))
             try:
@@ -109,7 +106,7 @@ cdef class RPCSession(GemstoneSession):
                     raise make_GemstoneError(self, error)
             finally:
                 free(c_dead_oops)
-        self.possibly_dead_gemstone_objects = []
+        self.possibly_dead_gemstone_objects.clear()
 
     def abort(self):
         cdef GciErrSType error
