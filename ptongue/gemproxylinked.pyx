@@ -42,6 +42,7 @@ cdef extern from "gci.hf":
     OopType GciNewUtf8String(const char* utf8data, bint convertToUnicode)
     OopType GciFltToOop(double aReal)
     void GciReleaseOops(const OopType theOops[], int numOops)
+    bint GciHiddenSetIncludesOop(OopType theOop, int hiddenSetId)
 
 #======================================================================================================================
 cdef bint is_gembuilder_initialised = False
@@ -110,8 +111,8 @@ cdef class LinkedSession(GemstoneSession):
         cdef GciErrSType error
         cdef object dead_oops = []
         cdef OopType *c_dead_oops
-        definitely_dead_gemstone_objects = [oop for oop in self.possibly_dead_gemstone_objects if oop not in self.instances]
-        dead_oops.extend(definitely_dead_gemstone_objects)
+        unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
+        dead_oops.extend(unreferenced_gemstone_objects)
         if dead_oops:
             c_dead_oops = <OopType *>malloc(len(dead_oops) * sizeof(OopType))
             try:
@@ -122,7 +123,16 @@ cdef class LinkedSession(GemstoneSession):
                     raise make_GemstoneError(self, error)
             finally:
                 free(c_dead_oops)
-        self.possibly_dead_gemstone_objects.clear()
+        self.deallocated_unfreed_gemstone_objects.clear()
+
+    def hidden_set_includes_oop(self, GemObject instance, int hidden_set_id):
+        if not self.is_current_session:
+            raise GemstoneApiError('Expected session to be the current session.')
+        cdef GciErrSType error
+        cdef bint oop_is_included = GciHiddenSetIncludesOop(instance.oop, hidden_set_id)
+        if GciErr(&error):
+            raise make_GemstoneError(self, error)
+        return oop_is_included
 
     def abort(self):
         if not self.is_current_session:

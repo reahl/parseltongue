@@ -507,7 +507,7 @@ def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
     obj_id = id(session.resolve_symbol('Date'))
     # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
     # that the recent object's address will be free in the following code.
-    large_object_to_prevent_python_from_reusing_obj_id = '123'*2000
+    large_object_to_prevent_python_from_reusing_obj_id = '123'*20000
     assert id(session.resolve_symbol('Date')) != obj_id
 
 
@@ -519,20 +519,30 @@ def test_linked_session_identity_of_objects_not_guaranteed_if_not_referenced(lin
     check_identity_of_objects_not_guaranteed_if_not_referenced(linked_session)
 
 
-def test_linked_session_remove_object_from_gemstone_set(linked_session):
+def test_linked_session_remove_unreferenced_gemstone_objects_from_gemstone_set(linked_session):
     today = linked_session.resolve_symbol('Date').perform('today')
-    linked_session.execute('SystemRepository markForCollection')
-    linked_session.execute('SystemRepository reclaimAll')
+    today_oop = today.oop
+    assert linked_session.hidden_set_includes_oop(today, 39)
     del(today)
     linked_session.remove_dead_gemstone_objects()
-
-
-def test_rpc_session_remove_object_from_gemstone_set(rpc_session, linked_session):
-    today = rpc_session.resolve_symbol('Date').perform('today')
     linked_session.execute('SystemRepository markForCollection')
     linked_session.execute('SystemRepository reclaimAll')
-    del(today)
-    rpc_session.remove_dead_gemstone_objects()
+    today = linked_session.get_or_create_gem_object(today_oop)
+    assert not linked_session.hidden_set_includes_oop(today, 39)
+
+
+# def test_rpc_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, linked_session):
+#     today = rpc_session.resolve_symbol('Date').perform('today')
+#     today_oop = today.oop
+#     for index in range(1, 46):
+#         print('{}: {}'.format(index, linked_session.hidden_set_includes_oop(today, index)))
+#     assert linked_session.hidden_set_includes_oop(today, 39)
+#     del(today)
+#     rpc_session.remove_dead_gemstone_objects()
+#     linked_session.execute('SystemRepository markForCollection')
+#     linked_session.execute('SystemRepository reclaimAll')
+#     today = rpc_session.get_or_create_gem_object(today_oop)
+#     assert not linked_session.hidden_set_includes_oop(today, 39)
 
     
 def check_raising_of_gemstone_exceptions(session, oop_true):
