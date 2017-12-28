@@ -530,18 +530,15 @@ def test_linked_session_remove_unreferenced_gemstone_objects_from_gemstone_set(l
     assert not linked_session.hidden_set_includes_oop(today_oop, 39)
 
 
-# def test_rpc_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, linked_session):
-#     today = rpc_session.resolve_symbol('Date').perform('today')
-#     today_oop = today.oop
-#     for index in range(1, 46):
-#         print('{}: {}'.format(index, linked_session.hidden_set_includes_oop(today, index)))
-#     assert linked_session.hidden_set_includes_oop(today, 39)
-#     del(today)
-#     rpc_session.remove_dead_gemstone_objects()
-#     linked_session.execute('SystemRepository markForCollection')
-#     linked_session.execute('SystemRepository reclaimAll')
-#     today = rpc_session.get_or_create_gem_object(today_oop)
-#     assert not linked_session.hidden_set_includes_oop(today, 39)
+def test_rpc_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, linked_session, oop_true):
+    date = linked_session.resolve_symbol('Date')
+    date_oop = date.oop
+    assert linked_session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
+    del(date)
+    for index in range(linked_session.export_set_free_batch_size):
+        converted_index = linked_session.execute('{}'.format(index))
+        del(converted_index)
+    assert not linked_session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
 
     
 def check_raising_of_gemstone_exceptions(session, oop_true):
