@@ -125,11 +125,11 @@ cdef class LinkedSession(GemstoneSession):
                 free(c_dead_oops)
         self.deallocated_unfreed_gemstone_objects.clear()
 
-    def hidden_set_includes_oop(self, GemObject instance, int hidden_set_id):
+    def hidden_set_includes_oop(self, OopType oop, int hidden_set_id):
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         cdef GciErrSType error
-        cdef bint oop_is_included = GciHiddenSetIncludesOop(instance.oop, hidden_set_id)
+        cdef bint oop_is_included = GciHiddenSetIncludesOop(oop, hidden_set_id)
         if GciErr(&error):
             raise make_GemstoneError(self, error)
         return oop_is_included

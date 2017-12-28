@@ -179,8 +179,8 @@ cdef class GemObject:
 
     def __dealloc__(self):
         if self.session.is_logged_in:
-            if len(self.session.deallocated_unfreed_gemstone_objects) > 10:
-                self.session.remove_dead_gemstone_objects(self.c_oop)
+            if len(self.session.deallocated_unfreed_gemstone_objects) > self.session.export_set_free_batch_size:
+                self.session.remove_dead_gemstone_objects()
             self.session.deallocated_unfreed_gemstone_objects.add(self.c_oop)
 
 #======================================================================================================================
@@ -190,10 +190,15 @@ cdef class GemstoneSession:
         self.instances = WeakValueDictionary()
         self.deallocated_unfreed_gemstone_objects = set()
         self.initial_fetch_size = 200
+        self.export_set_free_batch_size = 10
 
     @property
     def initial_fetch_size(self):
         return self.initial_fetch_size
+
+    @property
+    def export_set_free_batch_size(self):
+        return self.export_set_free_batch_size
 
     def get_or_create_gem_object(self, OopType oop):
         try:

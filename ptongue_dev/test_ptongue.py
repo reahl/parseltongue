@@ -522,13 +522,12 @@ def test_linked_session_identity_of_objects_not_guaranteed_if_not_referenced(lin
 def test_linked_session_remove_unreferenced_gemstone_objects_from_gemstone_set(linked_session):
     today = linked_session.resolve_symbol('Date').perform('today')
     today_oop = today.oop
-    assert linked_session.hidden_set_includes_oop(today, 39)
+    assert linked_session.hidden_set_includes_oop(today_oop, 39)
     del(today)
-    linked_session.remove_dead_gemstone_objects()
-    linked_session.execute('SystemRepository markForCollection')
-    linked_session.execute('SystemRepository reclaimAll')
-    today = linked_session.get_or_create_gem_object(today_oop)
-    assert not linked_session.hidden_set_includes_oop(today, 39)
+    for index in range(linked_session.export_set_free_batch_size):
+        converted_index = linked_session.execute('{}'.format(index))
+        del(converted_index)
+    assert not linked_session.hidden_set_includes_oop(today_oop, 39)
 
 
 # def test_rpc_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, linked_session):
