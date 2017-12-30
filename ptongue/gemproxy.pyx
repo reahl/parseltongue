@@ -190,7 +190,7 @@ cdef class GemstoneSession:
         self.instances = WeakValueDictionary()
         self.deallocated_unfreed_gemstone_objects = set()
         self.initial_fetch_size = 200
-        self.export_set_free_batch_size = 10
+        self.export_set_free_batch_size = 1000
 
     @property
     def initial_fetch_size(self):

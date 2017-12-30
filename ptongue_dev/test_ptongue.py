@@ -519,26 +519,23 @@ def test_linked_session_identity_of_objects_not_guaranteed_if_not_referenced(lin
     check_identity_of_objects_not_guaranteed_if_not_referenced(linked_session)
 
 
-def test_linked_session_remove_unreferenced_gemstone_objects_from_gemstone_set(linked_session):
-    today = linked_session.resolve_symbol('Date').perform('today')
-    today_oop = today.oop
-    assert linked_session.hidden_set_includes_oop(today_oop, 39)
-    del(today)
-    for index in range(linked_session.export_set_free_batch_size):
-        converted_index = linked_session.execute('{}'.format(index))
-        del(converted_index)
-    assert not linked_session.hidden_set_includes_oop(today_oop, 39)
-
-
-def test_rpc_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, linked_session, oop_true):
-    date = linked_session.resolve_symbol('Date')
+def check_session_remove_unreferenced_gemstone_objects_from_gemstone_set(session, oop_true):
+    date = session.resolve_symbol('Date')
     date_oop = date.oop
-    assert linked_session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
+    assert session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
     del(date)
-    for index in range(linked_session.export_set_free_batch_size):
-        converted_index = linked_session.execute('{}'.format(index))
+    for index in range(session.export_set_free_batch_size):
+        converted_index = session.execute('{}'.format(index))
         del(converted_index)
-    assert not linked_session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
+    assert not session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
+
+
+def test_linked_session_remove_unreferenced_gemstone_objects_from_gemstone_set(linked_session, oop_true):
+    check_session_remove_unreferenced_gemstone_objects_from_gemstone_set(linked_session, oop_true)
+
+
+def test_rpc_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, oop_true):
+    check_session_remove_unreferenced_gemstone_objects_from_gemstone_set(rpc_session, oop_true)
 
     
 def check_raising_of_gemstone_exceptions(session, oop_true):
