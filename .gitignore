@@ -12,5 +12,5 @@ build
 *.egg-info
 *.so
 __pycache__
-
 ptongue/gembuildertypes.c
+.tox/

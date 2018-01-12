@@ -1,0 +1,19 @@
+image: python:3.5
+
+before_script:
+  - apt-get update -y
+  - apt-get install -y libpam0g-dev
+  - apt-get install -y unzip
+
+  - useradd -m vagrant
+  - echo -e "vagrant\nvagrant\nvagrant" | passwd
+
+  - pip install tox
+  - pip install cython
+
+  - gemstone/installGemStoneCi.sh
+
+
+job1:
+  script: 
+    - su -c scripts/runTestsCi.sh vagrant
