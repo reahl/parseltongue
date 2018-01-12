@@ -9,16 +9,16 @@ ARCH=x86_64
 #Download and unzip gemstone
 mkdir -p /opt/gemstone
 
-# [ -e $HOME/testdownloads ] || mkdir -p $HOME/testdownloads 
+[ -e $HOME/testdownloads ] || mkdir -p $HOME/testdownloads 
 
-# DOWNLOADED=$HOME/testdownloads/GemStone64Bit${VERSION}-${ARCH}.Linux.zip
-# if [ ! -e $DOWNLOADED ]; then
-#  wget -nv -O  $DOWNLOADED "https://downloads.gemtalksystems.com/pub/GemStone64/${VERSION}/GemStone64Bit${VERSION}-${ARCH}.Linux.zip"
-# fi 
+DOWNLOADED=$HOME/testdownloads/GemStone64Bit${VERSION}-${ARCH}.Linux.zip
+if [ ! -e $DOWNLOADED ]; then
+ wget -nv -O  $DOWNLOADED "https://downloads.gemtalksystems.com/pub/GemStone64/${VERSION}/GemStone64Bit${VERSION}-${ARCH}.Linux.zip"
+fi 
 
-# unzip $DOWNLOADED -d /opt/gemstone
+unzip $DOWNLOADED -d /opt/gemstone
 
-unzip GemStone64Bit${VERSION}-${ARCH}.Linux.zip -d /opt/gemstone
+# unzip GemStone64Bit${VERSION}-${ARCH}.Linux.zip -d /opt/gemstone
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Set the Environment
