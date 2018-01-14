@@ -504,6 +504,15 @@ def test_linked_session_identity_of_objects_stay_same(linked_session):
 
 
 def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
+    """If a GemObject is not referenced by Python anymore, there is no need to
+       ensure its (python) identity stays the same. 
+
+       In order to ensure identity we have to keep a reference to each object that is
+       referenced from Python. This would result in unnecessary memory usage, and a
+       memory leak over time in a long-running process. To prevent this, we cull these
+       unreferenced objects and thus also cannot (unnecessarily so) keep maintaining
+       its original (python) identity."""
+
     obj_id = id(session.resolve_symbol('Date'))
     # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
     # that the recent object's address will be free in the following code.
@@ -518,12 +527,18 @@ def test_rpc_session_identity_of_objects_not_guaranteed_if_not_referenced(rpc_se
 def test_linked_session_identity_of_objects_not_guaranteed_if_not_referenced(linked_session):
     check_identity_of_objects_not_guaranteed_if_not_referenced(linked_session)
 
-
 def check_session_remove_unreferenced_gemstone_objects_from_gemstone_set(session, oop_true):
+    """GemStone holds GemObjects that are returned to Python-side in an "export set" to ensure
+       that they are not garbage collected when they're not referenced from inside GemStone while
+       still being referenced from Python. Hence, GemStone needs to be informed when Python
+       no longer references such objects so it can clean them from its export set. 
+       This is done in batches for performance reasons.
+    """
     date = session.resolve_symbol('Date')
     date_oop = date.oop
     assert session.execute('System testIf: Date isInHiddenSet: 39').oop == oop_true
     del(date)
+    # Fetch enough objects from GemStone to trigger a batch, and stop referencing them from Python:
     for index in range(session.export_set_free_batch_size):
         converted_index = session.execute('{}'.format(index))
         del(converted_index)
