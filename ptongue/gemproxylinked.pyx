@@ -41,6 +41,7 @@ cdef extern from "gci.hf":
     double GciOopToFlt(OopType theObject)
     OopType GciNewUtf8String(const char* utf8data, bint convertToUnicode)
     OopType GciFltToOop(double aReal)
+    void GciReleaseOops(const OopType theOops[], int numOops)
 
 #======================================================================================================================
 cdef bint is_gembuilder_initialised = False
@@ -104,6 +105,24 @@ cdef class LinkedSession(GemstoneSession):
             finally:
                 free(out_buff)
         return encrypted_password
+
+    def remove_dead_gemstone_objects(self):
+        cdef GciErrSType error
+        cdef object dead_oops = []
+        cdef OopType *c_dead_oops
+        unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
+        dead_oops.extend(unreferenced_gemstone_objects)
+        if dead_oops:
+            c_dead_oops = <OopType *>malloc(len(dead_oops) * sizeof(OopType))
+            try:
+                for index in xrange(0, len(dead_oops)):
+                    c_dead_oops[index] = dead_oops[index] 
+                GciReleaseOops(c_dead_oops, len(dead_oops))
+                if GciErr(&error):
+                    raise make_GemstoneError(self, error)
+            finally:
+                free(c_dead_oops)
+        self.deallocated_unfreed_gemstone_objects.clear()
 
     def abort(self):
         if not self.is_current_session:

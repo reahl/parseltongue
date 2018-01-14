@@ -109,6 +109,8 @@ cdef class GemObject:
 
 cdef class GemstoneSession:
     cdef object instances
+    cdef object deallocated_unfreed_gemstone_objects
     cdef int32 initial_fetch_size
+    cdef int32 export_set_free_batch_size
 
 #======================================================================================================================
