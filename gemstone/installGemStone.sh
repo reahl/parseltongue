@@ -9,9 +9,9 @@ ARCH=x86_64
 #Download and unzip gemstone
 mkdir -p /opt/gemstone
 
-[ -e $HOME/testdownloads ] || mkdir -p $HOME/testdownloads 
-
 export VAGRANT_HOME=/home/vagrant
+
+[ -e $VAGRANT_HOME/testdownloads ] || mkdir -p $VAGRANT_HOME/testdownloads 
 
 DOWNLOADED=$VAGRANT_HOME/testdownloads/GemStone64Bit${VERSION}-${ARCH}.Linux.zip
 if [ ! -e $DOWNLOADED ]; then
