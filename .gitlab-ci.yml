@@ -7,7 +7,7 @@ before_script:
   - apt-get install -y openssh-server
 
   - useradd -m vagrant
-  - echo -e "vagrant\nvagrant\nvagrant" | passwd
+  - echo -e "vagrant\nvagrant" | passwd vagrant
 
   - pip install tox
   - pip install cython
@@ -15,6 +15,6 @@ before_script:
   - gemstone/installGemStoneCi.sh
 
 
-job1:
+test_parseltongue:
   script: 
     - su -c scripts/runTestsCi.sh vagrant
