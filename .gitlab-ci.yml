@@ -12,8 +12,7 @@ before_script:
   - pip install tox
   - pip install cython
 
-  - gemstone/installGemStoneCi.sh
-
+  - gemstone/installGemStone.sh
 
 test_parseltongue:
   script: 

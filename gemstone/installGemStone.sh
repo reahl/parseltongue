@@ -33,8 +33,9 @@ echo ""  >> /etc/services
 echo "gs64ldi         5433/tcp                        #GemStone/S"  >> /etc/services
 
 #run installation
+INSTALLDIR="$(pwd)"
 cd $GEMSTONE/install
-/vagrant/gemstone/answersForInstallgs.sh | $GEMSTONE/install/installgs 
+$INSTALLDIR/gemstone/answersForInstallgs.sh | $GEMSTONE/install/installgs 
 
 #group and urser
 chgrp -R vagrant $GEMSTONE
@@ -43,4 +44,4 @@ chown -R vagrant $GEMSTONE
 ln -s $GEMSTONE/lib/libicudata.54.1.so $GEMSTONE/lib/libicudata.so.54
 ln -s $GEMSTONE/lib/libicui18n.54.1.so $GEMSTONE/lib/libicui18n.so.54
 ln -s $GEMSTONE/lib/libicuuc.54.1.so $GEMSTONE/lib/libicuuc.so.54
-
+ln -s $GEMSTONE/lib/libgbjgci313-3.3.3-64.so $GEMSTONE/lib/libgbjgci313.so
