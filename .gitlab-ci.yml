@@ -4,6 +4,7 @@ before_script:
   - apt-get update -y
   - apt-get install -y libpam0g-dev
   - apt-get install -y unzip
+  - apt-get install -y openssh-server
 
   - useradd -m vagrant
   - echo -e "vagrant\nvagrant\nvagrant" | passwd
