@@ -33,7 +33,12 @@ echo ""  >> /etc/services
 echo "gs64ldi         5433/tcp                        #GemStone/S"  >> /etc/services
 
 #run installation
-INSTALLDIR="$(pwd)"
+if [ -e /vagrant ]; then
+  INSTALLDIR=/vagrant
+else
+  INSTALLDIR="$(pwd)"
+fi
+
 cd $GEMSTONE/install
 $INSTALLDIR/gemstone/answersForInstallgs.sh | $GEMSTONE/install/installgs 
 
