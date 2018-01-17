@@ -2,18 +2,17 @@ image: python:3.5
 
 before_script:
   - apt-get update -y
-  - apt-get install -y libpam0g-dev
-  - apt-get install -y unzip
-  - apt-get install -y openssh-server
+  - apt-get install -y libpam0g-dev unzip openssh-server
 
   - useradd -m vagrant
   - echo -e "vagrant\nvagrant" | passwd vagrant
 
-  - pip install tox
-  - pip install cython
-
+  - pip install tox cython
+  
   - gemstone/installGemStone.sh
+  - gemstone/defineGemStoneEnvironment.sh
+  - export SOURCE_ROOT="$(pwd)"
 
 test_parseltongue:
   script: 
-    - su -c scripts/runTestsCi.sh vagrant
+    - su -lc "cd $SOURCE_ROOT; tox" vagrant
