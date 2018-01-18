@@ -33,7 +33,7 @@ echo ""  >> /etc/services
 echo "gs64ldi         5433/tcp                        #GemStone/S"  >> /etc/services
 
 #run installation
-if [ -z "{$CI}" ]; then
+if [ -z "$CI" ]; then
   SOURCE_ROOT=/vagrant
 else
   SOURCE_ROOT="$(pwd)"
