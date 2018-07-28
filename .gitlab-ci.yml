@@ -9,8 +9,8 @@ before_script:
 
   - pip install tox cython
   
-  - gemstone/installGemStone.sh
-  - gemstone/defineGemStoneEnvironment.sh
+  - gemstone/installGemStone.sh 3.4.1
+  - gemstone/defineGemStoneEnvironment.sh 3.4.1
   - export SOURCE_ROOT="$(pwd)"
 
 test_parseltongue:
