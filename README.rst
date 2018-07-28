@@ -27,22 +27,22 @@ Resolving objects
 -----------------
 
 Looking up a Smalltalk symbol from the usual symbol dictionaries
-results in a GemProxy object being returned which represents that
+results in a GemObject object being returned which represents that
 object in Python::
 
     date_class = session.resolve_symbol('Date')
-    assert isinstance(date_class, GemProxy)
+    assert isinstance(date_class, GemObject)
 
     
 Calling methods
 ---------------
 
-A GemProxy object forwards method calls to its counterpart in the
-Gem. It returns other GemProxy objects (and if it takes arguments,
-those must also be GemProxy objects)::
+A GemObject object forwards method calls to its counterpart in the
+Gem. It returns other GemObject objects (and if the method takes
+arguments, those must also be GemObject objects)::
                 
     today = date_class.today()
-    assert isinstance(today, GemProxy)
+    assert isinstance(today, GemObject)
     assert today.is_kind_of(date_class)
     
 

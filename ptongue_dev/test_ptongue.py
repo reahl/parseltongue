@@ -1,13 +1,14 @@
 
 from contextlib import contextmanager
+import os
+import warnings
 
 import pytest
-import warnings
 
 from ptongue.gemproxy import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError, GemstoneWarning
 from ptongue.gemproxyrpc import RPCSession
 from ptongue.gemproxylinked import LinkedSession
-from ptongue.gemstonecontrol import GemstoneService, NetLDI, Stone
+from ptongue.gemstonecontrol import GemstoneInstallation, GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
 
@@ -50,6 +51,8 @@ def expected(exception, test=None):
         raise NoExceptionRaised(exception)
 
 #======================================================================================================================
+
+
 
 @pytest.fixture(scope="module")
 def stone_fixture():
@@ -140,7 +143,7 @@ def test_rpc_session_login_captive_os_user(guestmode_netldi):
 
 def test_rpc_session_login_os_user(stone_fixture):
     with running_netldi(guest_mode=False):
-        with expected(GemstoneError, test='Password validation failed for user vagrant'):
+        with expected(GemstoneError, test=lambda e: e.number == 4147):
             RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
             
         session = RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
@@ -516,7 +519,7 @@ def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
     obj_id = id(session.resolve_symbol('Date'))
     # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
     # that the recent object's address will be free in the following code.
-    large_object_to_prevent_python_from_reusing_obj_id = '123'*20000
+    large_object_to_prevent_python_from_reusing_obj_id = '123'*200000000
     assert id(session.resolve_symbol('Date')) != obj_id
 
 

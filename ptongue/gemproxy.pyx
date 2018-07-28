@@ -72,6 +72,13 @@ cdef char* to_c_bytes(object py_string):
     
 #======================================================================================================================
 cdef class GemstoneError(Exception):
+    """Represents an exception that happened in a Gem.
+
+    This class is not a GemProxy, like other Gem objects because it
+    has to be a Python Exception to worj with Python exception
+    handling.
+
+    """
     def __cinit__(self, sess):
         self.c_error.init()
         self.session = sess
@@ -119,19 +126,44 @@ cdef class GemstoneError(Exception):
         return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
 
 cdef class InvalidSession(Exception):
+    """Indicates a problem with the current Session."""
     pass
 
 cdef class NotSupported(Exception):
+    """Thrown when an attempt is made to do something that is not
+       supported. For example, if you try to transfer a type of Python object
+       to Gemstone which cannot be transferred.
+    """
     pass
 
 cdef class GemstoneApiError(Exception):
+    """Thrown when problems are detected while communicating via the underlying C API."""
     pass
 
 class GemstoneWarning(Warning):
+    """Represents a warning condition related to this API."""
     pass
 
 #======================================================================================================================
 cdef class GemObject:
+    """A Python object that represents a given object in a Gem.
+
+       A GemObject object forwards method calls to its counterpart in the
+       Gem. It returns other GemObject objects (and if the method takes
+       arguments, those must also be GemObject objects)::
+                
+           today = date_class.today()
+           assert isinstance(today, GemObject)
+           assert today.is_kind_of(date_class)
+
+       In Python, method names are spelt differently. Each ':' in a Smalltalk
+       method symbol is replaced with a '_' in Python. When calling such a
+       method, you must pass the correct number of arguments as Python
+       positional arguments::
+
+           user_globals.at_put(some_key, gem_number)
+
+    """
     def __cinit__(self, GemstoneSession session, OopType oop):
         self.c_oop = oop
         self.session = session
@@ -150,6 +182,10 @@ cdef class GemObject:
 
     @property
     def to_py(self):
+        """Transfers this GemObject to a Python object of appropriate type. This
+           is only supported for basic types, such as unicode strings, various
+           numbers and booleans.
+        """
         return self.session.object_to_py(self)
 
     def is_kind_of(self, GemObject a_class):

@@ -1,9 +1,11 @@
 #!/bin/bash -e
 
-#install in ~/bin/ mby?
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <gemstone_version>"
+    exit 1
+fi
 
-VERSION=3.3.3
-#VERSION=3.4.0
+VERSION=$1
 ARCH=x86_64
 
 #Download and unzip gemstone
@@ -49,4 +51,4 @@ chown -R vagrant $GEMSTONE
 ln -s $GEMSTONE/lib/libicudata.54.1.so $GEMSTONE/lib/libicudata.so.54
 ln -s $GEMSTONE/lib/libicui18n.54.1.so $GEMSTONE/lib/libicui18n.so.54
 ln -s $GEMSTONE/lib/libicuuc.54.1.so $GEMSTONE/lib/libicuuc.so.54
-ln -s $GEMSTONE/lib/libgbjgci313-3.3.3-64.so $GEMSTONE/lib/libgbjgci313.so
+ln -s $GEMSTONE/lib/libgbjgci313-$VERSION-64.so $GEMSTONE/lib/libgbjgci313.so

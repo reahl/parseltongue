@@ -1,9 +1,14 @@
 #!/bin/bash -e
 
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <gemstone_version>"
+    exit 1
+fi
+
+VERSION=$1
+
 export VAGRANT_HOME=/home/vagrant
 
 cat <<'EOF' >> $VAGRANT_HOME/.profile
-    export GEMSTONE=/opt/gemstone/GemStone64Bit3.3.3-x86_64.Linux
-    export LD_LIBRARY_PATH=$GEMSTONE/lib
-    . $GEMSTONE/bin/gemsetup.sh  
+/vagrant/gemstone/gemShell.sh $VERSION
 EOF
