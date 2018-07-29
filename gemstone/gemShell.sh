@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh -e
 
 if ( [ -z "$VERSION" ] ) && ( [ "$#" -ne 1 ] ); then
     echo "Usage: $0 <gemstone_version>"

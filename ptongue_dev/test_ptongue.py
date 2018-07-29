@@ -142,8 +142,9 @@ def test_rpc_session_login_captive_os_user(guestmode_netldi):
 
 
 def test_rpc_session_login_os_user(stone_fixture):
-    with running_netldi(guest_mode=False),
-         expected(GemstoneError, test=lambda e: e.number == 4147):
+    with running_netldi(guest_mode=False):
+        
+        with expected(GemstoneError, test=lambda e: e.number == 4147):
             RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
             
         session = RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')

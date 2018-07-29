@@ -15,12 +15,4 @@ before_script:
 
 test_parseltongue:
   script:
-    - whoami
-    - ls -la /bin/sh
-    - cat ~vagrant/.profile
-    - ls -la ~vagrant/.profile
-    - su -lc "ls -la /bin/sh" vagrant
-    - su -lc "ls -la ~/.profile" vagrant
-    - su -lc "cat ~/.profile" vagrant
-    - su -lc "set" vagrant
     - su -lc "cd $SOURCE_ROOT; tox" vagrant
