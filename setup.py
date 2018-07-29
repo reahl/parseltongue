@@ -12,8 +12,9 @@ gemstone_version = version_match.group(1)
 
 setup(
     name='parseltongue',
+    require=['reahl-component'],
     setup_requires=['cython','pytest-runner'],
-    tests_require=['pytest', 'reahl-component', 'reahl-tofu'],
+    tests_require=['pytest', 'reahl-tofu'],
     packages=['ptongue'],
     ext_modules=cythonize([Extension('ptongue.gemproxy',
                     include_dirs = ['{}/include'.format(gemstone_dir)],
@@ -35,7 +36,6 @@ setup(
                                          '-fno-strict-aliasing',
                                          '-fno-exceptions'],
                     extra_link_args=['-Wl,-traditional',
-                                     '-Wl,--warn-unresolved-symbols',
                                      '-m64',
                                      '-lpthread',
                                      '-lcrypt',
@@ -60,7 +60,6 @@ setup(
                                          '-fno-strict-aliasing',
                                          '-fno-exceptions'],
                     extra_link_args=['-Wl,-traditional',
-                                     '-Wl,--warn-unresolved-symbols',
                                      '-m64',
                                      '-lpthread',
                                      '-lcrypt',
