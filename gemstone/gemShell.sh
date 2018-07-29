@@ -12,6 +12,9 @@ export LD_LIBRARY_PATH=$GEMSTONE/lib
 . $GEMSTONE/bin/gemsetup.sh
 
 if [ -z "$BASH_SOURCE" ]; then
+    echo "Not sourced, executing bash"
     exec bash
+else
+    echo "Sourced...exiting."
 fi
     
