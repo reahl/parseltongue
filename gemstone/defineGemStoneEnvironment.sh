@@ -7,8 +7,8 @@ fi
 
 VERSION=$1
 
-export VAGRANT_HOME=/home/vagrant
+GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
 
-cat <<'EOF' >> $VAGRANT_HOME/.profile
-/vagrant/gemstone/gemShell.sh $VERSION
+cat <<EOF >> $HOME/.profile
+$GEMSHELL $VERSION
 EOF
