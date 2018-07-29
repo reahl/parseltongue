@@ -5,16 +5,6 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-VERSION=$1
-ARCH=x86_64
-export GEMSTONE=/opt/gemstone/GemStone64Bit${VERSION}-${ARCH}.Linux
-export LD_LIBRARY_PATH=$GEMSTONE/lib
-. $GEMSTONE/bin/gemsetup.sh
-
-if [ "$(basename $0)" = "gemShell.sh" ]; then
-    echo "Not sourced, executing bash"
-#    exec bash
-else
-    echo "Sourced...exiting."
-fi
+. $(dirname $0)/gemVars.sh
+exec bash
     

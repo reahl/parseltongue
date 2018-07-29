@@ -7,11 +7,11 @@ fi
 
 VERSION=$1
 
-GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
+GEMVARS=$(readlink -f $(dirname $0))/gemVars.sh
 VAGRANT_HOME=/home/vagrant
 
 cat <<EOF >> $VAGRANT_HOME/.profile
-. $GEMSHELL $VERSION
+. $GEMVARS $VERSION
 EOF
 
 
