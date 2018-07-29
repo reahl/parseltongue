@@ -13,7 +13,7 @@ gemstone_version = version_match.group(1)
 setup(
     name='parseltongue',
     setup_requires=['cython','pytest-runner'],
-    tests_require=['pytest', 'reahl-component'],
+    tests_require=['pytest', 'reahl-component', 'reahl-tofu'],
     packages=['ptongue'],
     ext_modules=cythonize([Extension('ptongue.gemproxy',
                     include_dirs = ['{}/include'.format(gemstone_dir)],
