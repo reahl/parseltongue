@@ -7,13 +7,11 @@ fi
 
 VERSION=$1
 ARCH=x86_64
-GEMSTONE=/opt/gemstone/GemStone64Bit${VERSION}-${ARCH}.Linux
-export GEMSTONE
-LD_LIBRARY_PATH=$GEMSTONE/lib
-export LD_LIBRARY_PATH
+export GEMSTONE=/opt/gemstone/GemStone64Bit${VERSION}-${ARCH}.Linux
+export LD_LIBRARY_PATH=$GEMSTONE/lib
 . $GEMSTONE/bin/gemsetup.sh
 
-if [ -z "$BASH_SOURCE" ]; then
+if [ "$(basename $0)" = "gemShell.sh" ]; then
     echo "Not sourced, executing bash"
     exec bash
 else
