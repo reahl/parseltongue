@@ -13,7 +13,7 @@ export LD_LIBRARY_PATH=$GEMSTONE/lib
 
 if [ "$(basename $0)" = "gemShell.sh" ]; then
     echo "Not sourced, executing bash"
-    exec bash
+#    exec bash
 else
     echo "Sourced...exiting."
 fi
