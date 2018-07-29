@@ -11,7 +11,7 @@ GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
 VAGRANT_HOME=/home/vagrant
 
 cat <<EOF >> $VAGRANT_HOME/.profile
-source $GEMSHELL $VERSION
+. $GEMSHELL $VERSION
 EOF
 
 
