@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/sh -e
 
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <gemstone_version>"
@@ -11,7 +11,7 @@ GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
 VAGRANT_HOME=/home/vagrant
 
 cat <<EOF >> $VAGRANT_HOME/.profile
-$GEMSHELL $VERSION
+. $GEMSHELL $VERSION
 EOF
 
 
