@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -ex
 
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <gemstone_version>"
