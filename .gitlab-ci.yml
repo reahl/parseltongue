@@ -18,7 +18,7 @@ test_parseltongue:
     - whoami
     - ls -la /bin/sh
     - cat ~vagrant/.profile
-    - su -lc "ps aux" vagrant
+    - ls -la ~vagrant/.profile
     - su -lc "ls -la /bin/sh" vagrant
     - su -lc "ls -la ~/.profile" vagrant
     - su -lc "cat ~/.profile" vagrant
