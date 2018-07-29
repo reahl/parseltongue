@@ -15,4 +15,5 @@ before_script:
 
 test_parseltongue:
   script: 
+    - su -lc "set" vagrant
     - su -lc "cd $SOURCE_ROOT; tox" vagrant
