@@ -14,7 +14,7 @@ setup(
     name='parseltongue',
     install_requires=['reahl-component'],
     setup_requires=['cython','pytest-runner'],
-    tests_require=['pytest', 'reahl-tofu'],
+    tests_require=['pytest', 'reahl-component', 'reahl-tofu'],
     packages=['ptongue'],
     ext_modules=cythonize([Extension('ptongue.gemproxy',
                     include_dirs = ['{}/include'.format(gemstone_dir)],
