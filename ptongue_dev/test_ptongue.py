@@ -122,7 +122,7 @@ def test_rpc_session_login_os_user(stone_fixture):
 
 
 def test_linked_session_login(stone_fixture):
-    linked_session = LinkedSession('DataCurator', 'swordfish')
+    linked_session = LinkedSession('DataCurator', 'swordfish', stone_name='gs64stone', host_username='vagrant', host_password='vagrant')
     try:
         assert linked_session.is_logged_in
         assert not linked_session.is_remote 

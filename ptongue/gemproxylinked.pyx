@@ -68,9 +68,9 @@ def get_current_linked_session():
 #======================================================================================================================
 cdef class LinkedSession(GemstoneSession):
     cdef GciSessionIdType c_session_id
-    def __cinit__(self, str username, str password):
+    def __cinit__(self, str username, str password, str stone_name='gs64stone',
+                  str host_username=None, str host_password=''):
         cdef GciErrSType error
-        cdef char* c_host_username = NULL
 
         if not is_gembuilder_initialised:
             gembuilder_init(self)
@@ -79,6 +79,16 @@ cdef class LinkedSession(GemstoneSession):
         if current_linked_session != None:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
 
+        cdef char* c_host_username = NULL
+        if host_username:
+            c_host_username = to_c_bytes(host_username)
+
+        cdef char* c_host_password = NULL
+        if host_password:
+            c_host_password = to_c_bytes(host_password)
+        
+        GciSetNet(stone_name.encode('utf-8'), c_host_username, c_host_password, ''.encode('utf-8'))
+        
         clean_login = GciLoginEx(username.encode('utf-8'), self.encrypt_password(password), GCI_LOGIN_PW_ENCRYPTED, 0)
         self.c_session_id = GciGetSessionId()
         if not clean_login:
