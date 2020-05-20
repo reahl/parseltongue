@@ -12,6 +12,7 @@ gemstone_version = version_match.group(1)
 
 setup(
     name='parseltongue',
+    version='1.0.1',
     install_requires=['reahl-component'],
     setup_requires=['cython','pytest-runner'],
     tests_require=['pytest', 'reahl-component', 'reahl-tofu'],
