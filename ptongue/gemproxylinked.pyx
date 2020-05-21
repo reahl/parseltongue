@@ -48,18 +48,18 @@ cdef bint is_gembuilder_initialised = False
 current_linked_session = None
 
 #======================================================================================================================
-cdef gembuilder_init(GemstoneSession session):
-    cdef GciErrSType error
-    if not GciInit() and GciErr(&error):
-        raise make_GemstoneError(session, error)
-    is_gembuilder_initialised = True
-
-@register
 def gembuilder_dealoc():
     cdef GciErrSType error
     GciShutdown();
     if GciErr(&error):
         raise make_GemstoneError(None, error)
+
+cdef gembuilder_init(GemstoneSession session):
+    cdef GciErrSType error
+    if not GciInit() and GciErr(&error):
+        raise make_GemstoneError(session, error)
+    is_gembuilder_initialised = True
+    register(gembuilder_dealoc)
 
 def get_current_linked_session():
     global current_linked_session
@@ -287,6 +287,7 @@ cdef class LinkedSession(GemstoneSession):
         cdef bytes py_bytes = b''
         cdef ByteType* dest
         cdef OopType utf8_string = OOP_NIL
+
         while bytes_returned == num_bytes:
             dest = <ByteType *>malloc((num_bytes + 1) * sizeof(ByteType))
             try:
@@ -308,6 +309,7 @@ cdef class LinkedSession(GemstoneSession):
     def object_latin1_to_py(self, GemObject instance):
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
+
         cdef int64 start_index = 1
         cdef int64 num_bytes  = self.initial_fetch_size
         cdef int64 bytes_returned = num_bytes
