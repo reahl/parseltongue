@@ -88,15 +88,18 @@ cdef class GemstoneError(Exception):
 
     @property
     def category(self):
-        return self.session.get_or_create_gem_object(self.c_error.category) if self.c_error.category else None
+        obj = self.session.get_or_create_gem_object(self.c_error.category) if self.c_error.category else None
+        return None if obj.isNil().to_py else obj
 
     @property
     def context(self):
-        return self.session.get_or_create_gem_object(self.c_error.context) if self.c_error.context else None
+        obj = self.session.get_or_create_gem_object(self.c_error.context) if self.c_error.context else None
+        return None if obj.isNil().to_py else obj
 
     @property
     def exception_obj(self):
-        return self.session.get_or_create_gem_object(self.c_error.exceptionObj) if self.c_error.exceptionObj else None
+        obj = self.session.get_or_create_gem_object(self.c_error.exceptionObj) if self.c_error.exceptionObj else None
+        return None if obj.isNil().to_py else obj
 
     @property
     def args(self):
@@ -123,8 +126,18 @@ cdef class GemstoneError(Exception):
         return self.c_error.message.decode('utf-8')
 
     def __str__(self):
-        return ('{}: {}, {}'.format(self.exception_obj, self.message, self.reason)).replace('\\n', '')
+        try:
+            return self.exception_obj.asString().to_py
+        except:
+            return self.message
 
+    def __repr__(self):
+        try:
+            return self.exception_obj.printString().to_py
+        except:
+            return self.message
+    
+    
 cdef class InvalidSession(Exception):
     """Indicates a problem with the current Session."""
     pass
