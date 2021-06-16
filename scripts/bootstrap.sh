@@ -1,3 +1,6 @@
+echo "COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build"
+echo "docker-compose up -d"
+echo ""
 echo "python setup.py develop -N"
 echo "python setup.py build_ext --inplace"
 echo "python setup.py pytest"

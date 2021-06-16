@@ -100,6 +100,9 @@ cdef class LinkedSession(GemstoneSession):
 
         current_linked_session = self
 
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__.__name__, self.c_session_id)
+    
     def encrypt_password(self, str unencrypted_password):
         cdef char *out_buff
         cdef bytes encrypted_password

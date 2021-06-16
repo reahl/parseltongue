@@ -99,10 +99,10 @@ def test_rpc_session_login_captive_os_user(guestmode_netldi):
         session.log_out()
         assert not session.is_logged_in
 
-    with expected(GemstoneError, test='.*the userId/password combination is invalid or expired'):
+    with expected(GemstoneError, test=r'.*the userId/password combination is invalid or expired'):
         RPCSession('DataCurator', 'wrong_password')
 
-    with expected(GemstoneError, test='.*argument is not a valid GciSession pointer'):
+    with expected(GemstoneError, test=r'.*argument is not a valid GciSession pointer'):
         session.log_out()
 
 
@@ -110,9 +110,9 @@ def test_rpc_session_login_os_user(stone_fixture):
     with running_netldi(guest_mode=False):
         
         with expected(GemstoneError, test=lambda e: e.number == 4147):
-            RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='wrongvagrant')
+            RPCSession('DataCurator', 'swordfish', host_username='developer', host_password='wrongdeveloper')
             
-        session = RPCSession('DataCurator', 'swordfish', host_username='vagrant', host_password='vagrant')
+        session = RPCSession('DataCurator', 'swordfish', host_username='developer', host_password='developer')
         try:
             assert session.is_logged_in
             assert session.is_remote
@@ -122,7 +122,7 @@ def test_rpc_session_login_os_user(stone_fixture):
 
 
 def test_linked_session_login(stone_fixture):
-    linked_session = LinkedSession('DataCurator', 'swordfish', stone_name='gs64stone', host_username='vagrant', host_password='vagrant')
+    linked_session = LinkedSession('DataCurator', 'swordfish', stone_name='gs64stone', host_username='developer', host_password='developer')
     try:
         assert linked_session.is_logged_in
         assert not linked_session.is_remote 
@@ -132,10 +132,10 @@ def test_linked_session_login(stone_fixture):
         assert not linked_session.is_logged_in
         assert not linked_session.is_current_session
 
-    with expected(GemstoneError, test='.*the userId/password combination is invalid or expired'):
+    with expected(GemstoneError, test=r'.*the userId/password combination is invalid or expired'):
         LinkedSession('DataCurator', 'wrong_password')
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.log_out()
 
 
@@ -158,7 +158,7 @@ def test_rpc_session_is_remote_exception(invalid_rpc_session):
 
 
 def test_lined_session_is_remote_exception(invalid_linked_session):
-    with expected(GemstoneError, test='.*The given session ID is invalid\.'):
+    with expected(GemstoneError, test=r'.*The given session ID is invalid\.'):
         invalid_linked_session.is_remote
 
 
@@ -166,7 +166,7 @@ def test_lined_session_is_remote_exception(invalid_linked_session):
 
 def test_linked_singleton_error(linked_session):
     assert linked_session.is_logged_in
-    with expected(GemstoneApiError, test='.*There is an active linked session. Can not create another session\.'):
+    with expected(GemstoneApiError, test=r'.*There is an active linked session. Can not create another session\.'):
         LinkedSession('DataCurator', 'swordfish')
 
 
@@ -179,52 +179,52 @@ def test_linked_session_mismatch_error(stone_fixture):
     finally:
         linked_session.log_out()
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.abort()
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.begin()
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.commit()
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.is_remote
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.py_to_string_('String')
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.py_to_float_(123.123)
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.execute('2')
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.new_symbol('newSymbol')
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.resolve_symbol('Date')
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.log_out()
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.object_is_kind_of(date_symbol, date_symbol)
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.object_gemstone_class(date_symbol)
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.object_float_to_py(converted_float)
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.object_string_to_py(date_string)
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.object_latin1_to_py(date_string)
 
-    with expected(GemstoneApiError, test='.*Expected session to be the current session\.'):
+    with expected(GemstoneApiError, test=r'.*Expected session to be the current session\.'):
         linked_session.object_perform(date_symbol, 'asString')
 
         
@@ -258,11 +258,11 @@ def check_resolve_symbol_object(session):
         session.resolve_symbol(2)
 
     number = session.execute('2')
-    with expected(GemstoneError, test='.*a ArgumentTypeError occurred \(error 2242\)'):
+    with expected(GemstoneError, test=r'.*a ArgumentTypeError occurred \(error 2242\)'):
         session.resolve_symbol(number)
 
     py_string = 'a' * 2000
-    with expected(GemstoneError, test='.*a ImproperOperation occurred \(error 2402\), Cannot create a Symbol'):
+    with expected(GemstoneError, test=r'.*a ImproperOperation occurred \(error 2402\), Cannot create a Symbol'):
         session.new_symbol(py_string)
 
 
@@ -314,7 +314,7 @@ def check_perform_with_gem_object(session):
     date_class.perform(as_string_symbol)
 
     as_string_unicode = session.execute("'asString'")
-    with expected(GemstoneError, test='.*a ArgumentTypeError occurred \(error 2094\), for asString  expected a Symbol'):
+    with expected(GemstoneError, test=r'.*a ArgumentTypeError occurred \(error 2094\), for asString  expected a Symbol'):
         date_class.perform(as_string_unicode)
 
 
@@ -328,7 +328,7 @@ def test_linked_session_perform_with_gem_object(linked_session):
         
 def check_perform_exception(session):
     date_class = session.resolve_symbol('Date')
-    with expected(GemstoneError, test='.*a MessageNotUnderstood occurred \(error 2010\)'):
+    with expected(GemstoneError, test=r'.*a MessageNotUnderstood occurred \(error 2010\)'):
         date_class.perform('asFloat')
 
 
@@ -384,7 +384,7 @@ def test_linked_session_execute_in_context(linked_session):
 
 
 def check_session_execute_exception(session):
-    with expected(GemstoneError, test='.*a CompileError occurred \(error 1001\), undefined symbol'):
+    with expected(GemstoneError, test=r'.*a CompileError occurred \(error 1001\), undefined symbol'):
         session.execute('invalid smalltalk code')
 
 
@@ -439,11 +439,11 @@ def check_session_transactional_exceptions(invalid_session, error_message):
 
 
 def test_rpc_session_transactional_exceptions(invalid_rpc_session):
-    check_session_transactional_exceptions(invalid_rpc_session, '.*argument is not a valid GciSession pointer')
+    check_session_transactional_exceptions(invalid_rpc_session, r'.*argument is not a valid GciSession pointer')
 
 
 def test_linked_session_transactional_exceptions(invalid_linked_session):
-    check_session_transactional_exceptions(invalid_linked_session, '.*The given session ID is invalid\.')
+    check_session_transactional_exceptions(invalid_linked_session, r'.*The given session ID is invalid\.')
 
 
 #--[ miscellaneous ]------------------------------------------------------------
@@ -567,8 +567,8 @@ def test_linked_session_gemstone_class(linked_session, oop_true):
 
 
 @pytest.mark.parametrize('session_class, expected_error_message',[
-    (RPCSession, '.*argument is not a valid GciSession pointer'),
-    (InvalidLinkedSession, '.*The given session ID is invalid\.'),
+    (RPCSession, r'.*argument is not a valid GciSession pointer'),
+    (InvalidLinkedSession, r'.*The given session ID is invalid\.'),
     ])
 def test_gemstone_class_exception(guestmode_netldi, session_class, expected_error_message):
     session = session_class('DataCurator', 'swordfish')
@@ -587,7 +587,7 @@ def check_is_kind_of(session, oop_true):
     assert true.is_kind_of(boolean)
 
     not_a_class = session.execute('2')
-    with expected(GemstoneError, test='.*a ArgumentTypeError occurred \(error 2094\)'):
+    with expected(GemstoneError, test=r'.*a ArgumentTypeError occurred \(error 2094\)'):
         true.is_kind_of(not_a_class)
 
 
@@ -717,11 +717,11 @@ def check_from_py_float_exception(invalid_session, error_message):
 
 
 def test_rpc_session_from_py_float_exception(invalid_rpc_session):
-    check_from_py_float_exception(invalid_rpc_session, '.*argument is not a valid GciSession pointer')
+    check_from_py_float_exception(invalid_rpc_session, r'.*argument is not a valid GciSession pointer')
 
 
 def test_linked_session_from_py_float_exception(invalid_linked_session):
-    check_from_py_float_exception(invalid_linked_session, '.*The given session ID is invalid\.')
+    check_from_py_float_exception(invalid_linked_session, r'.*The given session ID is invalid\.')
 
         
 #--[ translating: unicode strings ]------------------------------------------------------------
@@ -749,7 +749,8 @@ def check_translating_different_lengths_of_strings_to_python(session, multiplier
     (1, 0),
     (2, 0),
     (1, 1),
-    (0, 0)
+    (0, 0),
+    (100, 40)
     ])
 def test_rpc_session_translating_different_lengths_of_strings_to_python(rpc_session, multiplier, plus):
     check_translating_different_lengths_of_strings_to_python(rpc_session, multiplier, plus)
@@ -785,11 +786,11 @@ def check_translating_python_string_exception(invalid_session, error_message):
 
 
 def test_rpc_session_translating_python_string_exception(invalid_rpc_session):
-    check_translating_python_string_exception(invalid_rpc_session, '.*argument is not a valid GciSession pointer')
+    check_translating_python_string_exception(invalid_rpc_session, r'.*argument is not a valid GciSession pointer')
 
 
 def test_linked_session_translating_python_string_exception(invalid_linked_session):
-    check_translating_python_string_exception(invalid_linked_session, '.*The given session ID is invalid\.')
+    check_translating_python_string_exception(invalid_linked_session, r'.*The given session ID is invalid\.')
 
         
 #--[ translating: misc errors ]------------------------------------------------------------
@@ -821,19 +822,19 @@ def check_exceptions_when_translating_wrong_gemstone_type(session, float_error_m
     with expected(GemstoneError, test=float_error_message):
         session.object_float_to_py(date_symbol)
 
-    with expected(GemstoneError, test='.*a ArgumentError occurred \(error 2718\)'):
+    with expected(GemstoneError, test=r'.*a ArgumentError occurred \(error 2718\)'):
         session.object_string_to_py(date_symbol)
 
-    with expected(GemstoneError, test='.*a ArgumentTypeError occurred \(error 2103\)'):
+    with expected(GemstoneError, test=r'.*a ArgumentTypeError occurred \(error 2103\)'):
         session.object_latin1_to_py(date_symbol)
 
 
 def test_rpc_session_exceptions_when_translating_wrong_gemstone_type(rpc_session):
-    check_exceptions_when_translating_wrong_gemstone_type(rpc_session, '.*class 802049 invalid for OopToDouble')
+    check_exceptions_when_translating_wrong_gemstone_type(rpc_session, r'.*class 802049 invalid for OopToDouble')
 
 
 def test_linked_session_exceptions_when_translating_wrong_gemstone_type(linked_session):
-    check_exceptions_when_translating_wrong_gemstone_type(linked_session, '.*The given object is not a float\.')
+    check_exceptions_when_translating_wrong_gemstone_type(linked_session, r'.*The given object is not a float\.')
 
 
 #--[ pythonic niceties ]------------------------------------------------------------
@@ -846,16 +847,16 @@ def check_mapping_method_names(session):
     assert user_globals.at(some_key).to_py == 123
     assert user_globals.yourself() is user_globals
 
-    with expected(GemstoneError, test='.*a SymbolDictionary does not understand  #\'methodthatdoesnotexist\''):
+    with expected(GemstoneError, test=r'.*a SymbolDictionary does not understand  #\'methodthatdoesnotexist\''):
         user_globals.methodthatdoesnotexist()
 
-    with expected(TypeError, test='at_put\(\) takes exactly 2 arguments \(0 given\)'):
+    with expected(TypeError, test=r'at_put\(\) takes exactly 2 arguments \(0 given\)'):
         user_globals.at_put()
 
-    with expected(TypeError, test='at_put\(\) takes exactly 2 arguments \(1 given\)'):
+    with expected(TypeError, test=r'at_put\(\) takes exactly 2 arguments \(1 given\)'):
         user_globals.at_put(some_key)
 
-    with expected(GemstoneError, test='.*a SymbolDictionary does not understand  #\'at\''):
+    with expected(GemstoneError, test=r'.*a SymbolDictionary does not understand  #\'at\''):
         user_globals.at()
 
 

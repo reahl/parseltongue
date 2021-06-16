@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+
+  parseltongue:
+    container_name: parseltongue
+    restart: always
+    init: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5433:5433"
+    volumes:
+      - ../../cache:/home/developer/testdownloads
+      - .:/home/developer/src
+      - type: bind
+        source: ~/.ssh/authorized_keys_docker
+        target: /home/developer/.ssh/authorized_keys2
+    environment:
+        GEMSTONE_VERSION: 3.4.1
+        DEV_HOME: /home/developer
+        DEV_USER: developer
+
