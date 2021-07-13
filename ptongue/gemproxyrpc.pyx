@@ -1,7 +1,7 @@
 from libc.stdlib cimport *
 from libc.string cimport memcpy
 
-from gemproxy cimport *
+from ptongue.gemproxy cimport *
 
 #======================================================================================================================
 cdef extern from "gcits.hf":
@@ -9,15 +9,19 @@ cdef extern from "gcits.hf":
     GciSession GciTsLogin(
         const char *StoneNameNrs,
         const char *HostUserId, 
-        const char *HostPassword, bint hostPwIsEncrypted,
+        const char *HostPassword,
+        BoolType hostPwIsEncrypted,
         const char *GemServiceNrs,
-        const char *gemstoneUsername, const char *gemstonePassword,
+        const char *gemstoneUsername,
+        const char *gemstonePassword,
         unsigned int loginFlags, 
-        int haltOnErrNum, GciErrSType *err);
-    bint GciTsLogout(GciSession sess, GciErrSType *err)
-    bint GciTsAbort(GciSession sess, GciErrSType *err)
-    bint GciTsBegin(GciSession sess, GciErrSType *err)
-    bint GciTsCommit(GciSession sess, GciErrSType *err)
+        int haltOnErrNum,
+        BoolType *executedSessionInit,
+        GciErrSType *err);
+    BoolType GciTsLogout(GciSession sess, GciErrSType *err)
+    BoolType GciTsAbort(GciSession sess, GciErrSType *err)
+    BoolType GciTsBegin(GciSession sess, GciErrSType *err)
+    BoolType GciTsCommit(GciSession sess, GciErrSType *err)
     int GciTsSessionIsRemote(GciSession sess)
     OopType GciTsPerform(
         GciSession sess,
@@ -53,6 +57,17 @@ cdef extern from "gcits.hf":
         bint convertToUnicode, GciErrSType *err)
     bint GciTsReleaseObjs(GciSession sess, OopType *buf, int count, GciErrSType *err)
 
+
+cdef extern from "gcirtl.hf":
+    cdef cppclass GciRtlFnameBuf:
+        GciRtlFnameBuf() except +
+    BoolType GciTsLoad(const char *path, char *errBuf, size_t errBufSize)
+    BoolType GciRtlLoad(BoolType useRpc, const char *path, char errBuf[], size_t errBufSize)
+    BoolType GciRtlIsLoaded()
+    void GciRtlUnload()
+
+
+    
 #======================================================================================================================
 cdef class RPCSession(GemstoneSession):
     cdef GciSession c_session
@@ -241,7 +256,7 @@ cdef class RPCSession(GemstoneSession):
                 if bytes_returned == -1:
                     raise make_GemstoneError(self, error)
 
-                c_string[bytes_returned] = '\0'
+                c_string[bytes_returned] = b'\0'
                 py_bytes = c_string
             finally:
                 free (c_string)

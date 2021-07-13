@@ -4,6 +4,8 @@ ctypedef uint64_t OopType
 ctypedef int32_t int32
 ctypedef int64_t int64
 
+ctypedef int32 BoolType
+
 ctypedef void* GciSession
 ctypedef unsigned char ByteType
 ctypedef int32 GciSessionIdType

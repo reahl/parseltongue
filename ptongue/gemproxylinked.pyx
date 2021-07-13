@@ -4,8 +4,8 @@ from contextlib import contextmanager
 from atexit import register
 import warnings
 
-from gemproxy cimport *
-from gemproxy import GemstoneWarning
+from ptongue.gemproxy cimport *
+from ptongue.gemproxy import GemstoneWarning
 
 #======================================================================================================================
 cdef extern from "gci.hf":
@@ -42,6 +42,15 @@ cdef extern from "gci.hf":
     OopType GciNewUtf8String(const char* utf8data, bint convertToUnicode)
     OopType GciFltToOop(double aReal)
     void GciReleaseOops(const OopType theOops[], int numOops)
+
+
+cdef extern from "gcirtl.hf":
+    cdef cppclass GciRtlFnameBuf:
+        GciRtlFnameBuf() except +
+    BoolType GciRtlLoad(BoolType useRpc, const char *path, char errBuf[], size_t errBufSize)
+    BoolType GciRtlLoadA(BoolType useRpc, const char *path, char errBuf[], size_t errBufSize, GciRtlFnameBuf *vmLibPath)
+    BoolType GciRtlIsLoaded()
+    void GciRtlUnload()
 
 #======================================================================================================================
 cdef bint is_gembuilder_initialised = False

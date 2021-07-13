@@ -1,4 +1,4 @@
-from gemproxy cimport int32, int64, OopType, GciErrSType
+from ptongue.gemproxy cimport int32, int64, OopType, GciErrSType
 from weakref import WeakValueDictionary
 import functools
 import warnings
