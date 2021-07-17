@@ -5,7 +5,7 @@ import warnings
 from ctypes import cdll, CDLL, create_string_buffer
 
 from ptongue.gemstone import *
-from ptongue.gemproxy import GemstoneWarning, GemstoneSession
+from ptongue.gemproxy import GemstoneWarning, GemstoneSession, to_c_bytes, make_GemstoneError, GemstoneApiError, GemObject
 
 #======================================================================================================================
 # cdef extern from "gci.hf":
@@ -60,7 +60,7 @@ gcilnk = None
 #======================================================================================================================
 def gembuilder_dealoc():
     error = GciErrSType()
-    gcirtl.GciShutdown();
+    gcilnk.GciShutdown();
     if gcilnk.GciErr(ctypes.byref(error)):
         raise make_GemstoneError(self, error)
 
@@ -96,11 +96,11 @@ class LinkedSession(GemstoneSession):
         if current_linked_session != None and current_linked_session.is_logged_in:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
 
-        c_host_username = NULL
+        c_host_username = 0
         if host_username:
             c_host_username = to_c_bytes(host_username)
 
-        c_host_password = NULL
+        c_host_password = 0
         if host_password:
             c_host_password = to_c_bytes(host_password)
         
@@ -110,7 +110,7 @@ class LinkedSession(GemstoneSession):
         self.c_session_id = gcilnk.GciGetSessionId()
         if not clean_login:
             gcilnk.GciErr(ctypes.byref(error))
-            if self.c_session_id == GCI_INVALID_SESSION_ID:
+            if self.c_session_id == GCI_INVALID_SESSION_ID.value:
                 raise make_GemstoneError(self, error)
             else:
                 warnings.warn(('{}: {}, {}'.format(error.exceptionObj, error.message, error.reason)).replace('\\n', ''),GemstoneWarning)
@@ -133,9 +133,7 @@ class LinkedSession(GemstoneSession):
         error = GciErrSType()
         unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
         if unreferenced_gemstone_objects:
-            c_dead_oops = (OopType * len(unreferenced_gemstone_objects))()
-            for index in xrange(0, len(dead_oops)):
-                c_dead_oops[index] = unreferenced_gemstone_objects[index] 
+            c_dead_oops = (OopType * len(unreferenced_gemstone_objects))(*unreferenced_gemstone_objects)
             gcilnk.GciReleaseOops(c_dead_oops, len(dead_oops))
             if gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
@@ -172,7 +170,7 @@ class LinkedSession(GemstoneSession):
         session_is_remote = gcilnk.GciSessionIsRemote()
         if gcilnk.GciErr(ctypes.byref(error)):
             raise make_GemstoneError(self, error)
-        return bool(session_is_remote.value)
+        return bool(session_is_remote)
 
     @property
     def is_logged_in(self):
@@ -332,10 +330,8 @@ class LinkedSession(GemstoneSession):
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
-        cargs = (OopType * len(args))
+        cargs = (OopType * len(args))(*[i.oop for i in args])
 
-        for i in xrange(len(args)):
-            cargs[i] = args[i].oop
         if isinstance(selector, str):
             return_oop = gcilnk.GciPerform(instance.c_oop, selector.encode('utf-8'), cargs, len(args))
         else:

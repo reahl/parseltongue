@@ -9,27 +9,27 @@ from ptongue.gemstone import *
 
 #======================================================================================================================
 well_known_class_names = { 
-    OOP_CLASS_SMALL_INTEGER.value: 'small_integer',
-    OOP_CLASS_LargeInteger.value: 'large_integer',
-    OOP_CLASS_SMALL_DOUBLE.value: 'float',
-    OOP_CLASS_Float.value: 'float',
-    OOP_CLASS_STRING.value: 'string',
-    OOP_CLASS_SYMBOL.value: 'string',
-    OOP_CLASS_DoubleByteString.value: 'string',
-    OOP_CLASS_DoubleByteSymbol.value: 'string',
-    OOP_CLASS_QuadByteString.value: 'string',
-    OOP_CLASS_QuadByteSymbol.value: 'string',
-    OOP_CLASS_CHARACTER.value: 'string',
-    OOP_CLASS_Utf8.value: 'string',
-    OOP_CLASS_Unicode7.value: 'string',
-    OOP_CLASS_Unicode16.value: 'string',
-    OOP_CLASS_Unicode32.value: 'string'
+    OOP_CLASS_SMALL_INTEGER: 'small_integer',
+    OOP_CLASS_LargeInteger: 'large_integer',
+    OOP_CLASS_SMALL_DOUBLE: 'float',
+    OOP_CLASS_Float: 'float',
+    OOP_CLASS_STRING: 'string',
+    OOP_CLASS_SYMBOL: 'string',
+    OOP_CLASS_DoubleByteString: 'string',
+    OOP_CLASS_DoubleByteSymbol: 'string',
+    OOP_CLASS_QuadByteString: 'string',
+    OOP_CLASS_QuadByteSymbol: 'string',
+    OOP_CLASS_CHARACTER: 'string',
+    OOP_CLASS_Utf8: 'string',
+    OOP_CLASS_Unicode7: 'string',
+    OOP_CLASS_Unicode16: 'string',
+    OOP_CLASS_Unicode32: 'string'
  }
 
 well_known_instances = {
-    OOP_TRUE.value: True,
-    OOP_FALSE.value: False,
-    OOP_NIL.value: None
+    OOP_TRUE: True,
+    OOP_FALSE: False,
+    OOP_NIL: None
 }
 
 well_known_python_instances = {
@@ -178,7 +178,7 @@ class GemObject:
 
     @property
     def is_nil(self):
-        return self.c_oop == OOP_NIL
+        return self.c_oop == OOP_NIL.value
 
     @property
     def is_symbol(self):
@@ -260,10 +260,10 @@ class GemstoneSession:
 
     def object_to_py(self, instance):
         try: 
-            return well_known_instances[instance.oop.value]
+            return well_known_instances[instance.oop]
         except KeyError:
             try:
-                gem_class_name = well_known_class_names[instance.gemstone_class().oop.value]
+                gem_class_name = well_known_class_names[instance.gemstone_class().oop]
             except KeyError:
                 raise NotSupported()
             return getattr(self, 'object_{}_to_py'.format(gem_class_name))(instance)

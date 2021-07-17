@@ -63,13 +63,13 @@ gci_byte_swiz_8_bytes = 3
 
 
 # Flags for GciLoginEx
-GCI_LOGIN_PW_ENCRYPTED = 1,
-GCI_LOGIN_IS_SUBORDINATE = 2,
-GCI_LOGIN_FULL_COMPRESSION_ENABLED = 4, 
-GCI_LOGIN_ERRS_USE_REF_SET = 8,
-GCI_LOGIN_QUIET = 0x10,
-GCI_CLIENT_DOES_SESSION_INIT = 0x20,
-GCI_TS_CLIENT = 0x40,
+GCI_LOGIN_PW_ENCRYPTED = 1
+GCI_LOGIN_IS_SUBORDINATE = 2
+GCI_LOGIN_FULL_COMPRESSION_ENABLED = 4
+GCI_LOGIN_ERRS_USE_REF_SET = 8
+GCI_LOGIN_QUIET = 0x10
+GCI_CLIENT_DOES_SESSION_INIT = 0x20
+GCI_TS_CLIENT = 0x40
 GCI_LOGIN_ALL_FLAGS = 0x7F 
 
 
@@ -98,29 +98,29 @@ swiz_kind_shift = 8
 
 
 #--------------------------------------------------[ gcoop.ht ]---
-OOP_ILLEGAL =             OopType(0x01)
+OOP_ILLEGAL =             0x01
 OOP_NO_CONTEXT =          OOP_ILLEGAL
-OOP_NIL =                 OopType(0x14)
-OOP_CLASS_INTEGER =       OopType(70145)
-OOP_CLASS_SMALL_INTEGER = OopType(74241)
-OOP_CLASS_LargeInteger =  OopType(136193)
-OOP_CLASS_SMALL_DOUBLE =  OopType(121345)
-OOP_CLASS_Float =         OopType(135937)
-OOP_CLASS_SYMBOL =        OopType(110849)
-OOP_CLASS_STRING =        OopType(74753)
-OOP_CLASS_DoubleByteString = OopType(143873)
-OOP_CLASS_DoubleByteSymbol = OopType(144129)
-OOP_CLASS_QuadByteString = OopType(144385)
-OOP_CLASS_QuadByteSymbol = OopType(144641)
-OOP_CLASS_CHARACTER =      OopType(68353)
-OOP_CLASS_Utf8 =           OopType(154113)
-OOP_CLASS_Unicode7 =       OopType(154369)
-OOP_CLASS_Unicode16 =      OopType(154625)
-OOP_CLASS_Unicode32 =      OopType(154881)
+OOP_NIL =                 0x14
+OOP_CLASS_INTEGER =       70145
+OOP_CLASS_SMALL_INTEGER = 74241
+OOP_CLASS_LargeInteger =  136193
+OOP_CLASS_SMALL_DOUBLE =  121345
+OOP_CLASS_Float =         135937
+OOP_CLASS_SYMBOL =        110849
+OOP_CLASS_STRING =        74753
+OOP_CLASS_DoubleByteString = 143873
+OOP_CLASS_DoubleByteSymbol = 144129
+OOP_CLASS_QuadByteString = 144385
+OOP_CLASS_QuadByteSymbol = 144641
+OOP_CLASS_CHARACTER =      68353
+OOP_CLASS_Utf8 =           154113
+OOP_CLASS_Unicode7 =       154369
+OOP_CLASS_Unicode16 =      154625
+OOP_CLASS_Unicode32 =      154881
 
 
 
-OOP_FALSE =            OopType(0x0C)
-OOP_TRUE =             OopType(0x10C) 
-OOP_ASCII_NUL =        OopType(0x1C)
-OOP_FIRST_JIS_CHAR =   OopType(0x24)
+OOP_FALSE =            0x0C
+OOP_TRUE =             0x10C
+OOP_ASCII_NUL =        0x1C
+OOP_FIRST_JIS_CHAR =   0x24

@@ -1,7 +1,8 @@
+import ctypes
 from ctypes import cdll, CDLL, create_string_buffer
 
 from ptongue.gemstone import *
-from ptongue.gemproxy import GemstoneError, GemObject, GemstoneSession, make_GemstoneError
+from ptongue.gemproxy import GemstoneError, GemObject, GemstoneSession, make_GemstoneError, to_c_bytes, InvalidSession, GemstoneApiError
 
 #======================================================================================================================
 # cdef extern from "gcits.hf":
@@ -82,20 +83,17 @@ class RPCSession(GemstoneSession):
         if host_username:
             c_host_username = to_c_bytes(host_username)
 
-        c_host_password = 0
-        if host_password:
-            c_host_password = to_c_bytes(host_password)
-
         error = GciErrSType()
         executedSessionInit = ctypes.c_int()
+        
         self.c_session = self.gcits.GciTsLogin(stone_name.encode('utf-8'),
                                                c_host_username,
-                                               self.encrypt_password(c_host_password),
+                                               self.encrypt_password(host_password),
                                                True,
                                                netldi_task.encode('utf-8'),
                                                username.encode('utf-8'),
                                                self.encrypt_password(password),
-                                               0,
+                                               GCI_LOGIN_PW_ENCRYPTED,
                                                0,
                                                ctypes.byref(executedSessionInit),
                                                ctypes.byref(error))
@@ -117,9 +115,7 @@ class RPCSession(GemstoneSession):
         error = GciErrSType()
         unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
         if unreferenced_gemstone_objects:
-            c_dead_oops = (OopType * len(unreferenced_gemstone_objects))()
-            for index in xrange(0, len(unreferenced_gemstone_objects)):
-                c_dead_oops[index] = unreferenced_gemstone_objects[index] 
+            c_dead_oops = (OopType * len(unreferenced_gemstone_objects))(*unreferenced_gemstone_objects)
             if not self.gcits.GciTsReleaseObjs(self.c_session, c_dead_oops, len(dead_oops), ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
         self.deallocated_unfreed_gemstone_objects.clear()
@@ -135,6 +131,7 @@ class RPCSession(GemstoneSession):
             raise make_GemstoneError(self, error)
 
     def commit(self):
+        error = GciErrSType()
         if not self.gcits.GciTsCommit(self.c_session, ctypes.byref(error)):
             raise make_GemstoneError(self, error)
 
@@ -277,10 +274,7 @@ class RPCSession(GemstoneSession):
         selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         selector_str = to_c_bytes(selector) if isinstance(selector, str) else 0
 
-        cargs = (OopType * len(args))
-        for i in xrange(len(args)):
-            cargs[i] = args[i].oop
-
+        cargs = (OopType * len(args))(*[i.oop for i in args])
         flags = 1
         environment_id = 0
 
