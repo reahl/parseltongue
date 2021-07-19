@@ -157,7 +157,7 @@ def test_rpc_session_is_remote_exception(invalid_rpc_session):
         invalid_rpc_session.is_remote
 
 
-def test_lined_session_is_remote_exception(invalid_linked_session):
+def test_linked_session_is_remote_exception(invalid_linked_session):
     with expected(GemstoneError, test=r'.*The given session ID is invalid\.'):
         invalid_linked_session.is_remote
 

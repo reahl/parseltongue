@@ -7,15 +7,16 @@ TRUE = 1
 #--------------------------------------------------[ gcioop.ht ]---
 OOP_TAG_SPECIAL_MASK = 0x6
 OOP_TAG_SMALLINT =     0x2
+OOP_NUM_TAG_BITS = 3
 
 #--------------------------------------------------[ gcicmn.ht ]---
 uintptr_t = ctypes.c_uint
 def GCI_OOP_IS_SMALL_INT(oop):
-    return (uintptr_t(oop) & OOP_TAG_SPECIAL_MASK) == OOP_TAG_SMALLINT
+    return (oop & OOP_TAG_SPECIAL_MASK) == OOP_TAG_SMALLINT
 
 
 #--------------------------------------------------[ gci.ht ]---
-OopType = ctypes.c_int64
+OopType = ctypes.c_uint64
 ByteType = ctypes.c_ubyte
 BoolType = ctypes.c_int
 
@@ -95,32 +96,37 @@ is_placeholder = 0x40
 swiz_kind_mask = 0x300
 swiz_kind_shift = 8
 
+GciSession = ctypes.c_void_p
 
 
 #--------------------------------------------------[ gcoop.ht ]---
-OOP_ILLEGAL =             0x01
+OOP_ILLEGAL =             OopType(0x01)
 OOP_NO_CONTEXT =          OOP_ILLEGAL
-OOP_NIL =                 0x14
-OOP_CLASS_INTEGER =       70145
-OOP_CLASS_SMALL_INTEGER = 74241
-OOP_CLASS_LargeInteger =  136193
-OOP_CLASS_SMALL_DOUBLE =  121345
-OOP_CLASS_Float =         135937
-OOP_CLASS_SYMBOL =        110849
-OOP_CLASS_STRING =        74753
-OOP_CLASS_DoubleByteString = 143873
-OOP_CLASS_DoubleByteSymbol = 144129
-OOP_CLASS_QuadByteString = 144385
-OOP_CLASS_QuadByteSymbol = 144641
-OOP_CLASS_CHARACTER =      68353
-OOP_CLASS_Utf8 =           154113
-OOP_CLASS_Unicode7 =       154369
-OOP_CLASS_Unicode16 =      154625
-OOP_CLASS_Unicode32 =      154881
+OOP_NIL =                 OopType(0x14)
+OOP_CLASS_INTEGER =       OopType(70145)
+OOP_CLASS_SMALL_INTEGER = OopType(74241)
+OOP_CLASS_LargeInteger =  OopType(136193)
+OOP_CLASS_SMALL_DOUBLE =  OopType(121345)
+OOP_CLASS_Float =         OopType(135937)
+OOP_CLASS_SYMBOL =        OopType(110849)
+OOP_CLASS_STRING =        OopType(74753)
+OOP_CLASS_DoubleByteString = OopType(143873)
+OOP_CLASS_DoubleByteSymbol = OopType(144129)
+OOP_CLASS_QuadByteString = OopType(144385)
+OOP_CLASS_QuadByteSymbol = OopType(144641)
+OOP_CLASS_CHARACTER =      OopType(68353)
+OOP_CLASS_Utf8 =           OopType(154113)
+OOP_CLASS_Unicode7 =       OopType(154369)
+OOP_CLASS_Unicode16 =      OopType(154625)
+OOP_CLASS_Unicode32 =      OopType(154881)
 
 
 
-OOP_FALSE =            0x0C
-OOP_TRUE =             0x10C
-OOP_ASCII_NUL =        0x1C
-OOP_FIRST_JIS_CHAR =   0x24
+OOP_FALSE =            OopType(0x0C)
+OOP_TRUE =             OopType(0x10C)
+OOP_ASCII_NUL =        OopType(0x1C)
+OOP_FIRST_JIS_CHAR =   OopType(0x24)
+
+
+MAX_SMALL_INT = 1152921504606846975
+MIN_SMALL_INT = -1152921504606846976

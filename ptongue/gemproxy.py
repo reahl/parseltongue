@@ -9,33 +9,33 @@ from ptongue.gemstone import *
 
 #======================================================================================================================
 well_known_class_names = { 
-    OOP_CLASS_SMALL_INTEGER: 'small_integer',
-    OOP_CLASS_LargeInteger: 'large_integer',
-    OOP_CLASS_SMALL_DOUBLE: 'float',
-    OOP_CLASS_Float: 'float',
-    OOP_CLASS_STRING: 'string',
-    OOP_CLASS_SYMBOL: 'string',
-    OOP_CLASS_DoubleByteString: 'string',
-    OOP_CLASS_DoubleByteSymbol: 'string',
-    OOP_CLASS_QuadByteString: 'string',
-    OOP_CLASS_QuadByteSymbol: 'string',
-    OOP_CLASS_CHARACTER: 'string',
-    OOP_CLASS_Utf8: 'string',
-    OOP_CLASS_Unicode7: 'string',
-    OOP_CLASS_Unicode16: 'string',
-    OOP_CLASS_Unicode32: 'string'
+    OOP_CLASS_SMALL_INTEGER.value: 'small_integer',
+    OOP_CLASS_LargeInteger.value: 'large_integer',
+    OOP_CLASS_SMALL_DOUBLE.value: 'float',
+    OOP_CLASS_Float.value: 'float',
+    OOP_CLASS_STRING.value: 'string',
+    OOP_CLASS_SYMBOL.value: 'string',
+    OOP_CLASS_DoubleByteString.value: 'string',
+    OOP_CLASS_DoubleByteSymbol.value: 'string',
+    OOP_CLASS_QuadByteString.value: 'string',
+    OOP_CLASS_QuadByteSymbol.value: 'string',
+    OOP_CLASS_CHARACTER.value: 'string',
+    OOP_CLASS_Utf8.value: 'string',
+    OOP_CLASS_Unicode7.value: 'string',
+    OOP_CLASS_Unicode16.value: 'string',
+    OOP_CLASS_Unicode32.value: 'string'
  }
 
 well_known_instances = {
-    OOP_TRUE: True,
-    OOP_FALSE: False,
-    OOP_NIL: None
+    OOP_TRUE.value: True,
+    OOP_FALSE.value: False,
+    OOP_NIL.value: None
 }
 
 well_known_python_instances = {
-    True: OOP_TRUE,
-    False: OOP_FALSE,
-    None: OOP_NIL
+    True: OOP_TRUE.value,
+    False: OOP_FALSE.value,
+    None: OOP_NIL.value
 }
 
 implemented_python_types = {
@@ -54,7 +54,7 @@ def make_GemstoneError(session, c_error):
 
 def compute_small_integer_oop(py_int):
     if py_int <= MAX_SMALL_INT and py_int >= MIN_SMALL_INT:
-        return OopType((int64(py_int) << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT)
+        return (py_int << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT
     else:
         raise OverflowError()
 
@@ -65,7 +65,7 @@ def to_c_bytes(py_string):
 class GemstoneError(Exception):
     """Represents an exception that happened in a Gem.
 
-    This class is not a GemProxy, like other Gem objects because it
+    This class is not a GemProxy, like other Gem objects becausgeme it
     has to be a Python Exception to worj with Python exception
     handling.
 
@@ -182,7 +182,7 @@ class GemObject:
 
     @property
     def is_symbol(self):
-        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL))
+        return self.is_kind_of(self.session.get_or_create_gem_object(OOP_CLASS_SYMBOL.value))
 
     @property
     def to_py(self):
@@ -270,7 +270,7 @@ class GemstoneSession:
     
     def object_small_integer_to_py(self, instance):
         if GCI_OOP_IS_SMALL_INT(instance.c_oop):
-            return int64(int64(instance.c_oop) >> int64(OOP_NUM_TAG_BITS))
+            return instance.c_oop >> OOP_NUM_TAG_BITS
         else:
             raise GemstoneApiError('Expected oop to represent a Small Integer.')
 

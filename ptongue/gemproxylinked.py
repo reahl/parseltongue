@@ -292,7 +292,7 @@ class LinkedSession(GemstoneSession):
             if bytes_returned == 0 and gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
 
-            dest[bytes_returned] = b'\0'
+            dest[bytes_returned] = 0
             py_bytes += dest
             start_index = start_index + num_bytes
         if utf8_string != OOP_NIL:
@@ -317,8 +317,7 @@ class LinkedSession(GemstoneSession):
             if bytes_returned == 0 and gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
 
-            dest[bytes_returned] = b'\0'
-            py_bytes +=  dest
+            py_bytes +=  bytearray(dest[:bytes_returned])
             start_index = start_index + num_bytes
         return py_bytes.decode('latin-1')
 
