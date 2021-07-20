@@ -24,6 +24,7 @@ COPY ./scripts /opt/dev/scripts
 USER root
 RUN --mount=type=cache,target=/home/developer/cache /opt/dev/gemstone/installGemStone.sh $GEMSTONE_VERSION
 #RUN /opt/dev/gemstone/installGemStone.sh $GEMSTONE_VERSION
+RUN echo 'developer:developer' | chpasswd
 
 USER developer
 
