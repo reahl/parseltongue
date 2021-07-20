@@ -44,18 +44,15 @@ from ptongue.gemproxy import GemstoneWarning, GemstoneSession, to_c_bytes, make_
 #     void GciReleaseOops(const OopType theOops[], int numOops)
 
 
-# cdef extern from "gcirtl.hf":
-#     cdef cppclass GciRtlFnameBuf:
-#         GciRtlFnameBuf() except +
-#     BoolType GciRtlLoad(BoolType useRpc, const char *path, char errBuf[], size_t errBufSize)
-#     BoolType GciRtlLoadA(BoolType useRpc, const char *path, char errBuf[], size_t errBufSize, GciRtlFnameBuf *vmLibPath)
-#     BoolType GciRtlIsLoaded()
-#     void GciRtlUnload()
-
 #======================================================================================================================
 is_gembuilder_initialised = False
 current_linked_session = None
 gcilnk = None
+
+class GciLnk:
+    def __init__(self):
+        gcilnk_filename = "libgcilnk-3.6.1-64.so"
+        self.library = CDLL(gcilnk_filename)
 
 #======================================================================================================================
 def gembuilder_dealoc():
@@ -67,9 +64,8 @@ def gembuilder_dealoc():
 def gembuilder_init(session):
     global gcilnk
     global is_gembuilder_initialised
-    gcilnk_filename = "libgcilnk-3.6.1-64.so"
-    cdll.LoadLibrary(gcilnk_filename)
-    gcilnk = CDLL(gcilnk_filename)
+
+    gcilnk = GciLnk()
 
     error = GciErrSType()
     if not gcilnk.GciInit() and gcilnk.GciErr(ctypes.byref(error)):
@@ -96,11 +92,11 @@ class LinkedSession(GemstoneSession):
         if current_linked_session != None and current_linked_session.is_logged_in:
             raise GemstoneApiError('There is an active linked session. Can not create another session.')
 
-        c_host_username = 0
+        c_host_username = None
         if host_username:
             c_host_username = to_c_bytes(host_username)
 
-        c_host_password = 0
+        c_host_password = None
         if host_password:
             c_host_password = to_c_bytes(host_password)
         
@@ -195,7 +191,7 @@ class LinkedSession(GemstoneSession):
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
         return_oop = gcilnk.GciFltToOop(py_float)
-        if return_oop == OOP_NIL and gcilnk.GciErr(ctypes.byref(error)):
+        if return_oop == OOP_NIL.value and gcilnk.GciErr(ctypes.byref(error)):
             raise make_GemstoneError(self, error)
         return return_oop
 
@@ -211,7 +207,7 @@ class LinkedSession(GemstoneSession):
                                                            symbol_list.oop if symbol_list else OOP_NIL)
         else:
             raise GemstoneApiError('Source is type {}.Expected source to be a str or GemObject'.format(source.__class__.__name__))
-        if return_oop == OOP_NIL and gcilnk.GciErr(ctypes.byref(error)):
+        if return_oop == OOP_NIL.value and gcilnk.GciErr(ctypes.byref(error)):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
@@ -234,7 +230,7 @@ class LinkedSession(GemstoneSession):
             return_oop = gcilnk.GciResolveSymbolObj(symbol.oop, symbol_list.oop if symbol_list else OOP_NIL)
         else:
             raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))
-        if return_oop == OOP_ILLEGAL and gcilnk.GciErr(ctypes.byref(error)):
+        if return_oop == OOP_ILLEGAL.value and gcilnk.GciErr(ctypes.byref(error)):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
         
@@ -263,7 +259,7 @@ class LinkedSession(GemstoneSession):
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
         return_oop = gcilnk.GciFetchClass(instance.c_oop)
-        if return_oop == OOP_NIL and gcilnk.GciErr(ctypes.byref(error)):
+        if return_oop == OOP_NIL.value and gcilnk.GciErr(ctypes.byref(error)):
            raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
@@ -295,7 +291,7 @@ class LinkedSession(GemstoneSession):
             dest[bytes_returned] = 0
             py_bytes += dest
             start_index = start_index + num_bytes
-        if utf8_string != OOP_NIL:
+        if utf8_string.value != OOP_NIL.value:
             gcilnk.GciReleaseOops(ctypes.byref(utf8_string), 1)
             if gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
@@ -336,7 +332,7 @@ class LinkedSession(GemstoneSession):
         else:
             return_oop = gcilnk.GciPerformSymDbg(instance.c_oop, selector.oop, cargs, len(args), 0)
 
-        if return_oop == OOP_NIL and gcilnk.GciErr(ctypes.byref(error)):
+        if return_oop == OOP_NIL.value() and gcilnk.GciErr(ctypes.byref(error)):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
