@@ -65,8 +65,8 @@ def to_c_bytes(py_string):
 class GemstoneError(Exception):
     """Represents an exception that happened in a Gem.
 
-    This class is not a GemProxy, like other Gem objects becausgeme it
-    has to be a Python Exception to worj with Python exception
+    This class is not a GemProxy, like other Gem objects becaus it
+    has to be a Python Exception to work with Python exception
     handling.
 
     """
