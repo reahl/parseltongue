@@ -1,4 +1,4 @@
-
+import ctypes
 from contextlib import contextmanager
 from atexit import register
 import warnings
@@ -10,38 +10,39 @@ from ptongue.gemproxy import GemstoneWarning, GemstoneSession, to_c_bytes, make_
 #======================================================================================================================
 # cdef extern from "gci.hf":
 #     void GciInitAppName(const char *applicationName, bint logWarnings)
-#     void GciSetNet(const char StoneName[], const char HostUserId[], const char HostPassword[], const char GemService[])
-#     bint GciInit()
-#     void GciShutdown()
+#cs     void GciSetNet(const char StoneName[], const char HostUserId[], const char HostPassword[], const char GemService[])
+#cs     bint GciInit()
+#cs     void GciShutdown()
 #     void GciUnload()
-#     char* GciEncrypt(const char* password, char outBuff[], unsigned int outBuffSize)
-#     bint GciLoginEx(const char gemstoneUsername[], const char gemstonePassword[], unsigned int loginFlags, int haltOnErrNum)
-#     void GciLogout()
-#     bint GciErr(GciErrSType *errorReport)
+#cs     char* GciEncrypt(const char* password, char outBuff[], unsigned int outBuffSize)
+#cs     bint GciLoginEx(const char gemstoneUsername[], const char gemstonePassword[], unsigned int loginFlags, int haltOnErrNum)
+#cs     void GciLogout()
+#cs     bint GciErr(GciErrSType *errorReport)
 #     void GciClearStack(OopType aGsProcess)
-#     void GciBegin()
-#     void GciAbort()
-#     bint GciCommit()
-#     GciSessionIdType GciGetSessionId()
+#cs     void GciBegin()
+#cs     void GciAbort()
+#cs     bint GciCommit()
+#cs     GciSessionIdType GciGetSessionId()
 #     void GciSetSessionId(GciSessionIdType sessionId)
-#     void GciReleaseOops(const OopType theOops[], int numOops)
-#     bint GciIsRemote()
-#     bint GciSessionIsRemote()
-#     bint GciIsKindOf(OopType anObj, OopType aClassHistory)
-#     OopType GciExecuteStrFromContext(const char source[], OopType contextObject, OopType symbolList)
-#     OopType GciExecuteFromContext(OopType source, OopType contextObject, OopType symbolList)
-#     OopType GciPerform(OopType receiver, const char selector[], const OopType args[], int numArgs)
-#     OopType GciPerformSymDbg(OopType receiver, OopType selector, const OopType args[], int numArgs, int flags)
-#     OopType GciNewSymbol(const char *cString)
-#     OopType GciResolveSymbol(const char *cString , OopType symbolList)
-#     OopType GciResolveSymbolObj(OopType aString, OopType symbolList)
-#     OopType GciFetchClass(OopType theObject)
-#     int64 GciFetchBytes_(OopType theObject, int64 startIndex, ByteType theBytes[], int64 numBytes)
-#     int64 GciFetchUtf8Bytes_(OopType aString, int64 startIndex, ByteType *buf, int64 bufSize, OopType *utf8String, int flags)
-#     double GciOopToFlt(OopType theObject)
-#     OopType GciNewUtf8String(const char* utf8data, bint convertToUnicode)
-#     OopType GciFltToOop(double aReal)
-#     void GciReleaseOops(const OopType theOops[], int numOops)
+#cs     void GciReleaseOops(const OopType theOops[], int numOops)
+#cs     void GciReleaseOops(const OopType theOops[], int numOops)
+#cs     bint GciIsRemote()
+#cs     bint GciSessionIsRemote()
+#cs     bint GciIsKindOf(OopType anObj, OopType aClassHistory)
+#cs     OopType GciExecuteStrFromContext(const char source[], OopType contextObject, OopType symbolList)
+#cs     OopType GciExecuteFromContext(OopType source, OopType contextObject, OopType symbolList)
+#cs     OopType GciPerform(OopType receiver, const char selector[], const OopType args[], int numArgs)
+#cs     OopType GciPerformSymDbg(OopType receiver, OopType selector, const OopType args[], int numArgs, int flags)
+#cs     OopType GciNewSymbol(const char *cString)
+#cs     OopType GciResolveSymbol(const char *cString , OopType symbolList)
+#cs     OopType GciResolveSymbolObj(OopType aString, OopType symbolList)
+#cs     OopType GciFetchClass(OopType theObject)
+#cs     int64 GciFetchBytes_(OopType theObject, int64 startIndex, ByteType theBytes[], int64 numBytes)
+#cs     int64 GciFetchUtf8Bytes_(OopType aString, int64 startIndex, ByteType *buf, int64 bufSize, OopType *utf8String, int flags)
+#cs     double GciOopToFlt(OopType theObject)
+#cs     OopType GciNewUtf8String(const char* utf8data, bint convertToUnicode)
+#cs     OopType GciFltToOop(double aReal)
+
 
 
 #======================================================================================================================
@@ -54,12 +55,125 @@ class GciLnk:
         gcilnk_filename = "libgcilnk-3.6.1-64.so"
         self.library = CDLL(gcilnk_filename)
 
+        self.GciSetNet = self.library.GciSetNet
+        self.GciSetNet.restype = None
+        self.GciSetNet.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+
+        self.GciInit = self.library.GciInit
+        self.GciInit.restype = BoolType
+        self.GciInit.argtypes = []
+
+        self.GciShutdown = self.library.GciShutdown
+        self.GciShutdown.restype = None
+        self.GciShutdown.argtypes = []
+
+        self.GciEncrypt = self.library.GciEncrypt
+        self.GciEncrypt.restype = ctypes.c_char_p
+        self.GciEncrypt.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint]
+
+        self.GciLoginEx = self.library.GciLoginEx
+        self.GciLoginEx.restype = BoolType
+        self.GciLoginEx.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_int]
+
+        self.GciLogout = self.library.GciLogout
+        self.GciLogout.restype = None
+        self.GciLogout.argtypes = []
+
+        self.GciErr = self.library.GciErr
+        self.GciErr.restype = BoolType
+        self.GciErr.argtypes = [ctypes.POINTER(GciErrSType)]
+
+        self.GciBegin = self.library.GciBegin
+        self.GciBegin.restype = None
+        self.GciBegin.argtypes = []
+
+        self.GciAbort = self.library.GciAbort
+        self.GciAbort.restype = None
+        self.GciAbort.argtypes = []
+
+        self.GciCommit = self.library.GciCommit
+        self.GciCommit.restype = BoolType
+        self.GciCommit.argtypes = []
+
+        self.GciGetSessionId = self.library.GciGetSessionId
+        self.GciGetSessionId.restype = GciSessionIdType
+        self.GciGetSessionId.argtypes = []
+
+        self.GciReleaseOops = self.library.GciReleaseOops
+        self.GciReleaseOops.restype = None
+        self.GciReleaseOops.argtypes = [ctypes.POINTER(OopType), ctypes.c_int]
+
+        self.GciIsRemote = self.library.GciIsRemote
+        self.GciIsRemote.restype = BoolType
+        self.GciIsRemote.argtypes = []
+
+        self.GciSessionIsRemote = self.library.GciSessionIsRemote
+        self.GciSessionIsRemote.restype = BoolType
+        self.GciSessionIsRemote.argtypes = []
+
+        self.GciIsKindOf = self.library.GciIsKindOf
+        self.GciIsKindOf.restype = BoolType
+        self.GciIsKindOf.argtypes = [OopType, OopType]
+
+        self.GciExecuteStrFromContext = self.library.GciExecuteStrFromContext
+        self.GciExecuteStrFromContext.restype = OopType
+        self.GciExecuteStrFromContext.argtypes = [ctypes.c_char_p, OopType, OopType]
+
+        self.GciExecuteFromContext = self.library.GciExecuteFromContext
+        self.GciExecuteFromContext.restype = OopType
+        self.GciExecuteFromContext.argtypes = [OopType, OopType, OopType]
+
+        self.GciPerform = self.library.GciPerform
+        self.GciPerform.restype = OopType
+        self.GciPerform.argtypes = [OopType, ctypes.c_char_p, ctypes.POINTER(OopType), ctypes.c_int]
+
+        self.GciPerformSymDbg = self.library.GciPerformSymDbg
+        self.GciPerformSymDbg.restype = OopType
+        self.GciPerformSymDbg.argtypes = [OopType, OopType, ctypes.POINTER(OopType), ctypes.c_int, ctypes.c_int]
+
+        self.GciNewSymbol = self.library.GciNewSymbol
+        self.GciNewSymbol.restype = OopType
+        self.GciNewSymbol.argtypes = [ctypes.c_char_p]
+
+        self.GciResolveSymbol = self.library.GciResolveSymbol
+        self.GciResolveSymbol.restype = OopType
+        self.GciResolveSymbol.argtypes = [ctypes.c_char_p, OopType]
+
+        self.GciResolveSymbolObj = self.library.GciResolveSymbolObj
+        self.GciResolveSymbolObj.restype = OopType
+        self.GciResolveSymbolObj.argtypes = [OopType, OopType]
+
+        self.GciFetchClass = self.library.GciFetchClass
+        self.GciFetchClass.restype = OopType
+        self.GciFetchClass.argtypes = [OopType]
+
+        self.GciFetchBytes_ = self.library.GciFetchBytes_
+        self.GciFetchBytes_.restype = int64
+        self.GciFetchBytes_.argtypes = [OopType, int64, ctypes.POINTER(ByteType), int64]
+
+        self.GciFetchUtf8Bytes_ = self.library.GciFetchUtf8Bytes_
+        self.GciFetchUtf8Bytes_.restype = int64
+        self.GciFetchUtf8Bytes_.argtypes = [OopType, int64, ctypes.POINTER(ByteType), int64, ctypes.POINTER(OopType), ctypes.c_int]
+
+        self.GciOopToFlt = self.library.GciOopToFlt
+        self.GciOopToFlt.restype = ctypes.c_double
+        self.GciOopToFlt.argtypes = [OopType]
+
+        self.GciNewUtf8String = self.library.GciNewUtf8String
+        self.GciNewUtf8String.restype = OopType
+        self.GciNewUtf8String.argtypes = [ctypes.c_char_p, BoolType]
+
+        self.GciFltToOop = self.library.GciFltToOop
+        self.GciFltToOop.restype = OopType
+        self.GciFltToOop.argtypes = [ctypes.c_double]
+
+
 #======================================================================================================================
-def gembuilder_dealoc():
+def gembuilder_dealoc(session):
     error = GciErrSType()
-    gcilnk.GciShutdown();
+    gcilnk.GciShutdown()
     if gcilnk.GciErr(ctypes.byref(error)):
-        raise make_GemstoneError(self, error)
+        raise make_GemstoneError(session, error)
 
 def gembuilder_init(session):
     global gcilnk
@@ -71,7 +185,7 @@ def gembuilder_init(session):
     if not gcilnk.GciInit() and gcilnk.GciErr(ctypes.byref(error)):
         raise make_GemstoneError(session, error)
     is_gembuilder_initialised = True
-    register(gembuilder_dealoc)
+    register(gembuilder_dealoc, session)
 
 def get_current_linked_session():
     global current_linked_session
@@ -109,7 +223,7 @@ class LinkedSession(GemstoneSession):
             if self.c_session_id == GCI_INVALID_SESSION_ID.value:
                 raise make_GemstoneError(self, error)
             else:
-                warnings.warn(('{}: {}, {}'.format(error.exceptionObj, error.message, error.reason)).replace('\\n', ''),GemstoneWarning)
+                warnings.warn(('{}: {}, {}'.format(error.exceptionObj, error.message, error.reason)).replace('\\n', ''), GemstoneWarning)
 
         current_linked_session = self
 
@@ -129,8 +243,9 @@ class LinkedSession(GemstoneSession):
         error = GciErrSType()
         unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
         if unreferenced_gemstone_objects:
-            c_dead_oops = (OopType * len(unreferenced_gemstone_objects))(*unreferenced_gemstone_objects)
-            gcilnk.GciReleaseOops(c_dead_oops, len(dead_oops))
+            dead_oop_count = len(unreferenced_gemstone_objects)
+            c_dead_oops = (OopType * dead_oop_count)(*unreferenced_gemstone_objects)
+            gcilnk.GciReleaseOops(c_dead_oops, dead_oop_count)
             if gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
         self.deallocated_unfreed_gemstone_objects.clear()
