@@ -485,7 +485,7 @@ def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
     obj_id = id(session.resolve_symbol('Date'))
     # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
     # that the recent object's address will be free in the following code.
-    large_object_to_prevent_python_from_reusing_obj_id = '123'*200000000
+    large_object_to_prevent_python_from_reusing_obj_id = '123'*2000000000
     assert id(session.resolve_symbol('Date')) != obj_id
 
 
@@ -553,7 +553,7 @@ def check_gemstone_class(session, oop_true):
     today = session.execute('Date today')
 
     date_class = today.gemstone_class()
-    assert session.execute('self == Date', context=date_class).oop == oop_true
+    assert session.execute('self == SmallDate', context=date_class).oop == oop_true
 
         
 #--[ translating: unicode strings ]------------------------------------------------------------
@@ -578,7 +578,7 @@ def test_gemstone_class_exception(guestmode_netldi, session_class, expected_erro
         session.log_out()
 
     with expected(GemstoneError, test=expected_error_message):
-        today.gemstone_class()
+        today.gemstone_class().gemstone_class()
 
         
 def check_is_kind_of(session, oop_true):
@@ -830,7 +830,7 @@ def check_exceptions_when_translating_wrong_gemstone_type(session, float_error_m
 
 
 def test_rpc_session_exceptions_when_translating_wrong_gemstone_type(rpc_session):
-    check_exceptions_when_translating_wrong_gemstone_type(rpc_session, r'.*class 802049 invalid for OopToDouble')
+    check_exceptions_when_translating_wrong_gemstone_type(rpc_session, r'.*class .* invalid for OopToDouble')
 
 
 def test_linked_session_exceptions_when_translating_wrong_gemstone_type(linked_session):

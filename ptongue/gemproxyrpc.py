@@ -310,7 +310,7 @@ class RPCSession(GemstoneSession):
         selector_oop = selector.oop if isinstance(selector, GemObject) else OOP_ILLEGAL
         selector_str = to_c_bytes(selector) if isinstance(selector, str) else None
 
-        cargs = (OopType * len(args))(*args)
+        cargs = (OopType * len(args))(*[i.oop for i in args])
         flags = 1
         environment_id = 0
 

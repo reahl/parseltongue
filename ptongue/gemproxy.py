@@ -214,8 +214,8 @@ class GemObject:
     def perform(self, selector, *args):
         return self.session.object_perform(self, selector, *args)
 
-    def __str__(self):
-        return '<%s object with oop %s>' % (self.__class__, self.c_oop)
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__.__name__, self.c_oop)
 
     def __dealloc__(self):
         if self.session.is_logged_in:
