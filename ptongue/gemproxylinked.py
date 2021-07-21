@@ -395,16 +395,15 @@ class LinkedSession(GemstoneSession):
         bytes_returned = num_bytes
         error = GciErrSType()
         py_bytes = b''
-        utf8_string = OOP_NIL
+        utf8_string = OopType(OOP_NIL.value)
 
         while bytes_returned == num_bytes:
-            dest = (ByteType * (num_bytes + 1))
+            dest = (ByteType * (num_bytes + 1))()
             bytes_returned = gcilnk.GciFetchUtf8Bytes_(instance.oop, start_index, dest, num_bytes, ctypes.byref(utf8_string), 0)
             if bytes_returned == 0 and gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
 
-            dest[bytes_returned] = 0
-            py_bytes += dest
+            py_bytes += bytearray(dest[:bytes_returned])
             start_index = start_index + num_bytes
         if utf8_string.value != OOP_NIL.value:
             gcilnk.GciReleaseOops(ctypes.byref(utf8_string), 1)
@@ -423,7 +422,7 @@ class LinkedSession(GemstoneSession):
 
         py_bytes = b''
         while bytes_returned == num_bytes:
-            dest = (ByteType * (num_bytes + 1))
+            dest = (ByteType * (num_bytes + 1))()
             bytes_returned = gcilnk.GciFetchBytes_(instance.oop, start_index, dest, num_bytes)
             if bytes_returned == 0 and gcilnk.GciErr(ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
@@ -447,7 +446,7 @@ class LinkedSession(GemstoneSession):
         else:
             return_oop = gcilnk.GciPerformSymDbg(instance.c_oop, selector.oop, cargs, len(args), 0)
 
-        if return_oop == OOP_NIL.value() and gcilnk.GciErr(ctypes.byref(error)):
+        if return_oop == OOP_NIL.value and gcilnk.GciErr(ctypes.byref(error)):
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 

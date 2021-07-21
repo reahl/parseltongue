@@ -270,7 +270,7 @@ class GemstoneSession:
     
     def object_small_integer_to_py(self, instance):
         if GCI_OOP_IS_SMALL_INT(instance.c_oop):
-            return instance.c_oop >> OOP_NUM_TAG_BITS
+            return ctypes.c_int64(instance.c_oop).value >> ctypes.c_int64(OOP_NUM_TAG_BITS).value
         else:
             raise GemstoneApiError('Expected oop to represent a Small Integer.')
 

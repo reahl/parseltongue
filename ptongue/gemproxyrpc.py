@@ -89,6 +89,11 @@ class GciTs:
         self.GciTsFetchUtf8.restype = ctypes.c_int64
         self.GciTsFetchUtf8.argtypes = [GciSession, OopType, ctypes.POINTER(ByteType), ctypes.c_int64, ctypes.POINTER(ctypes.c_int64), ctypes.POINTER(GciErrSType)]
 
+
+        self.GciTsFetchUtf8Bytes = self.library.GciTsFetchUtf8Bytes
+        self.GciTsFetchUtf8Bytes.restype = ctypes.c_int64
+        self.GciTsFetchUtf8Bytes.argtypes = [GciSession, OopType, ctypes.c_int64, ctypes.POINTER(ByteType), ctypes.c_int64, ctypes.POINTER(OopType), ctypes.POINTER(GciErrSType), ctypes.c_int]
+
         self.GciTsFetchBytes = self.library.GciTsFetchBytes
         self.GciTsFetchBytes.restype = ctypes.c_int64
         self.GciTsFetchBytes.argtypes = [GciSession, OopType, ctypes.c_int64, ctypes.POINTER(ByteType), ctypes.c_int64, ctypes.POINTER(GciErrSType)]
@@ -260,25 +265,26 @@ class RPCSession(GemstoneSession):
 
     def object_string_to_py(self, instance):
         error = GciErrSType()
-        max_bytes = 0
-        required_size = int64(self.initial_fetch_size)
-        tries = 0
-        while required_size.value > max_bytes:
-            tries = tries + 1
-            if tries > 2:
-                raise GemstoneApiError('Expected self.gcits.GciTsFetchUtf8 to fetch all bytes on a second call.')
-            max_bytes = required_size.value
-            c_string = (ByteType * (max_bytes + 1))()
-            bytes_returned = self.gcits.GciTsFetchUtf8(self.c_session,
-                     instance.c_oop, c_string, max_bytes, ctypes.byref(required_size), ctypes.byref(error))
+        start_index = 1
+        num_bytes  = self.initial_fetch_size
+        bytes_returned = num_bytes
+        error = GciErrSType()
+        py_bytes = b''
+        utf8_string = OopType(OOP_NIL.value)
 
+        while bytes_returned == num_bytes:
+            dest = (ByteType * (num_bytes + 1))()
+            bytes_returned = self.gcits.GciTsFetchUtf8Bytes(self.c_session, instance.c_oop, start_index, dest, num_bytes, ctypes.byref(utf8_string), ctypes.byref(error), 0)
             if bytes_returned == -1:
                 raise make_GemstoneError(self, error)
 
-            py_bytes = bytearray(c_string[:bytes_returned])
-
+            py_bytes += bytearray(dest[:bytes_returned])
+            start_index = start_index + num_bytes
+        if utf8_string.value != OOP_NIL.value:
+            if not self.gcits.GciTsReleaseObjs(self.c_session, ctypes.byref(utf8_string), 1, ctypes.byref(error)):
+                raise make_GemstoneError(self, error)
         return py_bytes.decode('utf-8')
-
+    
     def object_latin1_to_py(self, instance):
         error = GciErrSType()
         start_index = 1
