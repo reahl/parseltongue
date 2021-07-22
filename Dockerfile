@@ -31,7 +31,6 @@ USER developer
 RUN mkdir -p $DEV_HOME/.reahlworkspace/dist-egg
 #RUN /opt/dev/scripts/setupGit.sh
 RUN /opt/dev/gemstone/defineGemStoneEnvironment.sh $GEMSTONE_VERSION
-RUN bash -lc "pip install cython"
 
 USER root
 

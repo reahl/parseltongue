@@ -51,11 +51,6 @@ implemented_python_types = {
 }
 
 #======================================================================================================================
-def make_GemstoneError(session, c_error):
-    error = GemstoneError(session)
-    error.set_error(c_error)
-    return error
-
 def compute_small_integer_oop(py_int):
     if py_int <= MAX_SMALL_INT and py_int >= MIN_SMALL_INT:
         return (py_int << OOP_NUM_TAG_BITS) | OOP_TAG_SMALLINT
@@ -85,7 +80,7 @@ class GemstoneLibrary:
         if len(lib_names) > 1:
             raise Exception('Found many %s libraries in your $GEMSTONE (%s): %s' % (short_name, lib_dir, ','.join([i.name for i in lib_names])) )
         lib_path = lib_names[0]
-        version, bits = re.match('lib%s-(.*)-(.*)\..*' % short_name, lib_path.name).groups()
+        version, bits = re.match('lib%s-(.*)-(.*)..*' % short_name, lib_path.name).groups()
 
         matching_libraries = [i for i in cls.registered_libraries if i.short_name == short_name and packaging.version.parse(i.min_version) <= packaging.version.parse(version) <= packaging.version.parse(i.max_version)]
         if not matching_libraries:
@@ -106,12 +101,9 @@ class GemstoneError(Exception):
     handling.
 
     """
-    def __init__(self, sess):
-        self.c_error = GciErrSType()
-        self.session = sess
-
-    def set_error(self, c_error):
+    def __init__(self, sess, c_error):
         self.c_error = c_error
+        self.session = sess
 
     @property
     def category(self):
@@ -205,16 +197,12 @@ class GemObject:
 
     """
     def __init__(self, session, oop):
-        self.c_oop = oop
+        self.oop = oop
         self.session = session
 
     @property
-    def oop(self):
-        return self.c_oop
-
-    @property
     def is_nil(self):
-        return self.c_oop == OOP_NIL.value
+        return self.oop == OOP_NIL.value
 
     @property
     def is_symbol(self):
@@ -251,13 +239,13 @@ class GemObject:
         return self.session.object_perform(self, selector, *args)
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.c_oop)
+        return '%s(%s)' % (self.__class__.__name__, self.oop)
 
     def __del__(self):
         if self.session.is_logged_in:
             if len(self.session.deallocated_unfreed_gemstone_objects) > self.session.export_set_free_batch_size:
                 self.session.remove_dead_gemstone_objects()
-            self.session.deallocated_unfreed_gemstone_objects.add(self.c_oop)
+            self.session.deallocated_unfreed_gemstone_objects.add(self.oop)
 
 #======================================================================================================================
 
@@ -305,8 +293,8 @@ class GemstoneSession:
             return getattr(self, 'object_{}_to_py'.format(gem_class_name))(instance)
     
     def object_small_integer_to_py(self, instance):
-        if GCI_OOP_IS_SMALL_INT(instance.c_oop):
-            return ctypes.c_int64(instance.c_oop).value >> ctypes.c_int64(OOP_NUM_TAG_BITS).value
+        if GCI_OOP_IS_SMALL_INT(instance.oop):
+            return ctypes.c_int64(instance.oop).value >> ctypes.c_int64(OOP_NUM_TAG_BITS).value
         else:
             raise GemstoneApiError('Expected oop to represent a Small Integer.')
 
