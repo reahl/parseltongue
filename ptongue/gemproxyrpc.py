@@ -1,25 +1,23 @@
 import ctypes
+import os
+import warnings
+
 from ctypes import cdll, CDLL, create_string_buffer
 
 from ptongue.gemstone import *
-from ptongue.gemproxy import GemstoneError, GemObject, GemstoneSession, make_GemstoneError, to_c_bytes, InvalidSession, GemstoneApiError
+from ptongue.gemproxy import GemstoneLibrary, GemstoneError, GemObject, GemstoneSession, make_GemstoneError, to_c_bytes, InvalidSession, GemstoneApiError
 
 
-class GciTs:
-    def __init__(self):
-        gcitl_filename = "libgcits-3.6.1-64.so"
-        self.library = CDLL(gcitl_filename)
-
+class GciTs(GemstoneLibrary):
+    short_name = 'gcits'
+    def __init__(self, lib_path):
+        super().__init__(lib_path)
+        self.initial_fetch_size = 200
+        
         self.GciTsEncrypt = self.library.GciTsEncrypt
         self.GciTsEncrypt.restype = ctypes.c_char_p
         self.GciTsEncrypt.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_size_t]
-
         
-        self.GciTsLogin = self.library.GciTsLogin
-        self.GciTsLogin.restype = GciSession
-        self.GciTsLogin.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, BoolType, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
-                                    ctypes.c_uint, ctypes.c_int, ctypes.POINTER(BoolType), ctypes.POINTER(GciErrSType)]
-
         self.GciTsLogout = self.library.GciTsLogout
         self.GciTsLogout.restype = BoolType
         self.GciTsLogout.argtypes = [GciSession, ctypes.POINTER(GciErrSType)]
@@ -106,37 +104,6 @@ class GciTs:
         self.GciTsReleaseObjs.restype = BoolType
         self.GciTsReleaseObjs.argtypes = [GciSession, ctypes.POINTER(OopType), ctypes.c_int, ctypes.POINTER(GciErrSType)]
         
-        
-#======================================================================================================================
-class RPCSession(GemstoneSession):
-    def __init__(self, username, password, stone_name='gs64stone',
-                  host_username=None, host_password=None,
-                  netldi_task='gemnetobject'):
-        super().__init__()
-        
-        self.gcits = GciTs()
-        
-        c_host_username = None
-        if host_username:
-            c_host_username = to_c_bytes(host_username)
-
-        error = GciErrSType()
-        executedSessionInit = ctypes.c_int()
-        
-        self.c_session = self.gcits.GciTsLogin(stone_name.encode('utf-8'),
-                                               c_host_username,
-                                               self.encrypt_password(host_password),
-                                               True,
-                                               netldi_task.encode('utf-8'),
-                                               username.encode('utf-8'),
-                                               self.encrypt_password(password),
-                                               GCI_LOGIN_PW_ENCRYPTED,
-                                               0,
-                                               ctypes.byref(executedSessionInit),
-                                               ctypes.byref(error))
-        if not self.c_session:
-            raise make_GemstoneError(self, error)
-
     def encrypt_password(self, unencrypted_password):
         if not unencrypted_password:
             return None
@@ -145,55 +112,140 @@ class RPCSession(GemstoneSession):
         while encrypted_char == 0:
             out_buff_size = out_buff_size + self.initial_fetch_size
             out_buff = ctypes.create_string_buffer(out_buff_size)
-            encrypted_char = self.gcits.GciTsEncrypt(unencrypted_password.encode('utf-8'), out_buff, out_buff_size)
+            encrypted_char = self.GciTsEncrypt(unencrypted_password.encode('utf-8'), out_buff, out_buff_size)
         return out_buff.value
 
+    
+    
+class GciTs34(GciTs):
+    min_version = '3.4.0'
+    max_version = '3.4.9999'
+    def __init__(self, lib_path):
+        super().__init__(lib_path)
+
+        self.GciTsLogin = self.library.GciTsLogin
+        self.GciTsLogin.restype = GciSession
+        self.GciTsLogin.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, BoolType, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
+                                    ctypes.c_uint, ctypes.c_int, ctypes.POINTER(GciErrSType)]
+
+    def log_in(self, stone_name, host_username, host_password, netldi_task, username, password):
+        error = GciErrSType()
+        session = self.GciTsLogin(stone_name.encode('utf-8'),
+                                  to_c_bytes(host_username),
+                                  self.encrypt_password(host_password),
+                                  True,
+                                  netldi_task.encode('utf-8'),
+                                  username.encode('utf-8'),
+                                  self.encrypt_password(password),
+                                  GCI_LOGIN_PW_ENCRYPTED | GCI_LOGIN_QUIET,
+                                  0,
+                                  ctypes.byref(error))
+        
+        if not session:
+            raise make_GemstoneError(self, error)
+
+        return session
+        
+GemstoneLibrary.register(GciTs34)
+
+
+
+class GciTs36(GciTs):
+    min_version = '3.6.0'
+    max_version = '3.6.9999'
+    def __init__(self, lib_path):
+        super().__init__(lib_path)
+        
+        self.GciTsLogin = self.library.GciTsLogin
+        self.GciTsLogin.restype = GciSession
+        self.GciTsLogin.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, BoolType, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
+                                    ctypes.c_uint, ctypes.c_int, ctypes.POINTER(BoolType), ctypes.POINTER(GciErrSType)]
+
+        
+    def log_in(self, stone_name, host_username, host_password, netldi_task, username, password):
+        error = GciErrSType()
+        executedSessionInit = ctypes.c_int()
+        session = self.GciTsLogin(stone_name.encode('utf-8'),
+                                  to_c_bytes(host_username),
+                                  self.encrypt_password(host_password),
+                                  True,
+                                  netldi_task.encode('utf-8'),
+                                  username.encode('utf-8'),
+                                  self.encrypt_password(password),
+                                  GCI_LOGIN_PW_ENCRYPTED | GCI_LOGIN_QUIET,
+                                  0,
+                                  ctypes.byref(executedSessionInit),
+                                  ctypes.byref(error))
+
+        if not session:
+            raise make_GemstoneError(self, error)
+
+        if not executedSessionInit:
+            warnings.warn(('{}: {}, {}'.format(error.exceptionObj, error.message, error.reason)).replace('\\n', ''), GemstoneWarning)
+
+        return session
+        
+GemstoneLibrary.register(GciTs36)
+        
+#======================================================================================================================
+class RPCSession(GemstoneSession):
+    def __init__(self, username, password, stone_name='gs64stone',
+                  host_username=None, host_password=None,
+                  netldi_task='gemnetobject'):
+        super().__init__()
+        
+        self.gci = GemstoneLibrary.find_library('gcits')
+        self.c_session = self.gci.log_in(stone_name, host_username, host_password, netldi_task, username, password)
+
+    def encrypt_password(self, unencrypted_password):
+        return self.gci.encrypt_password(unencrypted_password)
+        
     def remove_dead_gemstone_objects(self):
         error = GciErrSType()
         unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
         if unreferenced_gemstone_objects:
             c_dead_oops = (OopType * len(unreferenced_gemstone_objects))(*unreferenced_gemstone_objects)
-            if not self.gcits.GciTsReleaseObjs(self.c_session, c_dead_oops, len(unreferenced_gemstone_objects), ctypes.byref(error)):
+            if not self.gci.GciTsReleaseObjs(self.c_session, c_dead_oops, len(unreferenced_gemstone_objects), ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
         self.deallocated_unfreed_gemstone_objects.clear()
 
     def abort(self):
         error = GciErrSType()
-        if not self.gcits.GciTsAbort(self.c_session, ctypes.byref(error)):
+        if not self.gci.GciTsAbort(self.c_session, ctypes.byref(error)):
             raise make_GemstoneError(self, error)
 
     def begin(self):
         error = GciErrSType()
-        if not self.gcits.GciTsBegin(self.c_session, ctypes.byref(error)):
+        if not self.gci.GciTsBegin(self.c_session, ctypes.byref(error)):
             raise make_GemstoneError(self, error)
 
     def commit(self):
         error = GciErrSType()
-        if not self.gcits.GciTsCommit(self.c_session, ctypes.byref(error)):
+        if not self.gci.GciTsCommit(self.c_session, ctypes.byref(error)):
             raise make_GemstoneError(self, error)
 
     @property
     def is_remote(self):
-        remote = self.gcits.GciTsSessionIsRemote(self.c_session)
+        remote = self.gci.GciTsSessionIsRemote(self.c_session)
         if remote == -1:
             raise InvalidSession()
         return bool(remote)
 
     @property
     def is_logged_in(self):
-        remote = self.gcits.GciTsSessionIsRemote(self.c_session)
+        remote = self.gci.GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
     def py_to_string_(self, py_str):
         error = GciErrSType()
-        return_oop = self.gcits.GciTsNewUtf8String(self.c_session, py_str.encode('utf-8'), True, ctypes.byref(error))
+        return_oop = self.gci.GciTsNewUtf8String(self.c_session, py_str.encode('utf-8'), True, ctypes.byref(error))
         if return_oop == OOP_ILLEGAL.value:
             raise make_GemstoneError(self, error)
         return return_oop
 
     def py_to_float_(self, py_float):
         error = GciErrSType()
-        return_oop = self.gcits.GciTsDoubleToOop(self.c_session, py_float, ctypes.byref(error))
+        return_oop = self.gci.GciTsDoubleToOop(self.c_session, py_float, ctypes.byref(error))
         if return_oop == OOP_ILLEGAL.value:
             raise make_GemstoneError(self, error)
         return return_oop
@@ -201,12 +253,12 @@ class RPCSession(GemstoneSession):
     def execute(self, source, context=None, symbol_list=None):
         error = GciErrSType()
         if isinstance(source, str):
-            return_oop = self.gcits.GciTsExecute(self.c_session, source.encode('utf-8'), OOP_CLASS_Utf8,
-                                                 context.oop if context else OOP_NIL, 
-                                                 symbol_list.oop if symbol_list else OOP_NIL,
-                                                 0, 0,  ctypes.byref(error))
+            return_oop = self.gci.GciTsExecute(self.c_session, source.encode('utf-8'), OOP_CLASS_Utf8,
+                                               context.oop if context else OOP_NIL, 
+                                               symbol_list.oop if symbol_list else OOP_NIL,
+                                               0, 0,  ctypes.byref(error))
         elif isinstance(source, GemObject):
-            return_oop = self.gcits.GciTsExecute(self.c_session, None, source.oop,
+            return_oop = self.gci.GciTsExecute(self.c_session, None, source.oop,
                                                context.oop if context else OOP_NIL, 
                                                symbol_list.oop if symbol_list else OOP_NIL,
                                                0, 0,  ctypes.byref(error))
@@ -218,7 +270,7 @@ class RPCSession(GemstoneSession):
 
     def new_symbol(self, py_string):
         error = GciErrSType()
-        return_oop = self.gcits.GciTsNewSymbol(self.c_session, py_string.encode('utf-8'), ctypes.byref(error))
+        return_oop = self.gci.GciTsNewSymbol(self.c_session, py_string.encode('utf-8'), ctypes.byref(error))
         if return_oop == OOP_ILLEGAL.value:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
@@ -226,11 +278,11 @@ class RPCSession(GemstoneSession):
     def resolve_symbol(self, symbol, symbol_list=None):
         error = GciErrSType()
         if isinstance(symbol, str):
-            return_oop = self.gcits.GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
-                                            symbol_list.oop if symbol_list else OOP_NIL, ctypes.byref(error))
+            return_oop = self.gci.GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
+                                                     symbol_list.oop if symbol_list else OOP_NIL, ctypes.byref(error))
         elif isinstance(symbol, GemObject):
-            return_oop = self.gcits.GciTsResolveSymbolObj(self.c_session, symbol.oop, 
-                                            symbol_list.oop if symbol_list else OOP_NIL, ctypes.byref(error))
+            return_oop = self.gci.GciTsResolveSymbolObj(self.c_session, symbol.oop, 
+                                                        symbol_list.oop if symbol_list else OOP_NIL, ctypes.byref(error))
         else:
             raise GemstoneApiError('Symbol is type {}.Expected symbol to be a str or GemObject'.format(symbol.__class__.__name__))
         if return_oop == OOP_ILLEGAL.value:
@@ -239,19 +291,19 @@ class RPCSession(GemstoneSession):
            
     def log_out(self):
         error = GciErrSType()
-        if not self.gcits.GciTsLogout(self.c_session, ctypes.byref(error)):
+        if not self.gci.GciTsLogout(self.c_session, ctypes.byref(error)):
             raise make_GemstoneError(self, error)
 
     def object_is_kind_of(self, instance, a_class):
         error = GciErrSType()
-        is_kind_of_result = self.gcits.GciTsIsKindOf(self.c_session, instance.c_oop, a_class.c_oop, ctypes.byref(error))
+        is_kind_of_result = self.gci.GciTsIsKindOf(self.c_session, instance.c_oop, a_class.c_oop, ctypes.byref(error))
         if is_kind_of_result == -1:
             raise make_GemstoneError(self, error)
         return bool(is_kind_of_result)
 
     def object_gemstone_class(self, instance):
         error = GciErrSType()
-        return_oop = self.gcits.GciTsFetchClass(self.c_session, instance.c_oop, ctypes.byref(error))
+        return_oop = self.gci.GciTsFetchClass(self.c_session, instance.c_oop, ctypes.byref(error))
         if return_oop == OOP_ILLEGAL.value:
            raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
@@ -259,7 +311,7 @@ class RPCSession(GemstoneSession):
     def object_float_to_py(self, instance):
         error = GciErrSType()
         result = ctypes.c_double()
-        if not self.gcits.GciTsOopToDouble(self.c_session, instance.c_oop, ctypes.byref(result), ctypes.byref(error)):
+        if not self.gci.GciTsOopToDouble(self.c_session, instance.c_oop, ctypes.byref(result), ctypes.byref(error)):
             raise make_GemstoneError(self, error)
         return result.value
 
@@ -274,14 +326,14 @@ class RPCSession(GemstoneSession):
 
         while bytes_returned == num_bytes:
             dest = (ByteType * (num_bytes + 1))()
-            bytes_returned = self.gcits.GciTsFetchUtf8Bytes(self.c_session, instance.c_oop, start_index, dest, num_bytes, ctypes.byref(utf8_string), ctypes.byref(error), 0)
+            bytes_returned = self.gci.GciTsFetchUtf8Bytes(self.c_session, instance.c_oop, start_index, dest, num_bytes, ctypes.byref(utf8_string), ctypes.byref(error), 0)
             if bytes_returned == -1:
                 raise make_GemstoneError(self, error)
 
             py_bytes += bytearray(dest[:bytes_returned])
             start_index = start_index + num_bytes
         if utf8_string.value != OOP_NIL.value:
-            if not self.gcits.GciTsReleaseObjs(self.c_session, ctypes.byref(utf8_string), 1, ctypes.byref(error)):
+            if not self.gci.GciTsReleaseObjs(self.c_session, ctypes.byref(utf8_string), 1, ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
         return py_bytes.decode('utf-8')
     
@@ -293,8 +345,8 @@ class RPCSession(GemstoneSession):
         py_bytes = b''
         while bytes_returned == num_bytes:
             dest = (ByteType * (num_bytes + 1))()
-            bytes_returned = self.gcits.GciTsFetchBytes(self.c_session, instance.oop, start_index,
-                                                    dest, num_bytes, ctypes.byref(error));
+            bytes_returned = self.gci.GciTsFetchBytes(self.c_session, instance.oop, start_index,
+                                                      dest, num_bytes, ctypes.byref(error));
             if bytes_returned == -1:
                 raise make_GemstoneError(self, error)
 
@@ -314,15 +366,15 @@ class RPCSession(GemstoneSession):
         flags = 1
         environment_id = 0
 
-        return_oop = self.gcits.GciTsPerform(self.c_session,
-                                               instance.c_oop,
-                                               selector_oop,
-                                               selector_str,
-                                               cargs, 
-                                               len(args),
-                                               flags,
-                                               environment_id,
-                                               ctypes.byref(error))
+        return_oop = self.gci.GciTsPerform(self.c_session,
+                                           instance.c_oop,
+                                           selector_oop,
+                                           selector_str,
+                                           cargs, 
+                                           len(args),
+                                           flags,
+                                           environment_id,
+                                           ctypes.byref(error))
         if return_oop == OOP_ILLEGAL.value:
             raise make_GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)

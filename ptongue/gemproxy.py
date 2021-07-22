@@ -2,7 +2,11 @@
 from weakref import WeakValueDictionary
 import functools
 import warnings
-
+import pathlib
+import os
+import re
+import packaging.version
+from ctypes import CDLL
 
 from ptongue.gemstone import *
 
@@ -59,9 +63,41 @@ def compute_small_integer_oop(py_int):
         raise OverflowError()
 
 def to_c_bytes(py_string):
-    return py_string.encode('utf-8')
+    return py_string.encode('utf-8') if py_string != None else None
     
 #======================================================================================================================
+class GemstoneLibrary:
+    registered_libraries = []
+
+    short_name = ''
+    min_version = '1'
+    max_version = '0'
+    @classmethod
+    def register(cls, library_class):
+        cls.registered_libraries.append(library_class)
+
+    @classmethod
+    def find_library(cls, short_name):
+        lib_dir = pathlib.Path(os.environ['GEMSTONE']) / 'lib'
+        lib_names = list(lib_dir.glob('*%s-*' % short_name))
+        if not lib_names:
+            raise Exception('Could not find a %s library in your $GEMSTONE (%s)' % (short_name, lib_dir) )
+        if len(lib_names) > 1:
+            raise Exception('Found many %s libraries in your $GEMSTONE (%s): %s' % (short_name, lib_dir, ','.join([i.name for i in lib_names])) )
+        lib_path = lib_names[0]
+        version, bits = re.match('lib%s-(.*)-(.*)\..*' % short_name, lib_path.name).groups()
+
+        matching_libraries = [i for i in cls.registered_libraries if i.short_name == short_name and packaging.version.parse(i.min_version) <= packaging.version.parse(version) <= packaging.version.parse(i.max_version)]
+        if not matching_libraries:
+            raise Exception('No support found for %s version %s' % (short_name, version))
+        latest_matching_class = list(sorted(matching_libraries, key=lambda i: packaging.version.parse(i.min_version)))[-1]
+        return latest_matching_class(lib_path)
+        
+    def __init__(self, lib_path):
+        self.library = CDLL(str(lib_path))
+
+        
+
 class GemstoneError(Exception):
     """Represents an exception that happened in a Gem.
 
