@@ -14,7 +14,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 #    rm /etc/apt/sources.list.d/xpra.list && \
 
 RUN apt-get update --allow-releaseinfo-change-origin && \
-    apt-get install --no-install-recommends -y build-essential g++ gcc gdb libpam0g-dev iputils-ping python3-dev && \
+    apt-get install --no-install-recommends -y  python3 iputils-ping && \
     apt-get clean && \
     rm -rf /var/cache/apt/* 
 
