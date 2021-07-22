@@ -217,7 +217,7 @@ class GemObject:
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, self.c_oop)
 
-    def __dealloc__(self):
+    def __del__(self):
         if self.session.is_logged_in:
             if len(self.session.deallocated_unfreed_gemstone_objects) > self.session.export_set_free_batch_size:
                 self.session.remove_dead_gemstone_objects()

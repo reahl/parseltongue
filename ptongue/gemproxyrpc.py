@@ -153,7 +153,7 @@ class RPCSession(GemstoneSession):
         unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
         if unreferenced_gemstone_objects:
             c_dead_oops = (OopType * len(unreferenced_gemstone_objects))(*unreferenced_gemstone_objects)
-            if not self.gcits.GciTsReleaseObjs(self.c_session, c_dead_oops, len(dead_oops), ctypes.byref(error)):
+            if not self.gcits.GciTsReleaseObjs(self.c_session, c_dead_oops, len(unreferenced_gemstone_objects), ctypes.byref(error)):
                 raise make_GemstoneError(self, error)
         self.deallocated_unfreed_gemstone_objects.clear()
 

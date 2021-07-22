@@ -483,9 +483,9 @@ def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
        its original (python) identity."""
 
     obj_id = id(session.resolve_symbol('Date'))
-    # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
+    # python object ids are their memory addresses and can be re-used; here we use some memory for the same kind of python object to make it unlikely 
     # that the recent object's address will be free in the following code.
-    large_object_to_prevent_python_from_reusing_obj_id = '123'*2000000000
+    a_gem_int = session.resolve_symbol('Integer')
     assert id(session.resolve_symbol('Date')) != obj_id
 
 

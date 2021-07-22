@@ -169,7 +169,7 @@ class GciLnk:
 
 
 #======================================================================================================================
-def gembuilder_dealoc(session):
+def gembuilder_dealloc(session):
     error = GciErrSType()
     gcilnk.GciShutdown()
     if gcilnk.GciErr(ctypes.byref(error)):
@@ -185,7 +185,7 @@ def gembuilder_init(session):
     if not gcilnk.GciInit() and gcilnk.GciErr(ctypes.byref(error)):
         raise make_GemstoneError(session, error)
     is_gembuilder_initialised = True
-    register(gembuilder_dealoc, session)
+    register(gembuilder_dealloc, session)
 
 def get_current_linked_session():
     global current_linked_session
