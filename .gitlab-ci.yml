@@ -7,6 +7,8 @@ before_script:
   - useradd -m developer
   - echo -e "developer\ndeveloper" | passwd developer
 
+  - pip install tox
+    
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
   - gemstone/installGemStone.sh 3.6.1
