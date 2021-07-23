@@ -4,14 +4,13 @@ before_script:
   - apt-get update -y
   - apt-get install -y libpam0g-dev unzip openssh-server
 
-  - useradd -m vagrant
-  - echo -e "vagrant\nvagrant" | passwd vagrant
+  - useradd -m developer
+  - echo -e "developer\ndeveloper" | passwd developer
 
-  - pip install tox cython
-  
-  - gemstone/installGemStone.sh 3.4.1
-  - gemstone/defineGemStoneEnvironment.sh 3.4.1
+  - gemstone/installGemStone.sh 3.6.1
+  - gemstone/defineGemStoneEnvironment.sh 3.6.1
   - export SOURCE_ROOT="$(pwd)"
+  - export DEV_USER=developer
 
 test_parseltongue:
   script:
