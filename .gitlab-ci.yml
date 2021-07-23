@@ -7,10 +7,10 @@ before_script:
   - useradd -m developer
   - echo -e "developer\ndeveloper" | passwd developer
 
-  - gemstone/installGemStone.sh 3.6.1
-  - gemstone/defineGemStoneEnvironment.sh 3.6.1
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
+  - gemstone/installGemStone.sh 3.6.1
+  - gemstone/defineGemStoneEnvironment.sh 3.6.1
 
 test_parseltongue:
   script:
