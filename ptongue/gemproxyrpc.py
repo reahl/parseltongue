@@ -150,8 +150,8 @@ GemstoneLibrary.register(GciTs34)
 
 
 
-class GciTs36(GciTs):
-    min_version = '3.6.0'
+class GciTs35(GciTs):
+    min_version = '3.5.0'
     max_version = '3.6.9999'
     def __init__(self, lib_path):
         super().__init__(lib_path)
