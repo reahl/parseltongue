@@ -29,7 +29,8 @@ well_known_class_names = {
     OOP_CLASS_Unicode16.value: 'string',
     OOP_CLASS_Unicode32.value: 'string',
     OOP_CLASS_ORDERED_COLLECTION.value: 'ordered_collection',
-    OOP_CLASS_N_DICTIONARY.value: 'dictionary'
+    OOP_CLASS_N_DICTIONARY.value: 'dictionary',
+    OOP_CLASS_IDENTITY_SET.value: 'identity_set'
  }
 
 well_known_instances = {
@@ -51,7 +52,8 @@ implemented_python_types = {
     'int': "integer",
     'float': "float",
     'list': "ordered_collection",
-    'dict': "dictionary"
+    'dict': "dictionary",
+    'set': "identity_set"
 }
 
 #======================================================================================================================
@@ -302,6 +304,12 @@ class GemstoneSession:
         for key, value in py_dict.items():
             dictionary.at_put(self.from_py(key), self.from_py(value))
         return dictionary.oop
+
+    def py_to_identity_set_(self, py_set):
+        identity_set = self.resolve_symbol('IdentitySet').new()
+        for i in py_set:
+            identity_set.add(self.from_py(i))
+        return identity_set.oop
     
     def object_to_py(self, instance):
         try: 
@@ -337,6 +345,14 @@ class GemstoneSession:
             value = instance.at(key)
             py_dict[key.to_py] = value.to_py
         return py_dict
+    
+    def object_identity_set_to_py(self, instance):
+        py_set = set()
+        items = instance.asArray()
+        for i in range(1, items.size().to_py+1):
+            item = items.at(self.from_py(i))
+            py_set.add(item.to_py)
+        return py_set
     
     
 #======================================================================================================================

@@ -858,6 +858,38 @@ def test_rpc_session_translating_dictionary_to_python(rpc_session):
     
 def test_linked_session_translating_dictionary_to_python(linked_session):
     check_translating_dictionary_to_python(linked_session)
+
+    
+
+def check_translating_python_set_to_gemstone(session):
+    py_set = set('a')
+    gemstone_set = session.from_py(py_set)
+
+    assert gemstone_set.gemstone_class() is session.resolve_symbol('IdentitySet')
+    assert gemstone_set.asArray().at(1).to_py == 'a'
+
+    
+def test_rpc_session_translating_python_set_to_gemstone(rpc_session):
+    check_translating_python_set_to_gemstone(rpc_session)
+
+    
+def test_linked_session_translating_python_set_to_gemstone(linked_session):
+    check_translating_python_set_to_gemstone(linked_session)
+
+    
+def check_translating_set_to_python(session):
+    gemstone_set = session.resolve_symbol('IdentitySet').new()
+    gemstone_set.add(session.from_py('a'))
+
+    assert gemstone_set.to_py == set('a')
+
+    
+def test_rpc_session_translating_set_to_python(rpc_session):
+    check_translating_set_to_python(rpc_session)
+
+    
+def test_linked_session_translating_set_to_python(linked_session):
+    check_translating_set_to_python(linked_session)
     
     
 #--[ translating: misc errors ]------------------------------------------------------------
