@@ -119,7 +119,8 @@ OOP_CLASS_Utf8 =           OopType(154113)
 OOP_CLASS_Unicode7 =       OopType(154369)
 OOP_CLASS_Unicode16 =      OopType(154625)
 OOP_CLASS_Unicode32 =      OopType(154881)
-
+OOP_CLASS_ORDERED_COLLECTION = OopType(92673)
+OOP_CLASS_N_DICTIONARY =   OopType(101377)
 
 
 OOP_FALSE =            OopType(0x0C)

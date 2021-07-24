@@ -792,11 +792,78 @@ def test_rpc_session_translating_python_string_exception(invalid_rpc_session):
 def test_linked_session_translating_python_string_exception(invalid_linked_session):
     check_translating_python_string_exception(invalid_linked_session, r'.*The given session ID is invalid\.')
 
-        
+
+#--[ translating: complex objects ]------------------------------------------------------------
+
+def check_translating_python_list_to_gemstone(session):
+    py_list = [1, 'two']
+    gemstone_list = session.from_py(py_list)
+
+    assert gemstone_list.gemstone_class() is session.resolve_symbol('OrderedCollection')
+    assert gemstone_list.at(session.from_py(1)).to_py == 1
+    assert gemstone_list.at(session.from_py(2)).to_py == 'two'
+
+    
+def test_rpc_session_translating_python_list_to_gemstone(rpc_session):
+    check_translating_python_list_to_gemstone(rpc_session)
+
+    
+def test_linked_session_translating_python_list_to_gemstone(linked_session):
+    check_translating_python_list_to_gemstone(linked_session)
+
+    
+def check_translating_ordered_collection_to_python(session):
+    gemstone_list = session.resolve_symbol('OrderedCollection').new()
+    gemstone_list.add(session.from_py(1))
+    gemstone_list.add(session.from_py('two'))
+
+    assert gemstone_list.to_py == [1, 'two']
+
+    
+def test_rpc_session_translating_ordered_collection_to_python(rpc_session):
+    check_translating_ordered_collection_to_python(rpc_session)
+
+    
+def test_linked_session_translating_ordered_collection_to_python(linked_session):
+    check_translating_ordered_collection_to_python(linked_session)
+
+
+
+def check_translating_python_dict_to_gemstone(session):
+    py_dict = {'a': 1}
+    gemstone_dictionary = session.from_py(py_dict)
+
+    assert gemstone_dictionary.gemstone_class() is session.resolve_symbol('Dictionary')
+    assert gemstone_dictionary.at(session.from_py('a')).to_py == 1
+
+    
+def test_rpc_session_translating_python_dict_to_gemstone(rpc_session):
+    check_translating_python_dict_to_gemstone(rpc_session)
+
+    
+def test_linked_session_translating_python_dict_to_gemstone(linked_session):
+    check_translating_python_dict_to_gemstone(linked_session)
+
+    
+def check_translating_dictionary_to_python(session):
+    gemstone_dictionary = session.resolve_symbol('Dictionary').new()
+    gemstone_dictionary.at_put(session.from_py('a'), session.from_py(1))
+
+    assert gemstone_dictionary.to_py == {'a': 1}
+
+    
+def test_rpc_session_translating_dictionary_to_python(rpc_session):
+    check_translating_dictionary_to_python(rpc_session)
+
+    
+def test_linked_session_translating_dictionary_to_python(linked_session):
+    check_translating_dictionary_to_python(linked_session)
+    
+    
 #--[ translating: misc errors ]------------------------------------------------------------
         
 def check_translating_unsupported_object_types(session):
-    py_not_implemented_type = []
+    py_not_implemented_type = (1,)
     with expected(NotSupported):
         session.from_py(py_not_implemented_type)
 
@@ -868,3 +935,38 @@ def test_linked_session_mapping_method_names(linked_session):
     check_mapping_method_names(linked_session)
 
     
+
+def check_converting_arguments_from_python(session):
+    a_collection = session.resolve_symbol('OrderedCollection').new()
+    a_collection.add(1)
+    a_collection.add('two')
+
+    one = a_collection.at(1)
+    two = a_collection.at(2)
+
+    assert one.to_py is 1
+    assert two.to_py == 'two'
+
+    
+def test_rpc_converting_arguments_from_python(rpc_session):
+    check_converting_arguments_from_python(rpc_session)
+
+    
+def test_linked_converting_arguments_from_python(linked_session):
+    check_converting_arguments_from_python(linked_session)
+
+
+    
+def check_iterating_collections(session):
+    a_collection = session.resolve_symbol('OrderedCollection').new()
+    a_collection.add('one')
+    a_collection.add('two')
+
+    iterated = [i.to_py for i in a_collection]
+    assert iterated == ['one', 'two']
+
+def test_rpc_iterating_collections(rpc_session):
+    check_iterating_collections(rpc_session)
+
+def test_linked_iterating_collections(linked_session):
+    check_iterating_collections(linked_session)    

@@ -27,7 +27,9 @@ well_known_class_names = {
     OOP_CLASS_Utf8.value: 'string',
     OOP_CLASS_Unicode7.value: 'string',
     OOP_CLASS_Unicode16.value: 'string',
-    OOP_CLASS_Unicode32.value: 'string'
+    OOP_CLASS_Unicode32.value: 'string',
+    OOP_CLASS_ORDERED_COLLECTION.value: 'ordered_collection',
+    OOP_CLASS_N_DICTIONARY.value: 'dictionary'
  }
 
 well_known_instances = {
@@ -47,7 +49,9 @@ implemented_python_types = {
     'bool': "boolean_or_none",
     'str': "string",
     'int': "integer",
-    'float': "float"
+    'float': "float",
+    'list': "ordered_collection",
+    'dict': "dictionary"
 }
 
 #======================================================================================================================
@@ -233,11 +237,16 @@ class GemObject:
         if len(args) != expected_args:
             raise TypeError('%s() takes exactly %s arguments (%s given)' % (selector, expected_args, len(args)))
         selector_symbol = self.session.new_symbol(smalltalk_selector)
-        return self.perform(selector_symbol, *args)
+        return self.perform(selector_symbol, *[(i if isinstance(i, self.__class__) else self.session.from_py(i)) for i in args])
 
     def perform(self, selector, *args):
         return self.session.object_perform(self, selector, *args)
 
+    def __iter__(self):
+        self_as_collection = self.asOrderedCollection()
+        for i in range(1, self_as_collection.size().to_py+1):
+            yield self_as_collection.at(i)
+        
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, self.oop)
 
@@ -282,6 +291,18 @@ class GemstoneSession:
             return_oop = self.execute('^{}'.format(py_int)).oop
         return return_oop
 
+    def py_to_ordered_collection_(self, py_list):
+        collection = self.resolve_symbol('OrderedCollection').new()
+        for i in py_list:
+            collection.add(self.from_py(i))
+        return collection.oop
+
+    def py_to_dictionary_(self, py_dict):
+        dictionary = self.resolve_symbol('Dictionary').new()
+        for key, value in py_dict.items():
+            dictionary.at_put(self.from_py(key), self.from_py(value))
+        return dictionary.oop
+    
     def object_to_py(self, instance):
         try: 
             return well_known_instances[instance.oop]
@@ -302,5 +323,20 @@ class GemstoneSession:
         string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
         return int(string_result)
 
+    def object_ordered_collection_to_py(self, instance):
+        py_list = []
+        for i in range(1, instance.size().to_py+1):
+            py_list.append(instance.at(i).to_py)
+        return py_list
+
+    def object_dictionary_to_py(self, instance):
+        py_dict = {}
+        keys = instance.keys().asArray()
+        for i in range(1, keys.size().to_py+1):
+            key = keys.at(self.from_py(i))
+            value = instance.at(key)
+            py_dict[key.to_py] = value.to_py
+        return py_dict
+    
     
 #======================================================================================================================
