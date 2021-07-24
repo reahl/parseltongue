@@ -332,9 +332,9 @@ class RPCSession(GemstoneSession):
 
             py_bytes += bytearray(dest[:bytes_returned])
             start_index = start_index + num_bytes
-        if utf8_string.value != OOP_NIL.value:
-            if not self.gci.GciTsReleaseObjs(self.c_session, ctypes.byref(utf8_string), 1, ctypes.byref(error)):
-                raise GemstoneError(self, error)
+            if utf8_string.value != OOP_NIL.value:
+                if not self.gci.GciTsReleaseObjs(self.c_session, ctypes.byref(utf8_string), 1, ctypes.byref(error)):
+                    raise GemstoneError(self, error)
         return py_bytes.decode('utf-8')
     
     def object_latin1_to_py(self, instance):
