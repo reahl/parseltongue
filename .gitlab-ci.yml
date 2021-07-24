@@ -16,4 +16,5 @@ before_script:
 
 test_parseltongue:
   script:
-    - su -lc "echo $GEMSTONE; cd $SOURCE_ROOT; tox" developer
+    - su -lc "echo $GEMSTONE" developer
+    - su -lc "cd $SOURCE_ROOT; tox" developer
