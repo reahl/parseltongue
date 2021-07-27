@@ -8,6 +8,7 @@ fi
 VERSION=$1
 
 GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
+$GEMSHELL
 
 echo "================== profile before =========="
 echo GEMSTONE1: $GEMSTONE
