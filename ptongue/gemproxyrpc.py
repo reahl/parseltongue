@@ -2,14 +2,14 @@ import ctypes
 import os
 import warnings
 
-from ctypes import cdll, CDLL, create_string_buffer
-
 from ptongue.gemstone import *
-from ptongue.gemproxy import GemstoneLibrary, GemObject, GemstoneSession, GemstoneError, to_c_bytes, InvalidSession, GemstoneApiError
+from ptongue.gemproxy import GemstoneLibrary, GemObject, GemstoneSession, GemstoneError, to_c_bytes, InvalidSession, \
+    GemstoneApiError, GemstoneWarning
 
 
 class GciTs(GemstoneLibrary):
     short_name = 'gcits'
+
     def __init__(self, lib_path):
         super().__init__(lib_path)
         self.initial_fetch_size = 200
@@ -87,7 +87,6 @@ class GciTs(GemstoneLibrary):
         self.GciTsFetchUtf8.restype = ctypes.c_int64
         self.GciTsFetchUtf8.argtypes = [GciSession, OopType, ctypes.POINTER(ByteType), ctypes.c_int64, ctypes.POINTER(ctypes.c_int64), ctypes.POINTER(GciErrSType)]
 
-
         self.GciTsFetchUtf8Bytes = self.library.GciTsFetchUtf8Bytes
         self.GciTsFetchUtf8Bytes.restype = ctypes.c_int64
         self.GciTsFetchUtf8Bytes.argtypes = [GciSession, OopType, ctypes.c_int64, ctypes.POINTER(ByteType), ctypes.c_int64, ctypes.POINTER(OopType), ctypes.POINTER(GciErrSType), ctypes.c_int]
@@ -115,11 +114,11 @@ class GciTs(GemstoneLibrary):
             encrypted_char = self.GciTsEncrypt(unencrypted_password.encode('utf-8'), out_buff, out_buff_size)
         return out_buff.value
 
-    
-    
+
 class GciTs34(GciTs):
     min_version = '3.4.0'
     max_version = '3.4.9999'
+
     def __init__(self, lib_path):
         super().__init__(lib_path)
 
@@ -145,14 +144,15 @@ class GciTs34(GciTs):
             raise GemstoneError(self, error)
 
         return session
-        
+
+
 GemstoneLibrary.register(GciTs34)
 
 
-
-class GciTs35(GciTs):
-    min_version = '3.5.0'
+class GciTs36(GciTs):
+    min_version = '3.6.0'
     max_version = '3.6.9999'
+
     def __init__(self, lib_path):
         super().__init__(lib_path)
         
@@ -164,7 +164,7 @@ class GciTs35(GciTs):
         
     def log_in(self, stone_name, host_username, host_password, netldi_task, username, password):
         error = GciErrSType()
-        executedSessionInit = ctypes.c_int()
+        executed_session_init = ctypes.c_int()
         session = self.GciTsLogin(stone_name.encode('utf-8'),
                                   to_c_bytes(host_username),
                                   self.encrypt_password(host_password),
@@ -174,19 +174,21 @@ class GciTs35(GciTs):
                                   self.encrypt_password(password),
                                   GCI_LOGIN_PW_ENCRYPTED | GCI_LOGIN_QUIET,
                                   0,
-                                  ctypes.byref(executedSessionInit),
+                                  ctypes.byref(executed_session_init),
                                   ctypes.byref(error))
 
         if not session:
             raise GemstoneError(self, error)
 
-        if not executedSessionInit:
+        if not executed_session_init:
             warnings.warn(('{}: {}, {}'.format(error.exceptionObj, error.message, error.reason)).replace('\\n', ''), GemstoneWarning)
 
         return session
-        
+
+
 GemstoneLibrary.register(GciTs36)
-        
+
+
 #======================================================================================================================
 class RPCSession(GemstoneSession):
     def __init__(self, username, password, stone_name='gs64stone',

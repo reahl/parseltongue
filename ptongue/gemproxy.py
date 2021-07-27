@@ -97,12 +97,11 @@ class GemstoneLibrary:
     def __init__(self, lib_path):
         self.library = CDLL(str(lib_path))
 
-        
 
 class GemstoneError(Exception):
     """Represents an exception that happened in a Gem.
 
-    This class is not a GemProxy, like other Gem objects becaus it
+    This class is not a GemProxy, like other Gem objects because it
     has to be a Python Exception to work with Python exception
     handling.
 
