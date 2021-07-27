@@ -16,6 +16,6 @@ before_script:
 
 test_parseltongue:
   script:
-    - su -lc "gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
+    - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
     - su -lc "echo $GEMSTONE" developer
     - su -lc "cd $SOURCE_ROOT; echo GEMSTONE1 -$GEMSTONE-; tox" developer
