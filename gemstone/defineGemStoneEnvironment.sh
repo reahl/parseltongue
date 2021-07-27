@@ -11,8 +11,5 @@ GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
 
 cat <<EOF >> $HOME/.profile
 VERSION=$VERSION
-echo $GEMSHELL
-echo GEMSTONE1: -$GEMSTONE-
 . $GEMSHELL $VERSION
-echo GEMSTONE2: -$GEMSTONE-
 EOF
