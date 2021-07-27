@@ -8,7 +8,7 @@ fi
 VERSION=$1
 
 GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
-$GEMSHELL
+$GEMSHELL $VERSION
 
 echo "================== profile before =========="
 echo GEMSTONE1: $GEMSTONE
@@ -24,3 +24,5 @@ echo "================== profile after=========="
 echo GEMSTONE2: $GEMSTONE
 cat $HOME/.profile
 echo "================== profile after end=========="
+source ~/.profile
+echo GEMSTONE3: $GEMSTONE
