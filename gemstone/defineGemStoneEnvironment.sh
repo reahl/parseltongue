@@ -14,9 +14,3 @@ VERSION=$VERSION
 . $GEMSHELL $VERSION
 echo GEMSTONE: $GEMSTONE
 EOF
-
-. ~/.profile
-echo "================== profile after=========="
-echo GEMSTONE: $GEMSTONE
-cat $HOME/.profile
-echo "================== profile after end=========="
