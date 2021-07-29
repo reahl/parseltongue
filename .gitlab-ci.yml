@@ -12,10 +12,9 @@ before_script:
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
   - gemstone/installGemStone.sh 3.6.1
-  - gemstone/defineGemStoneEnvironment.sh 3.6.1
+  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
 
 test_parseltongue:
   script:
-    - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
     - su -lc "echo $GEMSTONE" developer
     - su -lc "cd $SOURCE_ROOT; tox" developer
