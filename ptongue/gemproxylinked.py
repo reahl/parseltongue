@@ -132,6 +132,19 @@ class GciLnk(GemstoneLibrary):
         self.GciFltToOop.restype = OopType
         self.GciFltToOop.argtypes = [ctypes.c_double]
 
+        self.GciContinueWith = self.library.GciContinueWith
+        self.GciContinueWith.restype = OopType
+        self.GciContinueWith.argtypes = [OopType, OopType, ctypes.c_int, ctypes.POINTER(GciErrSType)]
+
+        self.GciClearStack = self.library.GciClearStack
+        self.GciClearStack.restype = None
+        self.GciClearStack.argtypes = [OopType]
+
+        self.GciSetHaltOnError = self.library.GciSetHaltOnError
+        self.GciSetHaltOnError.restype = ctypes.c_int
+        self.GciSetHaltOnError.argtypes = [ctypes.c_int]
+
+
 GemstoneLibrary.register(GciLnk)
 
 #======================================================================================================================
@@ -409,4 +422,17 @@ class LinkedSession(GemstoneSession):
             raise GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
+    def object_continue_with(self, gemstone_process, continue_with_error_oop, replace_top_of_stack_oop):
+        error = GciErrSType()
+        return_oop = self.gci.GciContinueWith(gemstone_process.oop, replace_top_of_stack_oop, 0, continue_with_error_oop)
+        if return_oop == OOP_ILLEGAL.value and gci.GciErr(ctypes.byref(error)):
+            raise GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
+
+    def object_clear_stack(self, gemstone_process):
+        error = GciErrSType()
+        success = self.gci.GciClearStack(gemstone_process.oop)
+        if gci.GciErr(ctypes.byref(error)):        
+            raise GemstoneError(self, error)
+    
 #======================================================================================================================

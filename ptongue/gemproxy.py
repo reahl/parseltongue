@@ -160,7 +160,15 @@ class GemstoneError(Exception):
             return self.exception_obj.printString().to_py
         except:
             return self.message
-    
+
+    def continue_with(self, continue_with_error=None, replace_top_of_stack=None):
+        replace_top_of_stack_oop = replace_top_of_stack.oop if replace_top_of_stack else OOP_ILLEGAL
+        continue_with_error_oop = ctypes.byref(continue_with_error.c_error) if continue_with_error else None
+        return self.session.object_continue_with(self.context, continue_with_error_oop, replace_top_of_stack_oop)
+
+    def clear_stack(self):
+        return self.session.object_clear_stack(self.context)
+        
     
 class InvalidSession(Exception):
     """Indicates a problem with the current Session."""
@@ -279,7 +287,7 @@ class GemstoneSession:
             method_name = implemented_python_types[py_object.__class__.__name__]
             return_oop = getattr(self, 'py_to_{}_'.format(method_name))(py_object)
         except KeyError:
-            raise NotSupported()
+            raise NotSupported('Cannot convert %s to a GemObject' % py_object.__class__.__name__)
         return self.get_or_create_gem_object(return_oop)
 
     def py_to_boolean_or_none_(self, py_object):
@@ -317,7 +325,7 @@ class GemstoneSession:
             try:
                 gem_class_name = well_known_class_names[instance.gemstone_class().oop]
             except KeyError:
-                raise NotSupported()
+                raise NotSupported('Cannot convert a gemstone %s to python' % instance.gemstone_class().name().to_py)
             return getattr(self, 'object_{}_to_py'.format(gem_class_name))(instance)
     
     def object_small_integer_to_py(self, instance):

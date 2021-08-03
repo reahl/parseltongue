@@ -1002,3 +1002,39 @@ def test_rpc_iterating_collections(rpc_session):
 
 def test_linked_iterating_collections(linked_session):
     check_iterating_collections(linked_session)    
+
+
+#--[ debugging ]------------------------------------------------------------
+    
+def check_debugging(session):
+    try:
+        session.execute('true ifTrue: [ 0 halt. 1+1. 122+1 ]')
+        assert None, 'Expected a GemstoneError'
+    except GemstoneError as e:
+        try:
+            e.context.gciStepOverFromLevel(1)
+        except GemstoneError as ex:
+            result = ex.continue_with()
+
+    assert result.to_py == 123
+
+def test_rpc_debugging(rpc_session):
+    check_debugging(rpc_session)
+
+def test_linked_debugging(linked_session):
+    check_debugging(linked_session)
+
+    
+def check_clear_stack(session):
+    try:
+        session.execute('true ifTrue: [ 0 halt. 1+1. 122+1 ]')
+        assert None, 'Expected a GemstoneError'
+    except GemstoneError as e:
+        e.clear_stack()
+
+def test_rpc_clear_stack(rpc_session):
+    check_clear_stack(rpc_session)
+
+def test_linked_clear_stack(linked_session):
+    check_clear_stack(linked_session)
+    

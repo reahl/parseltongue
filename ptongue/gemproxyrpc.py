@@ -102,6 +102,15 @@ class GciTs(GemstoneLibrary):
         self.GciTsReleaseObjs = self.library.GciTsReleaseObjs
         self.GciTsReleaseObjs.restype = BoolType
         self.GciTsReleaseObjs.argtypes = [GciSession, ctypes.POINTER(OopType), ctypes.c_int, ctypes.POINTER(GciErrSType)]
+
+        self.GciTsContinueWith = self.library.GciTsContinueWith
+        self.GciTsContinueWith.restype = OopType
+        self.GciTsContinueWith.argtypes = [GciSession, OopType, OopType, ctypes.POINTER(GciErrSType), ctypes.c_int, ctypes.POINTER(GciErrSType)]
+
+        self.GciTsClearStack = self.library.GciTsClearStack
+        self.GciTsClearStack.restype = BoolType
+        self.GciTsClearStack.argtypes = [GciSession, OopType, ctypes.POINTER(GciErrSType)]
+        
         
     def encrypt_password(self, unencrypted_password):
         if not unencrypted_password:
@@ -149,8 +158,8 @@ class GciTs34(GciTs):
 GemstoneLibrary.register(GciTs34)
 
 
-class GciTs36(GciTs):
-    min_version = '3.6.0'
+class GciTs35(GciTs):
+    min_version = '3.5.0'
     max_version = '3.6.9999'
 
     def __init__(self, lib_path):
@@ -186,7 +195,7 @@ class GciTs36(GciTs):
         return session
 
 
-GemstoneLibrary.register(GciTs36)
+GemstoneLibrary.register(GciTs35)
 
 
 #======================================================================================================================
@@ -381,4 +390,20 @@ class RPCSession(GemstoneSession):
             raise GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
+
+    def object_continue_with(self, gemstone_process, continue_with_error_oop, replace_top_of_stack_oop):
+        error = GciErrSType()
+        return_oop = self.gci.GciTsContinueWith(self.c_session, gemstone_process.oop, replace_top_of_stack_oop, continue_with_error_oop, 0, ctypes.byref(error))
+        if return_oop == OOP_ILLEGAL.value:
+            raise GemstoneError(self, error)
+        return self.get_or_create_gem_object(return_oop)
+
+    def object_clear_stack(self, gemstone_process):
+        error = GciErrSType()
+        success = self.gci.GciTsClearStack(self.c_session, gemstone_process.oop, ctypes.byref(error))
+        if not success:
+            raise GemstoneError(self, error)
+
+
+    
 #======================================================================================================================
