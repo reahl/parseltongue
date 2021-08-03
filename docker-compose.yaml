@@ -17,7 +17,7 @@ services:
         source: ~/.ssh/authorized_keys_docker
         target: /home/developer/.ssh/authorized_keys2
     environment:
-        GEMSTONE_VERSION: 3.4.1
+        GEMSTONE_VERSION: 3.6.1
         DEV_HOME: /home/developer
         DEV_USER: developer
 

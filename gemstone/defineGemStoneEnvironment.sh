@@ -10,7 +10,7 @@ VERSION=$1
 GEMSHELL=$(readlink -f $(dirname $0))/gemShell.sh
 
 cat <<EOF >> $HOME/.profile
-VERSION=$VERSION . $GEMSHELL 
+echo GEMSHELL: $GEMSHELL
+VERSION=$VERSION
+. $GEMSHELL $VERSION
 EOF
-
-

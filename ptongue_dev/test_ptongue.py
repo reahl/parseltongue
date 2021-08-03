@@ -157,7 +157,7 @@ def test_rpc_session_is_remote_exception(invalid_rpc_session):
         invalid_rpc_session.is_remote
 
 
-def test_lined_session_is_remote_exception(invalid_linked_session):
+def test_linked_session_is_remote_exception(invalid_linked_session):
     with expected(GemstoneError, test=r'.*The given session ID is invalid\.'):
         invalid_linked_session.is_remote
 
@@ -483,9 +483,9 @@ def check_identity_of_objects_not_guaranteed_if_not_referenced(session):
        its original (python) identity."""
 
     obj_id = id(session.resolve_symbol('Date'))
-    # python object ids are their memory addresses and can be re-used; here we use some memory to make it unlikely 
+    # python object ids are their memory addresses and can be re-used; here we use some memory for the same kind of python object to make it unlikely 
     # that the recent object's address will be free in the following code.
-    large_object_to_prevent_python_from_reusing_obj_id = '123'*200000000
+    a_gem_int = session.resolve_symbol('Integer')
     assert id(session.resolve_symbol('Date')) != obj_id
 
 
@@ -553,7 +553,7 @@ def check_gemstone_class(session, oop_true):
     today = session.execute('Date today')
 
     date_class = today.gemstone_class()
-    assert session.execute('self == Date', context=date_class).oop == oop_true
+    assert session.execute('self == SmallDate', context=date_class).oop == oop_true
 
         
 #--[ translating: unicode strings ]------------------------------------------------------------
@@ -578,7 +578,7 @@ def test_gemstone_class_exception(guestmode_netldi, session_class, expected_erro
         session.log_out()
 
     with expected(GemstoneError, test=expected_error_message):
-        today.gemstone_class()
+        today.gemstone_class().gemstone_class()
 
         
 def check_is_kind_of(session, oop_true):
@@ -792,11 +792,110 @@ def test_rpc_session_translating_python_string_exception(invalid_rpc_session):
 def test_linked_session_translating_python_string_exception(invalid_linked_session):
     check_translating_python_string_exception(invalid_linked_session, r'.*The given session ID is invalid\.')
 
-        
+
+#--[ translating: complex objects ]------------------------------------------------------------
+
+def check_translating_python_list_to_gemstone(session):
+    py_list = [1, 'two']
+    gemstone_list = session.from_py(py_list)
+
+    assert gemstone_list.gemstone_class() is session.resolve_symbol('OrderedCollection')
+    assert gemstone_list.at(session.from_py(1)).to_py == 1
+    assert gemstone_list.at(session.from_py(2)).to_py == 'two'
+
+    
+def test_rpc_session_translating_python_list_to_gemstone(rpc_session):
+    check_translating_python_list_to_gemstone(rpc_session)
+
+    
+def test_linked_session_translating_python_list_to_gemstone(linked_session):
+    check_translating_python_list_to_gemstone(linked_session)
+
+    
+def check_translating_ordered_collection_to_python(session):
+    gemstone_list = session.resolve_symbol('OrderedCollection').new()
+    gemstone_list.add(session.from_py(1))
+    gemstone_list.add(session.from_py('two'))
+
+    assert gemstone_list.to_py == [1, 'two']
+
+    
+def test_rpc_session_translating_ordered_collection_to_python(rpc_session):
+    check_translating_ordered_collection_to_python(rpc_session)
+
+    
+def test_linked_session_translating_ordered_collection_to_python(linked_session):
+    check_translating_ordered_collection_to_python(linked_session)
+
+
+
+def check_translating_python_dict_to_gemstone(session):
+    py_dict = {'a': 1}
+    gemstone_dictionary = session.from_py(py_dict)
+
+    assert gemstone_dictionary.gemstone_class() is session.resolve_symbol('Dictionary')
+    assert gemstone_dictionary.at(session.from_py('a')).to_py == 1
+
+    
+def test_rpc_session_translating_python_dict_to_gemstone(rpc_session):
+    check_translating_python_dict_to_gemstone(rpc_session)
+
+    
+def test_linked_session_translating_python_dict_to_gemstone(linked_session):
+    check_translating_python_dict_to_gemstone(linked_session)
+
+    
+def check_translating_dictionary_to_python(session):
+    gemstone_dictionary = session.resolve_symbol('Dictionary').new()
+    gemstone_dictionary.at_put(session.from_py('a'), session.from_py(1))
+
+    assert gemstone_dictionary.to_py == {'a': 1}
+
+    
+def test_rpc_session_translating_dictionary_to_python(rpc_session):
+    check_translating_dictionary_to_python(rpc_session)
+
+    
+def test_linked_session_translating_dictionary_to_python(linked_session):
+    check_translating_dictionary_to_python(linked_session)
+
+    
+
+def check_translating_python_set_to_gemstone(session):
+    py_set = set('a')
+    gemstone_set = session.from_py(py_set)
+
+    assert gemstone_set.gemstone_class() is session.resolve_symbol('IdentitySet')
+    assert gemstone_set.asArray().at(1).to_py == 'a'
+
+    
+def test_rpc_session_translating_python_set_to_gemstone(rpc_session):
+    check_translating_python_set_to_gemstone(rpc_session)
+
+    
+def test_linked_session_translating_python_set_to_gemstone(linked_session):
+    check_translating_python_set_to_gemstone(linked_session)
+
+    
+def check_translating_set_to_python(session):
+    gemstone_set = session.resolve_symbol('IdentitySet').new()
+    gemstone_set.add(session.from_py('a'))
+
+    assert gemstone_set.to_py == set('a')
+
+    
+def test_rpc_session_translating_set_to_python(rpc_session):
+    check_translating_set_to_python(rpc_session)
+
+    
+def test_linked_session_translating_set_to_python(linked_session):
+    check_translating_set_to_python(linked_session)
+    
+    
 #--[ translating: misc errors ]------------------------------------------------------------
         
 def check_translating_unsupported_object_types(session):
-    py_not_implemented_type = []
+    py_not_implemented_type = (1,)
     with expected(NotSupported):
         session.from_py(py_not_implemented_type)
 
@@ -830,7 +929,7 @@ def check_exceptions_when_translating_wrong_gemstone_type(session, float_error_m
 
 
 def test_rpc_session_exceptions_when_translating_wrong_gemstone_type(rpc_session):
-    check_exceptions_when_translating_wrong_gemstone_type(rpc_session, r'.*class 802049 invalid for OopToDouble')
+    check_exceptions_when_translating_wrong_gemstone_type(rpc_session, r'.*class .* invalid for OopToDouble')
 
 
 def test_linked_session_exceptions_when_translating_wrong_gemstone_type(linked_session):
@@ -867,4 +966,86 @@ def test_rpc_session_mapping_method_names(rpc_session):
 def test_linked_session_mapping_method_names(linked_session):
     check_mapping_method_names(linked_session)
 
+    
+
+def check_converting_arguments_from_python(session):
+    a_collection = session.resolve_symbol('OrderedCollection').new()
+    a_collection.add(1)
+    a_collection.add('two')
+
+    one = a_collection.at(1)
+    two = a_collection.at(2)
+
+    assert one.to_py is 1
+    assert two.to_py == 'two'
+
+    
+def test_rpc_converting_arguments_from_python(rpc_session):
+    check_converting_arguments_from_python(rpc_session)
+
+    
+def test_linked_converting_arguments_from_python(linked_session):
+    check_converting_arguments_from_python(linked_session)
+
+
+    
+def check_iterating_collections(session):
+    a_collection = session.resolve_symbol('OrderedCollection').new()
+    a_collection.add('one')
+    a_collection.add('two')
+
+    iterated = [i.to_py for i in a_collection]
+    assert iterated == ['one', 'two']
+
+def test_rpc_iterating_collections(rpc_session):
+    check_iterating_collections(rpc_session)
+
+def test_linked_iterating_collections(linked_session):
+    check_iterating_collections(linked_session)    
+
+
+def check_symbol_shortcut(session):
+    assert session.UserGlobals is session.resolve_symbol('UserGlobals')
+
+def test_rpc_session_symbol_shortcut(rpc_session):
+    check_symbol_shortcut(rpc_session)
+
+
+def test_linked_session_symbol_shortcut(linked_session):
+    check_symbol_shortcut(linked_session)
+    
+
+#--[ debugging ]------------------------------------------------------------
+    
+def check_debugging(session):
+    try:
+        session.execute('true ifTrue: [ 0 halt. 1+1. 122+1 ]')
+        assert None, 'Expected a GemstoneError'
+    except GemstoneError as e:
+        try:
+            e.context.gciStepOverFromLevel(1)
+        except GemstoneError as ex:
+            result = ex.continue_with()
+
+    assert result.to_py == 123
+
+def test_rpc_debugging(rpc_session):
+    check_debugging(rpc_session)
+
+def test_linked_debugging(linked_session):
+    check_debugging(linked_session)
+
+    
+def check_clear_stack(session):
+    try:
+        session.execute('true ifTrue: [ 0 halt. 1+1. 122+1 ]')
+        assert None, 'Expected a GemstoneError'
+    except GemstoneError as e:
+        e.clear_stack()
+
+def test_rpc_clear_stack(rpc_session):
+    check_clear_stack(rpc_session)
+
+def test_linked_clear_stack(linked_session):
+    check_clear_stack(linked_session)
     
