@@ -180,7 +180,7 @@ class LinkedSession(GemstoneSession):
 
         global is_gembuilder_initialised
         if not is_gembuilder_initialised:
-            self.gci = gembuilder_init(self)
+            gembuilder_init(self)
 
         global current_linked_session
         if current_linked_session != None and current_linked_session.is_logged_in:
@@ -424,14 +424,14 @@ class LinkedSession(GemstoneSession):
 
     def object_continue_with(self, gemstone_process, continue_with_error_oop, replace_top_of_stack_oop):
         error = GciErrSType()
-        return_oop = self.gci.GciContinueWith(gemstone_process.oop, replace_top_of_stack_oop, 0, continue_with_error_oop)
+        return_oop = gci.GciContinueWith(gemstone_process.oop, replace_top_of_stack_oop, 0, continue_with_error_oop)
         if return_oop == OOP_ILLEGAL.value and gci.GciErr(ctypes.byref(error)):
             raise GemstoneError(self, error)
         return self.get_or_create_gem_object(return_oop)
 
     def object_clear_stack(self, gemstone_process):
         error = GciErrSType()
-        success = self.gci.GciClearStack(gemstone_process.oop)
+        success = gci.GciClearStack(gemstone_process.oop)
         if gci.GciErr(ctypes.byref(error)):        
             raise GemstoneError(self, error)
     
