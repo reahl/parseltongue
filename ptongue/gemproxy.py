@@ -360,6 +360,8 @@ class GemstoneSession:
             item = items.at(self.from_py(i))
             py_set.add(item.to_py)
         return py_set
-    
+
+    def __getattr__(self, name):
+        return self.resolve_symbol(name)
     
 #======================================================================================================================

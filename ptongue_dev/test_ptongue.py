@@ -1004,6 +1004,17 @@ def test_linked_iterating_collections(linked_session):
     check_iterating_collections(linked_session)    
 
 
+def check_symbol_shortcut(session):
+    assert session.UserGlobals is session.resolve_symbol('UserGlobals')
+
+def test_rpc_session_symbol_shortcut(rpc_session):
+    check_symbol_shortcut(rpc_session)
+
+
+def test_linked_session_symbol_shortcut(linked_session):
+    check_symbol_shortcut(linked_session)
+    
+
 #--[ debugging ]------------------------------------------------------------
     
 def check_debugging(session):
