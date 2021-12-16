@@ -1,0 +1,22 @@
+--- ptongue_dev/test_ptongue.py
++++ ptongue_dev/test_ptongue.py
+@@ -1002,3 +1002,19 @@ def test_rpc_iterating_collections(rpc_session):
+ 
+ def test_linked_iterating_collections(linked_session):
+     check_iterating_collections(linked_session)    
++
++
++#--[ debugging ]------------------------------------------------------------
++    
++def check_debugging(session):
++    try:
++        session.execute('System configurationAt: #GemNativeCodeEnabled put: false')
++        session.execute('true ifTrue: [ 0 halt. 123 ]')
++    except GemstoneError as e:
++        result = session.continue_with(e)
++
++    assert result.to_py == 123
++
++def test_rpc_debugging(rpc_session):
++    check_debugging(rpc_session)
++    

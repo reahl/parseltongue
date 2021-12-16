@@ -384,6 +384,9 @@ class LinkedSession(GemstoneSession):
         return py_bytes.decode('utf-8')
 
     def object_latin1_to_py(self, instance):
+        return self.object_bytes_to_py(instance).decode('latin-1')
+
+    def object_bytes_to_py(self, instance):
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
 
@@ -401,7 +404,7 @@ class LinkedSession(GemstoneSession):
 
             py_bytes +=  bytearray(dest[:bytes_returned])
             start_index = start_index + num_bytes
-        return py_bytes.decode('latin-1')
+        return py_bytes
 
     def object_perform(self, instance, selector, *args):
         if not self.is_current_session:

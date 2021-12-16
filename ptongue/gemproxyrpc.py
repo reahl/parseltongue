@@ -349,6 +349,9 @@ class RPCSession(GemstoneSession):
         return py_bytes.decode('utf-8')
     
     def object_latin1_to_py(self, instance):
+        return self.object_bytes_to_py(instance).decode('latin-1')
+        
+    def object_bytes_to_py(self, instance):
         error = GciErrSType()
         start_index = 1
         num_bytes  = self.initial_fetch_size
@@ -363,7 +366,7 @@ class RPCSession(GemstoneSession):
 
             py_bytes += bytearray(dest[:bytes_returned])
             start_index = start_index + num_bytes
-        return py_bytes.decode('latin-1')
+        return py_bytes
 
     def object_perform(self, instance, selector, *args):
         error = GciErrSType()

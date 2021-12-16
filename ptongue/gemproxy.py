@@ -23,6 +23,7 @@ well_known_class_names = {
     OOP_CLASS_DoubleByteSymbol.value: 'string',
     OOP_CLASS_QuadByteString.value: 'string',
     OOP_CLASS_QuadByteSymbol.value: 'string',
+    OOP_CLASS_ByteArray.value: 'bytes',
     OOP_CLASS_CHARACTER.value: 'string',
     OOP_CLASS_Utf8.value: 'string',
     OOP_CLASS_Unicode7.value: 'string',
