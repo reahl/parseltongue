@@ -793,6 +793,19 @@ def test_linked_session_translating_python_string_exception(invalid_linked_sessi
     check_translating_python_string_exception(invalid_linked_session, r'.*The given session ID is invalid\.')
 
 
+def test_rpc_session_translating_bytearray_to_python(rpc_session):
+    check_translating_bytearray_to_python(rpc_session)
+    
+def test_linked_session_translating_bytearray_to_python(linked_session):
+    check_translating_bytearray_to_python(linked_session)
+    
+def check_translating_bytearray_to_python(session):
+    byte_array = session.execute("'abc' asByteArray, (ByteArray new: 5000), 'def' asByteArray")
+    py_bytes = byte_array.to_py
+    assert len(py_bytes) == 5006
+    assert py_bytes.startswith(b'abc')
+    assert py_bytes.endswith(b'def')
+    
 #--[ translating: complex objects ]------------------------------------------------------------
 
 def check_translating_python_list_to_gemstone(session):
