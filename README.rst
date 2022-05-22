@@ -43,7 +43,7 @@ arguments, those must also be GemObject objects)::
                 
     today = date_class.today()
     assert isinstance(today, GemObject)
-    assert today.is_kind_of(date_class)
+    assert today.isKindOf(date_class)
     
 
 Transferring basic objects
@@ -60,6 +60,21 @@ Python. These include unicode strings, various numbers and booleans::
 
    assert python_string == '1901/01/02'
 
+
+Automatic translation of arguments
+----------------------------------
+
+Some arguments to Gemstone method calls can be turned into
+GemObject instances automatically::
+
+          
+   long_ago = date_class.fromDays(1)
+   
+   long_ago_string = long_ago.asString()
+   python_string = long_ago_string.to_py
+
+   assert python_string == '1901/01/02'
+   
    
 Method name mapping
 -------------------
@@ -75,3 +90,29 @@ positional arguments::
     
     user_globals.at_put(some_key, gem_number)
     
+
+
+
+which types of python things can be to_gemstoned on the fly (anything that can be passed to .from_py)
+which types can be to_py
+
+set <> IdentitySet
+list <> OrderedCollection
+dict <> Dictionary
+bytes <> ByteArray
+str   <> DoubleByteString / QuadByteString / Utf8 / Unicode7 / Unicode16 / Unicode32
+str <> Symbol
+str <> Character
+int <> SmallInteger, LargeInteger
+float <> SmallDouble, Float
+bool <> Boolean
+
+
+list, dict, set
+ create an empty equivalent in GemStone, create a gemstone-site equivalent of each element and add it to the collection in gemstone
+
+the reverse is true for to_py on IdentitySet, OrderedCollection, Dictionary
+ 
+
+iterate through Collection
+  returns GemObjects

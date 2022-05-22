@@ -951,6 +951,35 @@ def test_linked_session_exceptions_when_translating_wrong_gemstone_type(linked_s
 
 #--[ pythonic niceties ]------------------------------------------------------------
 
+
+def check_str_methods(session):
+    OrderedCollection = session.resolve_symbol('OrderedCollection')
+
+    assert str(OrderedCollection) == 'OrderedCollection'
+    assert repr(OrderedCollection) == 'GemObject(%s)' % OrderedCollection.oop
+
+    an_instance = OrderedCollection.new()
+    an_instance.add(session.from_py('x'))
+    
+    assert str(an_instance) == 'anOrderedCollection( \'x\')'
+
+    an_instance.add(session.from_py('y'*100))
+    
+    assert str(an_instance) == 'anOrderedCollection'
+    
+    twoday = session.resolve_symbol('Date').fromString(session.from_py('22/2/22').asString())
+    assert str(twoday) == 'aSmallDate(22/02/22)'
+    
+
+
+def test_rpc_session_str_methods(rpc_session):
+    check_str_methods(rpc_session)
+
+
+def test_linked_session_str_methods(linked_session):
+    check_str_methods(linked_session)
+
+    
 def check_mapping_method_names(session):
     user_globals = session.resolve_symbol('UserGlobals')
     some_key = session.new_symbol('akey')

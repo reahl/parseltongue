@@ -47,14 +47,14 @@ well_known_python_instances = {
 }
 
 implemented_python_types = {
-    'NoneType': "boolean_or_none",
-    'bool': "boolean_or_none",
-    'str': "string",
-    'int': "integer",
-    'float': "float",
-    'list': "ordered_collection",
-    'dict': "dictionary",
-    'set': "identity_set"
+    'NoneType': 'boolean_or_none',
+    'bool': 'boolean_or_none',
+    'str': 'string',
+    'int': 'integer',
+    'float': 'float',
+    'list': 'ordered_collection',
+    'dict': 'dictionary',
+    'set': 'identity_set'
 }
 
 #======================================================================================================================
@@ -259,6 +259,22 @@ class GemObject:
         
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, self.oop)
+
+    def __str__(self):
+        if self.perform('isBehavior').to_py:
+            printed = self.perform('printString').to_py
+        else:
+            class_name = self.perform('class').perform('printString').to_py
+            pre = 'an' if (class_name[0] in 'AEIOU') else 'a'
+            description = '%s%s' % (pre, class_name)
+            gem_printed = self.perform('printString')
+            if gem_printed.perform('size').to_py <= max(len(class_name) * 2, 30):
+                printed = gem_printed.to_py
+                if not printed.startswith(description):
+                    printed = '%s(%s)' % (description, printed)
+            else:
+                printed = description
+        return printed #'%s: %s' % (repr(self), printed)
 
     def __del__(self):
         if self.session.is_logged_in:
