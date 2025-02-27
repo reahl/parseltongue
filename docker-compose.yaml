@@ -1,4 +1,3 @@
-version: "3.7"
 services:
 
   parseltongue:
@@ -17,7 +16,7 @@ services:
         source: ~/.ssh/authorized_keys_docker
         target: /home/developer/.ssh/authorized_keys2
     environment:
-        GEMSTONE_VERSION: 3.6.1
+        GEMSTONE_VERSION: 3.7.2
         DEV_HOME: /home/developer
         DEV_USER: developer
 

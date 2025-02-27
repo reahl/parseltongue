@@ -16,7 +16,7 @@ gci = None
 class GciLnk(GemstoneLibrary):
     short_name = 'gcilnk'
     min_version = '3.4.0'
-    max_version = '3.6.9999'
+    max_version = '3.7.9999'
     def __init__(self, lib_path):
         super().__init__(lib_path)
 
