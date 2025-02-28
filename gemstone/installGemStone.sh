@@ -51,3 +51,6 @@ ln -s $GEMSTONE/lib/libicudata.54.1.so $GEMSTONE/lib/libicudata.so.54
 ln -s $GEMSTONE/lib/libicui18n.54.1.so $GEMSTONE/lib/libicui18n.so.54
 ln -s $GEMSTONE/lib/libicuuc.54.1.so $GEMSTONE/lib/libicuuc.so.54
 ln -s $GEMSTONE/lib/libgbjgci313-$VERSION-64.so $GEMSTONE/lib/libgbjgci313.so
+
+sed -i 's/^#GEM_NATIVE_CODE_ENABLED = 2;/GEM_NATIVE_CODE_ENABLED = 0;/' $GEMSTONE/data/system.conf
+
