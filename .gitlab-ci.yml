@@ -1,4 +1,4 @@
-image: python:3.5
+image: python:3.10
 
 before_script:
   - apt-get update -y
@@ -11,10 +11,11 @@ before_script:
     
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
-  - gemstone/installGemStone.sh 3.6.1
-  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
+  - gemstone/installGemStone.sh 3.7.2
+  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
 
 test_parseltongue:
   script:
     - su -lc "echo $GEMSTONE" developer
+    - su -lc "echo $SOURCE_ROOT -- $(pwd)" developer
     - su -lc "cd $SOURCE_ROOT; tox" developer
