@@ -1,12 +1,12 @@
 # syntax = docker/dockerfile:1.2
 
-FROM iwanvosloo/reahl-dev:5.1
+FROM iwanvosloo/reahl-dev:7.0
 
-ARG GEMSTONE_VERSION=3.6.1
+ARG GEMSTONE_VERSION=3.7.2
 ARG DEV_HOME=/home/developer
 ARG DEV_USER=developer
 
-ENV GEMSTONE_VERSION=3.6.1
+ENV GEMSTONE_VERSION=3.7.2
 ENV DEBIAN_FRONTEND=noninteractive
 
 
