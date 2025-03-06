@@ -2,7 +2,7 @@ image: python:3.10
 
 before_script:
   - apt-get update -y
-  - apt-get install -y libpam0g-dev unzip openssh-server
+  - apt-get install -y libpam0g-dev unzip openssh-server iputils-ping
 
   - useradd -m developer
   - echo -e "developer\ndeveloper" | passwd developer
@@ -11,8 +11,8 @@ before_script:
     
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
-  - gemstone/installGemStone.sh 3.6.1
-  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
+  - gemstone/installGemStone.sh 3.7.2
+  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
 
 test_parseltongue:
   script:
