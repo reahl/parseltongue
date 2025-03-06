@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "parseltongue"
+version = "2.0.0"
+dependencies = [
+    "reahl-component",
+    "packaging"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "reahl-component",
+    "reahl-tofu"
+]
+
+[tool.setuptools]
+packages = ["ptongue"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+testpaths = ["ptongue_dev"]
+
+
