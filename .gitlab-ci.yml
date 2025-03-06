@@ -11,8 +11,8 @@ before_script:
     
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
-  - gemstone/installGemStone.sh 3.7.2
-  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
+  - gemstone/installGemStone.sh 3.6.1
+  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.6.1" developer
 
 test_parseltongue:
   script:
