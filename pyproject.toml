@@ -5,6 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "parseltongue"
 version = "2.0.1"
+description = "Python bindings for GemStone/S 64 Bit"
+license = {text = "LGPL-3.0-or-later"}
+authors = [
+    {name = "Iwan Vosloo", email = "iwan@reahl.org"},
+    {name = "Craig Sparks", email = "craig@reahl.org"}
+]
+readme = "README.md"
 dependencies = [
     "reahl-component",
     "packaging"
@@ -23,5 +30,3 @@ packages = ["ptongue"]
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 testpaths = ["ptongue_dev"]
-
-
