@@ -14,6 +14,23 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
+"""
+GemStone thread-safe remote procedure call interface.
+
+This module provides thread-safe remote procedure call (RPC) connectivity to 
+GemStone/S 64 Bit object databases. It implements Python classes that wrap the 
+lower-level GCI (GemBuilder for C Interface) thread-safe library.
+
+Classes:
+    GciTs: Base class for thread-safe GCI library interface
+    GciTs34: GCI interface for GemStone version 3.4
+    RPCSession: Remote session connection to a GemStone database
+
+This module enables applications to connect to GemStone databases using 
+the thread-safe RPC interface, execute Smalltalk code, manipulate objects, 
+and interact with the object database. It provides session management,
+object conversion between Python and GemStone, and transaction control.
+"""
 import ctypes
 import os
 import warnings
