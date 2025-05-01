@@ -30,10 +30,33 @@ gci = None
 
 
 class GciLnk(GemstoneLibrary):
+    """
+    GemStone library wrapper for 'gcilnk' - the linked session interface to GemStone.
+    
+    This class provides a Python wrapper around the C functions in the GemStone
+    linked API (gcilnk). It maps C function signatures to Python methods using ctypes,
+    allowing direct calls to the GemStone C API from Python.
+    
+    Supported GemStone versions range from 3.4.0 to 3.7.9999.
+    
+    This library is used for creating linked sessions where the GCI is linked 
+    directly with your GemStone session rather than using remote procedure calls.
+    """
     short_name = 'gcilnk'
     min_version = '3.4.0'
     max_version = '3.7.9999'
+    
     def __init__(self, lib_path):
+        """
+        Initialize a GciLnk instance by loading the specified library path.
+        
+        Maps all the required C functions to Python methods using ctypes.
+        
+        Parameters
+        ----------
+        lib_path : str
+            Path to the gcilnk shared library.
+        """
         super().__init__(lib_path)
 
         self.GciSetNet = self.library.GciSetNet

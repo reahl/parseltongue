@@ -523,6 +523,7 @@ class GemObject:
             if len(self.session.deallocated_unfreed_gemstone_objects) > self.session.export_set_free_batch_size:
                 self.session.remove_dead_gemstone_objects()
             self.session.deallocated_unfreed_gemstone_objects.add(self.oop)
+            
 #======================================================================================================================
 class GemstoneSession:
     """A Python interface for managing a connection to a Gemstone database.
