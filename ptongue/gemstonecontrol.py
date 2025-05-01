@@ -45,6 +45,9 @@ class GemstoneInstallation(object):
     
     This class provides utilities for working with a specific GemStone
     installation, including environment setup and version information.
+    
+    :param install_directory: Path to the GemStone installation directory
+    :param version: Version of the GemStone installation
     """
     @classmethod
     def from_install_directory(cls, gemstone):
@@ -64,12 +67,6 @@ class GemstoneInstallation(object):
         return GemstoneInstallation(os.environ['GEMSTONE'], version)
         
     def __init__(self, install_directory, version):
-        """
-        Initialize a GemStone installation.
-        
-        :param install_directory: Path to the GemStone installation directory
-        :param version: Version of the GemStone installation
-        """
         self.install_directory = install_directory
         self.version = version
 
@@ -113,22 +110,20 @@ class GemstoneService(object):
     
     Provides functionality to start, stop, and monitor GemStone services
     such as Stone, NetLDI, and other server processes.
+    
+    :param service_name: Name of the service (e.g., 'stone', 'netldi')
+    :param start_command: Command to start the service
+    :param stop_command: Command to stop the service
+    :param start_args: Arguments for the start command
+    :param stop_args: Arguments for the stop command
+    :param start_output_check: String to verify in output when starting
+    :param stop_output_check: String to verify in output when stopping
+    :param gemstone_installation: GemstoneInstallation instance or None to use default
+
     """
     def __init__(self, service_name, start_command, stop_command, start_args=[], stop_args=[],
                  start_output_check='', stop_output_check='',
                  gemstone_installation=None):
-        """
-        Initialize a GemStone service.
-        
-        :param service_name: Name of the service (e.g., 'stone', 'netldi')
-        :param start_command: Command to start the service
-        :param stop_command: Command to stop the service
-        :param start_args: Arguments for the start command
-        :param stop_args: Arguments for the stop command
-        :param start_output_check: String to verify in output when starting
-        :param stop_output_check: String to verify in output when stopping
-        :param gemstone_installation: GemstoneInstallation instance or None to use default
-        """
         self.gemstone_installation = gemstone_installation or GemstoneInstallation.from_install_directory(os.environ['GEMSTONE'])
         self.service_name = service_name
         self.start_args = start_args
@@ -177,14 +172,11 @@ class NetLDI(GemstoneService):
   
     The NetLDI service is responsible for starting GemStone Gem processes
     on behalf of client applications.
+    
+    :param guest_mode: If True, start NetLDI with guest mode enabled (-g flag)
+    :param gemstone_installation: GemstoneInstallation instance or None to use default
     """
     def __init__(self, guest_mode=True, gemstone_installation=None):
-        """
-        Initialize a NetLDI service.
-       
-        :param guest_mode: If True, start NetLDI with guest mode enabled (-g flag)
-        :param gemstone_installation: GemstoneInstallation instance or None to use default
-        """
         start_args = ['-g'] if guest_mode else []
         super(NetLDI, self).__init__('netLDI',
                                      'startnetldi', 'stopnetldi',
@@ -201,16 +193,13 @@ class Stone(GemstoneService):
    
     The Stone process is the main database server that manages the repository
     and coordinates access to the database.
+
+    Creates a Stone service for the default stone 'gs64stone' using
+    standard DataCurator credentials.
+    
+    :param gemstone_installation: GemstoneInstallation instance or None to use default
     """
     def __init__(self, gemstone_installation=None):
-        """
-        Initialize a Stone service with default settings.
-       
-        Creates a Stone service for the default stone 'gs64stone' using
-        standard DataCurator credentials.
-       
-        :param gemstone_installation: GemstoneInstallation instance or None to use default
-        """
         stone_name = 'gs64stone'
         username = 'DataCurator'
         password = 'swordfish'

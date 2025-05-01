@@ -85,20 +85,6 @@ def to_c_bytes(py_string):
     
 #======================================================================================================================
 class GemstoneLibrary:
-    """A registry and factory for Gemstone C library interfaces.
-    
-    This class provides functionality for registering, discovering, and loading
-    Gemstone libraries based on their version compatibility. It serves as a registry
-    and factory for library implementations, allowing the system to choose the
-    appropriate implementation based on the available libraries.
-    
-    :cvar short_name: Short name identifier for the library
-    :cvar min_version: Minimum supported version string
-    :cvar max_version: Maximum supported version string
-
-    :param lib_path: Path to the shared library file
-    
-    """
     registered_libraries = []
     short_name = ''
     min_version = '1'
@@ -109,27 +95,10 @@ class GemstoneLibrary:
     
     @classmethod
     def register(cls, library_class):
-        """Register a library implementation class.
-        
-        This adds the given library class to the list of available implementations
-        that can be selected based on version compatibility.
-        
-        :param library_class: The library class to register
-        """
         cls.registered_libraries.append(library_class)
     
     @classmethod
     def find_library(cls, short_name):
-        """Find and instantiate an appropriate library implementation.
-        
-        This method looks for compatible library files in the Gemstone installation
-        directory and instantiates the most appropriate implementation class based
-        on version compatibility.
-        
-        :param short_name: Short name identifier for the library to find
-        :return: An instance of the appropriate library implementation
-        :raises Exception: If no compatible library file or implementation is found
-        """
         lib_dir = pathlib.Path(os.environ['GEMSTONE']) / 'lib'
         lib_names = list(lib_dir.glob('*%s-*' % short_name))
         if not lib_names:
@@ -272,13 +241,6 @@ class GemstoneError(Exception):
             return self.message
 
     def __repr__(self):
-        """Get a detailed string representation of the exception.
-        
-        This tries to use the Smalltalk exception's printString method,
-        falling back to the C-level error message if that fails.
-        
-        :return: A detailed string representation of the exception.
-        """
         try:
             return self.exception_obj.printString().to_py
         except:
@@ -411,29 +373,9 @@ class GemObject:
         return self.session.object_gemstone_class(self)
 
     def __getattr__(self, name):
-        """Handle attribute access for methods not defined in Python.
-
-        This method intercepts attribute access and converts it to method calls
-        on the Gemstone object. This allows for natural Python syntax when calling
-        Gemstone methods.
-
-        :param name: The name of the attribute being accessed.
-        :return: A function that, when called, will invoke the corresponding
-                method on the Gemstone object.
-        """
         return functools.partial(self.perform_mapped_selector, name)
 
     def perform_mapped_selector(self, selector, *args):
-        """Perform a method call using Python method name conventions.
-
-        This method provides the implementation for calling Gemstone methods
-        using Python naming conventions (underscores instead of colons).
-
-        :param selector: The Python-style method name (with underscores).
-        :param args: Arguments to pass to the method.
-        :return: The result of the method call.
-        :raises TypeError: If an incorrect number of arguments is provided.
-        """
         smalltalk_selector = selector.replace('_', ':')
         if args or '_' in selector:
            smalltalk_selector += ':'
@@ -469,10 +411,6 @@ class GemObject:
             yield self_as_collection.at(i)
         
     def __repr__(self):
-        """Provide a string representation for debugging.
-
-        :return: A string representation showing the class name and OOP.
-        """
         return '%s(%s)' % (self.__class__.__name__, self.oop)
 
     def __str__(self):
@@ -499,12 +437,6 @@ class GemObject:
         return printed
 
     def __del__(self):
-        """Clean up resources when this object is garbage collected.
-
-        This method ensures that when a Python GemObject is garbage collected,
-        the corresponding Gemstone object is added to a list of objects that
-        should be released on the Gemstone side.
-        """
         if self.session.is_logged_in:
             if len(self.session.deallocated_unfreed_gemstone_objects) > self.session.export_set_free_batch_size:
                 self.session.remove_dead_gemstone_objects()
@@ -562,22 +494,9 @@ class GemstoneSession:
         return self.get_or_create_gem_object(return_oop)
         
     def py_to_boolean_or_none_(self, py_object):
-        """Convert Python None, True, or False to their Gemstone equivalents.
-        
-        :param py_object: Python None, True, or False
-        :return: OOP value for the corresponding Gemstone object
-        """
         return well_known_python_instances[py_object]
         
     def py_to_integer_(self, py_int):
-        """Convert a Python integer to a Gemstone integer.
-        
-        For values that fit in a SmallInteger, creates a direct OOP.
-        For larger integers, uses Gemstone LargeInteger.
-        
-        :param py_int: A Python integer
-        :return: OOP value for the corresponding Gemstone integer
-        """
         try:
             return_oop = compute_small_integer_oop(py_int)
         except OverflowError:    
@@ -585,48 +504,24 @@ class GemstoneSession:
         return return_oop
         
     def py_to_ordered_collection_(self, py_list):
-        """Convert a Python list to a Gemstone OrderedCollection.
-        
-        :param py_list: A Python list
-        :return: OOP value for a corresponding Gemstone OrderedCollection
-        """
         collection = self.resolve_symbol('OrderedCollection').new()
         for i in py_list:
             collection.add(self.from_py(i))
         return collection.oop
         
     def py_to_dictionary_(self, py_dict):
-        """Convert a Python dictionary to a Gemstone Dictionary.
-        
-        :param py_dict: A Python dictionary
-        :return: OOP value for a corresponding Gemstone Dictionary
-        """
         dictionary = self.resolve_symbol('Dictionary').new()
         for key, value in py_dict.items():
             dictionary.at_put(self.from_py(key), self.from_py(value))
         return dictionary.oop
         
     def py_to_identity_set_(self, py_set):
-        """Convert a Python set to a Gemstone IdentitySet.
-        
-        :param py_set: A Python set
-        :return: OOP value for a corresponding Gemstone IdentitySet
-        """
         identity_set = self.resolve_symbol('IdentitySet').new()
         for i in py_set:
             identity_set.add(self.from_py(i))
         return identity_set.oop
     
     def object_to_py(self, instance):
-        """Convert a Gemstone object to its corresponding Python representation.
-        
-        This method determines the appropriate conversion method based on the
-        Gemstone object's class and delegates to a specialized conversion method.
-        
-        :param instance: A GemObject to convert to Python
-        :return: The corresponding Python object
-        :raises NotSupported: If the Gemstone class cannot be converted
-        """
         try: 
             return well_known_instances[instance.oop]
         except KeyError:
@@ -637,43 +532,22 @@ class GemstoneSession:
             return getattr(self, 'object_{}_to_py'.format(gem_class_name))(instance)
     
     def object_small_integer_to_py(self, instance):
-        """Convert a Gemstone SmallInteger to a Python integer.
-        
-        :param instance: A GemObject representing a SmallInteger
-        :return: The corresponding Python integer
-        :raises GemstoneApiError: If the object is not a SmallInteger
-        """
         if GCI_OOP_IS_SMALL_INT(instance.oop):
             return ctypes.c_int64(instance.oop).value >> ctypes.c_int64(OOP_NUM_TAG_BITS).value
         else:
             raise GemstoneApiError('Expected oop to represent a Small Integer.')
             
     def object_large_integer_to_py(self, instance):
-        """Convert a Gemstone LargeInteger to a Python integer.
-        
-        :param instance: A GemObject representing a LargeInteger
-        :return: The corresponding Python integer
-        """
         string_result = self.object_latin1_to_py(self.object_perform(instance, 'asString'))
         return int(string_result)
         
     def object_ordered_collection_to_py(self, instance):
-        """Convert a Gemstone OrderedCollection to a Python list.
-        
-        :param instance: A GemObject representing an OrderedCollection
-        :return: The corresponding Python list
-        """
         py_list = []
         for i in range(1, instance.size().to_py+1):
             py_list.append(instance.at(i).to_py)
         return py_list
         
     def object_dictionary_to_py(self, instance):
-        """Convert a Gemstone Dictionary to a Python dictionary.
-        
-        :param instance: A GemObject representing a Dictionary
-        :return: The corresponding Python dictionary
-        """
         py_dict = {}
         keys = instance.keys().asArray()
         for i in range(1, keys.size().to_py+1):
@@ -683,11 +557,6 @@ class GemstoneSession:
         return py_dict
     
     def object_identity_set_to_py(self, instance):
-        """Convert a Gemstone IdentitySet to a Python set.
-        
-        :param instance: A GemObject representing an IdentitySet
-        :return: The corresponding Python set
-        """
         py_set = set()
         items = instance.asArray()
         for i in range(1, items.size().to_py+1):
@@ -696,15 +565,6 @@ class GemstoneSession:
         return py_set
         
     def __getattr__(self, name):
-        """Allow direct access to Gemstone globals as attributes.
-        
-        This method allows Gemstone globals to be accessed as attributes
-        of the session object, e.g., session.OrderedCollection instead of
-        session.resolve_symbol('OrderedCollection').
-        
-        :param name: Name of the Gemstone global to access
-        :return: A GemObject representing the global
-        """
         return self.resolve_symbol(name)
 
 #======================================================================================================================
