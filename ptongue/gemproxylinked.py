@@ -212,6 +212,19 @@ def get_current_linked_session():
 
 #======================================================================================================================
 class LinkedSession(GemstoneSession):
+    """
+    A session that directly links to a GemStone database using the linked GCI API.
+    
+    LinkedSession provides a client that runs in the same process as the GemStone server
+    (as opposed to RPCSession which connects to a remote server). Only one active 
+    LinkedSession can exist at a time per process.
+    
+    :param username: GemStone user account name used for authentication
+    :param password: GemStone password used for authentication
+    :param stone_name: Name of the GemStone repository to connect to, defaults to 'gs64stone'
+    :param host_username: If specified, the OS username used for connecting to the server
+    :param host_password: Password for host_username, if required, defaults to empty string
+    """
     def __init__(self, username, password, stone_name='gs64stone',
                   host_username=None, host_password=''):
         super().__init__()
@@ -239,9 +252,23 @@ class LinkedSession(GemstoneSession):
         current_linked_session = self
 
     def __repr__(self):
+        """
+        Return a string representation of the LinkedSession instance.
+        
+        :return: A string in the format 'LinkedSession(session_id)'
+        """
         return '%s(%s)' % (self.__class__.__name__, self.c_session_id)
     
     def encrypt_password(self, unencrypted_password):
+        """
+        Encrypt a password for secure transmission to GemStone.
+        
+        Uses the GemStone encryption mechanism to create a secure password 
+        representation suitable for sending over the network.
+        
+        :param unencrypted_password: The plaintext password to encrypt
+        :return: The encrypted password ready for use with GciLoginEx
+        """
         out_buff_size = 0
         encrypted_char = 0
         while encrypted_char == 0:
@@ -251,6 +278,15 @@ class LinkedSession(GemstoneSession):
         return out_buff.value
 
     def remove_dead_gemstone_objects(self):
+        """
+        Release GemStone objects that are no longer referenced by Python.
+        
+        This method cleans up objects that were previously held by Python
+        but are no longer referenced. It prevents memory leaks by informing
+        GemStone that these objects can be released.
+        
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         unreferenced_gemstone_objects = [oop for oop in self.deallocated_unfreed_gemstone_objects if oop not in self.instances]
         if unreferenced_gemstone_objects:
@@ -262,6 +298,14 @@ class LinkedSession(GemstoneSession):
         self.deallocated_unfreed_gemstone_objects.clear()
 
     def abort(self):
+        """
+        Abort the current transaction.
+        
+        Any changes made since the last commit or abort will be discarded.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -270,6 +314,14 @@ class LinkedSession(GemstoneSession):
             raise GemstoneError(self, error)
 
     def begin(self):
+        """
+        Begin a new transaction.
+        
+        If there is an active transaction, it is aborted before starting a new one.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -278,6 +330,14 @@ class LinkedSession(GemstoneSession):
             raise GemstoneError(self, error)
 
     def commit(self):
+        """
+        Commit the current transaction.
+        
+        Write all changes made in the current transaction to the database.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If the commit fails or an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -286,6 +346,16 @@ class LinkedSession(GemstoneSession):
 
     @property
     def is_remote(self):
+        """
+        Determine whether this session is connected to a remote Gem.
+        
+        For a LinkedSession, this should typically return False unless 
+        the session was configured in a special way.
+        
+        :return: True if connected to a remote Gem, False if using a linked Gem
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -296,14 +366,34 @@ class LinkedSession(GemstoneSession):
 
     @property
     def is_logged_in(self):
+        """
+        Check if this session is currently logged in.
+        
+        :return: True if the session is logged in, False otherwise
+        """
         return (self.c_session_id == gci.GciGetSessionId()) and (self.c_session_id != GCI_INVALID_SESSION_ID)
 
     @property
     def is_current_session(self):
+        """
+        Check if this session is the current active linked session.
+        
+        Only one linked session can be active at a time in a process.
+        
+        :return: True if this is the current active session, False otherwise
+        """
         global current_linked_session
         return self is current_linked_session
 
     def py_to_string_(self, py_str):
+        """
+        Convert a Python string to a GemStone string object.
+        
+        :param py_str: The Python string to convert
+        :return: The object ID (oop) of the new GemStone string
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -313,6 +403,14 @@ class LinkedSession(GemstoneSession):
         return return_oop
 
     def py_to_float_(self, py_float):
+        """
+        Convert a Python float to a GemStone Float or SmallDouble object.
+        
+        :param py_float: The Python float to convert
+        :return: The object ID (oop) of the new GemStone float
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -322,6 +420,20 @@ class LinkedSession(GemstoneSession):
         return return_oop
 
     def execute(self, source, context=None, symbol_list=None):
+        """
+        Execute GemStone Smalltalk code.
+        
+        :param source: The Smalltalk code to execute, either as a Python string or 
+                      a GemStone string object
+        :param context: The context object in which to execute the code, defaults to None
+                       (which uses the default nil context)
+        :param symbol_list: The symbol list to use for name resolution, defaults to None
+                           (which uses the default symbol list from the user's profile)
+        :return: The result of executing the Smalltalk code
+        :raises GemstoneApiError: If this session is not the current active session,
+                                 or if the source is not of the expected type
+        :raises GemstoneError: If an error occurs during execution
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -338,6 +450,14 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def new_symbol(self, py_string):
+        """
+        Create a new GemStone Symbol object.
+        
+        :param py_string: The Python string to be converted to a Symbol
+        :return: The new Symbol object
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs, such as if the string is too long to be a Symbol
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -347,6 +467,18 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def resolve_symbol(self, symbol, symbol_list=None):
+        """
+        Resolve a symbol to its value in a symbol dictionary.
+        
+        :param symbol: The name of the symbol to resolve, either as a Python string
+                      or a GemStone Symbol object
+        :param symbol_list: The symbol list to use for resolution, defaults to None
+                           (which uses the default symbol list from the user's profile)
+        :return: The object that the symbol refers to
+        :raises GemstoneApiError: If this session is not the current active session,
+                                 or if symbol is not of the expected type
+        :raises GemstoneError: If the symbol cannot be resolved or another error occurs
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -361,6 +493,14 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
         
     def log_out(self):
+        """
+        Log out from the GemStone session.
+        
+        After log out, the session can no longer be used.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during logout
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -372,6 +512,15 @@ class LinkedSession(GemstoneSession):
         current_linked_session = None
 
     def object_is_kind_of(self, instance, a_class):
+        """
+        Check if an object is an instance of a specified class or one of its subclasses.
+        
+        :param instance: The object to check
+        :param a_class: The class to compare against
+        :return: True if instance is of the specified class or a subclass, False otherwise
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the check
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -381,6 +530,14 @@ class LinkedSession(GemstoneSession):
         return bool(is_kind_of_result)
 
     def object_gemstone_class(self, instance):
+        """
+        Get the class of a GemStone object.
+        
+        :param instance: The object whose class is to be determined
+        :return: The class of the specified object
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the operation
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -390,6 +547,14 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def object_float_to_py(self, instance):
+        """
+        Convert a GemStone Float or SmallDouble to a Python float.
+        
+        :param instance: A GemStone Float or SmallDouble object
+        :return: The Python float value
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If the object is not a Float or SmallDouble, or if another error occurs
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -399,6 +564,17 @@ class LinkedSession(GemstoneSession):
         return result
 
     def object_string_to_py(self, instance):
+        """
+        Convert a GemStone String to a Python string.
+        
+        This method supports various string types in GemStone, including
+        String, DoubleByteString, QuadByteString, and Utf8.
+        
+        :param instance: A GemStone string object
+        :return: The Python string representation
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If the object is not a string, or if another error occurs
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         start_index = 1
@@ -423,9 +599,25 @@ class LinkedSession(GemstoneSession):
         return py_bytes.decode('utf-8')
 
     def object_latin1_to_py(self, instance):
+        """
+        Convert a GemStone String or ByteArray to a Python string using Latin-1 encoding.
+        
+        :param instance: A GemStone string or byte object
+        :return: The Python string representation using Latin-1 encoding
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during conversion
+        """
         return self.object_bytes_to_py(instance).decode('latin-1')
 
     def object_bytes_to_py(self, instance):
+        """
+        Convert a GemStone ByteArray or byte-based object to Python bytes.
+        
+        :param instance: A GemStone byte object
+        :return: The Python bytes representation
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If the object is not a byte object, or if another error occurs
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
 
@@ -446,6 +638,18 @@ class LinkedSession(GemstoneSession):
         return py_bytes
 
     def object_perform(self, instance, selector, *args):
+        """
+        Send a message to a GemStone object.
+        
+        :param instance: The receiver of the message (the object to which the message is sent)
+        :param selector: The message selector, either as a Python string or a GemStone Symbol
+        :param args: The arguments to the message
+        :return: The result of the message send
+        :raises GemstoneApiError: If this session is not the current active session,
+                                 or if the selector is not of the expected type
+        :raises GemstoneError: If an error occurs during the message send,
+                              such as if the object does not understand the selector
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         if not isinstance(selector, (str, GemObject)):
@@ -465,6 +669,17 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def object_continue_with(self, gemstone_process, continue_with_error_oop, replace_top_of_stack_oop):
+        """
+        Continue execution of a halted GemStone process.
+        
+        Used primarily for debugging or exception handling.
+        
+        :param gemstone_process: The GsProcess object that is halted
+        :param continue_with_error_oop: If not None, an error object to continue with
+        :param replace_top_of_stack_oop: Optional value to replace the top of the stack before continuing
+        :return: The result of continuing execution
+        :raises GemstoneError: If an error occurs during the operation
+        """
         error = GciErrSType()
         return_oop = gci.GciContinueWith(gemstone_process.oop, replace_top_of_stack_oop, 0, continue_with_error_oop)
         if return_oop == OOP_ILLEGAL.value and gci.GciErr(ctypes.byref(error)):
@@ -472,9 +687,16 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def object_clear_stack(self, gemstone_process):
+        """
+        Clear the execution stack of a GemStone process.
+        
+        This effectively terminates execution of the process.
+        
+        :param gemstone_process: The GsProcess object whose stack is to be cleared
+        :raises GemstoneError: If an error occurs during the operation
+        """
         error = GciErrSType()
         success = gci.GciClearStack(gemstone_process.oop)
         if gci.GciErr(ctypes.byref(error)):        
             raise GemstoneError(self, error)
-    
 #======================================================================================================================
