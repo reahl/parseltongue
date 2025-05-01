@@ -85,22 +85,27 @@ def to_c_bytes(py_string):
     
 #======================================================================================================================
 class GemstoneLibrary:
-    """A registry and factory for Gemstone library interfaces.
+    """A registry and factory for Gemstone C library interfaces.
     
     This class provides functionality for registering, discovering, and loading
     Gemstone libraries based on their version compatibility. It serves as a registry
     and factory for library implementations, allowing the system to choose the
     appropriate implementation based on the available libraries.
     
-    :cvar registered_libraries: List of registered library classes
     :cvar short_name: Short name identifier for the library
     :cvar min_version: Minimum supported version string
     :cvar max_version: Maximum supported version string
+
+    :param lib_path: Path to the shared library file
+    
     """
     registered_libraries = []
     short_name = ''
     min_version = '1'
     max_version = '0'
+    
+    def __init__(self, lib_path):
+        self.library = CDLL(str(lib_path))
     
     @classmethod
     def register(cls, library_class):
@@ -121,12 +126,6 @@ class GemstoneLibrary:
         directory and instantiates the most appropriate implementation class based
         on version compatibility.
         
-        The method:
-        1. Locates library files matching the given short name
-        2. Extracts version information from the file name
-        3. Finds registered library classes that support that version
-        4. Instantiates the most recent compatible implementation
-        
         :param short_name: Short name identifier for the library to find
         :return: An instance of the appropriate library implementation
         :raises Exception: If no compatible library file or implementation is found
@@ -146,12 +145,6 @@ class GemstoneLibrary:
         return latest_matching_class(lib_path)
         
     def __init__(self, lib_path):
-        """Initialize a library instance.
-        
-        Loads the shared library from the specified path.
-        
-        :param lib_path: Path to the shared library file
-        """
         self.library = CDLL(str(lib_path))
 
         
@@ -165,15 +158,10 @@ class GemstoneError(Exception):
     needs to be a Python Exception to work properly with Python's exception
     handling mechanisms.
     
-    :ivar c_error: The C structure containing the error details.
-    :ivar session: The Gemstone session where the error occurred.
+    :param sess: The Gemstone session where the error occurred.
+    :param c_error: A C structure containing the error details.
     """
     def __init__(self, sess, c_error):
-        """Initialize a new GemstoneError.
-        
-        :param sess: The Gemstone session where the error occurred.
-        :param c_error: A C structure containing the error details.
-        """
         self.c_error = c_error
         self.session = sess
 
@@ -368,14 +356,12 @@ class GemObject:
 
     :ivar oop: The object-oriented pointer value in the Gemstone VM.
     :ivar session: Reference to the session this object belongs to.
+    
+    :param session: The Gemstone session this object belongs to.
+    :param oop: The object-oriented pointer value in the Gemstone VM.
     """
     
     def __init__(self, session, oop):
-        """Initialize a new GemObject.
-
-        :param session: The Gemstone session this object belongs to.
-        :param oop: The object-oriented pointer value in the Gemstone VM.
-        """
         self.oop = oop
         self.session = session
 
@@ -534,17 +520,8 @@ class GemstoneSession:
     
     The session maintains a cache of GemObject instances to ensure that the same 
     Gemstone object is always represented by the same Python object during its lifetime.
-    
-    :ivar instances: A weak dictionary mapping OOPs to GemObject instances
-    :ivar deallocated_unfreed_gemstone_objects: Set of OOPs pending release
-    :ivar initial_fetch_size: Default size for fetching data chunks
-    :ivar export_set_free_batch_size: Batch size for releasing objects
     """
     def __init__(self):
-        """Initialize a new Gemstone session.
-        
-        Sets up the object cache and management structures.
-        """
         self.instances = WeakValueDictionary()
         self.deallocated_unfreed_gemstone_objects = set()
         self.initial_fetch_size = 200
