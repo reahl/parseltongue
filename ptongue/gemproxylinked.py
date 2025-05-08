@@ -23,6 +23,9 @@ with GemStone using the GemBuilder for C (GCI) interface.
 Supported GemStone versions: 3.4.0 to 3.7.9999
 
 Example usage:
+
+.. code-block:: python
+
     from ptongue.gemproxylinked import LinkedSession
 
     # Create a logged-in linked session to a GemStone database

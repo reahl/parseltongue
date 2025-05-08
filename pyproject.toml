@@ -11,7 +11,7 @@ authors = [
     {name = "Iwan Vosloo", email = "iwan@reahl.org"},
     {name = "Craig Sparks", email = "craig@reahl.org"}
 ]
-readme = "README.md"
+readme = "README.rst"
 dependencies = [
     "reahl-component",
     "packaging"
@@ -23,6 +23,11 @@ test = [
     "reahl-component",
     "reahl-tofu"
 ]
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinxcontrib-apidoc>=0.3.0",
+]
 
 [tool.setuptools]
 packages = ["ptongue"]
@@ -30,3 +35,9 @@ packages = ["ptongue"]
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 testpaths = ["ptongue_dev"]
+
+[tool.sphinx-docs]
+source_dir = "docs"
+build_dir = "docs/_build"
+builder = "html"
+

@@ -228,13 +228,6 @@ class GemstoneError(Exception):
         return self.c_error.message.decode('utf-8')
 
     def __str__(self):
-        """Get a string representation of the exception.
-        
-        This tries to use the Smalltalk exception's asString method,
-        falling back to the C-level error message if that fails.
-        
-        :return: A string representation of the exception.
-        """
         try:
             return self.exception_obj.asString().to_py
         except:
@@ -391,9 +384,15 @@ class GemObject:
         This is the low-level method that actually executes a method call on the
         Gemstone object. It accepts a Gemstone selector (Symbol) and arguments.
 
+        This method need not be called directly, it is automatically invoked
+        when an unknown attribute is called on a GemObject, for example::
+
+          session.Date.today().addDays(2)
+
         :param selector: The method selector, either as a GemObject Symbol
                          or a string that will be converted to a Symbol.
-        :param args: GemObject arguments to pass to the method.
+        :param args: GemObject arguments to pass to the method. If not a GemObject,
+                     the object will be transformed using session.from_py()
         :return: The result of the method call.
         """
         return self.session.object_perform(self, selector, *args)
