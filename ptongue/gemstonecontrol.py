@@ -15,22 +15,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
 """
-GemStone server process control module.
+GemStone server process control
+===============================
 
 This module provides classes for managing GemStone/S 64 Bit database server 
 processes and installations. It includes functionality to start and stop 
 the Stone repository monitor and NetLDI network service, as well as to 
 configure the environment for GemStone operations.
 
-Classes:
-    GemstoneInstallation: Represents a GemStone installation directory and version
-    GemstoneService: Base class for GemStone server processes
-    NetLDI: Controls the Network Long Distance Information service
-    Stone: Controls the Stone repository monitor (database server)
-
-This module allows programmatic control of GemStone server processes,
-which is useful for automated testing, application deployment, and
-system administration tasks.
+The programmatic control offered here is useful for automated testing,
+application deployment, and system administration tasks.
 """
 import os
 import re

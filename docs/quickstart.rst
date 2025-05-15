@@ -1,9 +1,9 @@
 Quick Start Guide
 =================
 
-This guide will help you get started with Parseltongue, the Python interface to GemStone/S 64.
+This guide will help you get started with Parseltongue, a Python interface to GemStone/S 64.
 
-For more examples and detailed API documentation, see the API reference section.
+For more examples see :doc:`examples`, for API documentation, see :doc:`api/ptongue`.
 
 
 Connecting to GemStone
@@ -77,12 +77,23 @@ Python. These include unicode strings, various numbers and booleans::
 
     assert python_string == '1901/01/02'
 
+A few collection types can also be transferred. Transferring
+a collection also transfers its contents::
+
+   gem_number = session.from_py(1)
+   gem_collection = session.OrderedCollection.new()
+   gem_collection.add(gem_number)
+
+   py_list = gem_collection.to_py
+   assert py_list[0] == 1
+
+See :meth:`~ptongue.GemObject.to_py` and :meth:`~ptongue.GemstoneSession.from_py`.
 
 Automatic translation of arguments
 ----------------------------------
 
 Some arguments to Gemstone method calls can be turned into
-GemObject instances without first having to ``from_py`` them::
+GemObject instances without first having to :meth:`~ptongue.GemstoneSession.from_py`. them::
 
           
     long_ago = date_class.fromDays(1)
@@ -91,7 +102,22 @@ GemObject instances without first having to ``from_py`` them::
     python_string = long_ago_string.to_py
 
     assert python_string == '1901/01/02'
-   
+
+    
+Iterating over Gemstone collections
+-----------------------------------
+
+When a Gemstone object understands asOrdereredCollection, Python can iterate over
+its elements without converting the collection or its elements to Python::
+
+   gem_collection = session.OrderedCollection.new()
+   gem_collection.add(1)
+
+   assert [i.to_py for i in gem_collection] == [1]
+
+This is useful when you want to iterate over a Gemstone collection and execute
+methods without transferring it or its elements to Python.
+
    
 Method name mapping
 -------------------
@@ -113,8 +139,7 @@ A complete example
 
 .. code-block:: python
 
-    from ptongue.gemproxylinked import LinkedSession
-    from ptongue.gemproxy import GemObject
+    from ptongue import LinkedSession, GemObject
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 
@@ -149,8 +174,7 @@ Error Handling
 
 .. code-block:: python
 
-    from ptongue.gemproxylinked import LinkedSession
-    from ptongue.gemproxy import GemstoneError
+    from ptongue import LinkedSession, GemstoneError
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 

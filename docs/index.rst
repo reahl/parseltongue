@@ -11,7 +11,7 @@ with a running GemStone/S 64 server.
    
    installation
    quickstart
-   api/modules
+   api/ptongue
    examples
 
 Indices and tables

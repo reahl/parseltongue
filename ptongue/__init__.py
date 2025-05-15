@@ -14,3 +14,11 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
+
+
+from .gemproxy import GemObject, GemstoneSession, GemstoneError, InvalidSession, NotSupported, GemstoneApiError, GemstoneWarning
+from .gemproxylinked import LinkedSession
+from .gemproxyrpc import RPCSession
+
+__all__ = ['GemObject', 'GemstoneSession', 'LinkedSession', 'RPCSession', 'GemstoneError', 'InvalidSession', 'NotSupported', 'GemstoneApiError', 'GemstoneWarning',
+           'gemstonecontrol']

@@ -15,27 +15,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
 """
-GemStone Linked Session Interface Module
+Linked Sessions
+===============
 
-This module provides classes and utilities for establishing linked sessions
-with GemStone using the GemBuilder for C (GCI) interface.
+This module provides connectivity to GemStone/S 64 Bit object databases via
+a gem embedded in the calling process.
 
-Supported GemStone versions: 3.4.0 to 3.7.9999
-
-Example usage:
-
-.. code-block:: python
-
-    from ptongue.gemproxylinked import LinkedSession
-
-    # Create a logged-in linked session to a GemStone database
-    session = LinkedSession('DataCurator', 'swordfish')
-    try:
-        session.begin()
-        # Perform database operations
-        session.commit()
-    finally:
-        session.log_out()
 """
 import ctypes
 from contextlib import contextmanager
@@ -216,11 +201,11 @@ class LinkedSession(GemstoneSession):
     """
     A session that directly links to a GemStone database using the linked GCI API.
     
-    LinkedSession provides a client that runs in the same process as the GemStone server
+    LinkedSession provides a client that runs inside the Python process
     (as opposed to RPCSession which connects to a remote server). Only one active 
     LinkedSession can exist at a time per process.
 
-    Creating a LinkedSession includes logging in.
+    Creating a LinkedSession implies logging in.
     
     :param username: GemStone user account name used for authentication
     :param password: GemStone password used for authentication
@@ -258,15 +243,6 @@ class LinkedSession(GemstoneSession):
         return '%s(%s)' % (self.__class__.__name__, self.c_session_id)
     
     def encrypt_password(self, unencrypted_password):
-        """
-        Encrypt a password for secure transmission to GemStone.
-        
-        Uses the GemStone encryption mechanism to create a secure password 
-        representation suitable for sending over the network.
-        
-        :param unencrypted_password: The plaintext password to encrypt
-        :return: The encrypted password ready for use with GciLoginEx
-        """
         out_buff_size = 0
         encrypted_char = 0
         while encrypted_char == 0:
@@ -401,7 +377,7 @@ class LinkedSession(GemstoneSession):
         :param context: The context object in which to execute the code, defaults to None
                        (which uses the default nil context)
         :param symbol_list: The symbol list to use for name resolution, defaults to None
-                           (which uses the default symbol list from the user's profile)
+                           (which uses the default symbol list from the user\'s profile)
         :return: The result of executing the Smalltalk code
         :raises GemstoneApiError: If this session is not the current active session,
                                  or if the source is not of the expected type
@@ -442,6 +418,10 @@ class LinkedSession(GemstoneSession):
     def resolve_symbol(self, symbol, symbol_list=None):
         """
         Resolve a symbol to its value in a symbol dictionary.
+
+        There is a shorthand for this method: session.SymbolName automatically
+        calls session.resolve_symbol('SymbolName') iff there is no Python attribute
+        named "SymbolName" on session.
         
         :param symbol: The name of the symbol to resolve, either as a Python string
                       or a GemStone Symbol object

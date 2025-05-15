@@ -15,21 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
 """
-GemStone thread-safe remote procedure call interface.
+RPC Sessions
+============
 
 This module provides thread-safe remote procedure call (RPC) connectivity to 
-GemStone/S 64 Bit object databases. It implements Python classes that wrap the 
-lower-level GCI (GemBuilder for C Interface) thread-safe library.
-
-Classes:
-    GciTs: Base class for thread-safe GCI library interface
-    GciTs34: GCI interface for GemStone version 3.4
-    RPCSession: Remote session connection to a GemStone database
-
-This module enables applications to connect to GemStone databases using 
-the thread-safe RPC interface, execute Smalltalk code, manipulate objects, 
-and interact with the object database. It provides session management,
-object conversion between Python and GemStone, and transaction control.
+GemStone/S 64 Bit object databases.
 """
 import ctypes
 import os
@@ -41,14 +31,6 @@ from ptongue.gemproxy import GemstoneLibrary, GemObject, GemstoneSession, Gemsto
 
 
 class GciTs(GemstoneLibrary):
-    """
-    Interface to the thread-safe GemStone C Interface (GCI) library.
-    
-    This class provides thread-safe access to GemStone database operations
-    through the gcits shared library.
-    
-    :param lib_path: Path to the gcits shared library
-    """
     short_name = 'gcits'
 
     def __init__(self, lib_path):
@@ -154,15 +136,6 @@ class GciTs(GemstoneLibrary):
         
         
     def encrypt_password(self, unencrypted_password):
-        """
-        Encrypt a plaintext password for use with GemStone.
-        
-        This creates a GemStone-compatible encrypted password that can be
-        used for login operations.
-        
-        :param unencrypted_password: The plaintext password to encrypt
-        :return: The encrypted password
-        """
         if not unencrypted_password:
             return None
         out_buff_size = 0
@@ -175,12 +148,6 @@ class GciTs(GemstoneLibrary):
 
 
 class GciTs34(GciTs):
-    """
-    Thread-safe GCI interface for GemStone version 3.4.
-    
-    This class extends GciTs to provide functionality specific to 
-    GemStone version 3.4.0 through 3.4.9999.
-    """
     min_version = '3.4.0'
     max_version = '3.4.9999'
 
@@ -215,14 +182,6 @@ GemstoneLibrary.register(GciTs34)
 
 
 class GciTs35(GciTs):
-    """
-    Thread-safe GCI interface for GemStone version 3.5.
-    
-    This class extends GciTs to provide functionality specific to 
-    GemStone version 3.5.0 through 3.7.9999.
-
-    :param lib_path: Path to the gcits shared library
-    """
     min_version = '3.5.0'
     max_version = '3.7.9999'
 
@@ -236,21 +195,6 @@ class GciTs35(GciTs):
 
         
     def log_in(self, stone_name, host_username, host_password, netldi_task, username, password):
-        """
-        Log in to a GemStone repository using version 3.4 protocol.
-        
-        Establishes a session with a GemStone repository by authenticating
-        with the provided credentials.
-        
-        :param stone_name: Name of the stone (repository) to connect to
-        :param host_username: Operating system username for host authentication
-        :param host_password: Operating system password for host authentication
-        :param netldi_task: Network service name
-        :param username: GemStone username for repository authentication
-        :param password: GemStone password for repository authentication
-        :return: A session handle for the established connection
-        :raises GemstoneError: If login fails
-        """
         error = GciErrSType()
         executed_session_init = ctypes.c_int()
         session = self.GciTsLogin(stone_name.encode('utf-8'),
@@ -281,9 +225,9 @@ GemstoneLibrary.register(GciTs35)
 class RPCSession(GemstoneSession):
     """
     A session that interacts with a remote Gemstone database via remote procedure call.
-    
-    This class provides access to a GemStone database through the thread-safe
-    GCI library using remote procedure calls.
+
+    Creating an RPCSession impies logging in, and for a gem to be created for the session
+    on the remote side.
     
     :param username: GemStone username for repository authentication
     :param password: GemStone password for repository authentication
@@ -301,12 +245,6 @@ class RPCSession(GemstoneSession):
         self.c_session = self.gci.log_in(stone_name, host_username, host_password, netldi_task, username, password)
 
     def encrypt_password(self, unencrypted_password):
-        """
-        Encrypt a plaintext password for use with GemStone.
-        
-        :param unencrypted_password: The plaintext password to encrypt
-        :return: The encrypted password
-        """
         return self.gci.encrypt_password(unencrypted_password)
         
     def remove_dead_gemstone_objects(self):
@@ -430,6 +368,10 @@ class RPCSession(GemstoneSession):
     def resolve_symbol(self, symbol, symbol_list=None):
         """
         Resolve a symbol in the GemStone symbol list.
+
+        There is a shorthand for this method: session.SymbolName automatically
+        calls session.resolve_symbol('SymbolName') iff there is no Python attribute
+        named "SymbolName" on session.
         
         :param symbol: String or GemObject symbol to resolve
         :param symbol_list: Optional symbol list for resolution

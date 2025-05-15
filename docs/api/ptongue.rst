@@ -12,8 +12,4 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   ptongue.gemproxy
-   ptongue.gemproxylinked
-   ptongue.gemproxyrpc
-   ptongue.gemstone
    ptongue.gemstonecontrol

@@ -14,6 +14,12 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
+"""
+Main Python wrapper and common classes
+======================================
+
+
+"""
 
 from weakref import WeakValueDictionary
 import functools
@@ -341,8 +347,17 @@ class GemObject:
         """Convert this GemObject to an appropriate Python object.
 
         This method transfers the GemObject to a Python object of appropriate type.
-        This is only supported for basic types, such as unicode strings, various
-        numbers and booleans.
+        Apart from a few collections, this only supports basic types, such
+        as unicode strings, various numbers and booleans.
+
+        Collections supported:
+         - OrderedCollection - becomes a Python list
+         - Dictionary - becomes a Python dict
+         - IdentitySet - becomes a Python set
+
+        In the case of collections, the contents of the new collections on the Python
+        side are created using object.to_py individually on the Gemstone elements contained
+        inside the Gemstone collections.
 
         :return: A Python representation of this Gemstone object.
         :raises NotSupported: If the object cannot be converted to a Python type.
@@ -381,10 +396,10 @@ class GemObject:
     def perform(self, selector, *args):
         """Directly perform a method on the Gemstone object.
 
-        This is the low-level method that actually executes a method call on the
-        Gemstone object. It accepts a Gemstone selector (Symbol) and arguments.
+        This is the low-level method that executes a method call on the
+        Gemstone object. It accepts a Gemstone selector and arguments.
 
-        This method need not be called directly, it is automatically invoked
+        This method need not be called directly, it is usually automatically invoked
         when an unknown attribute is called on a GemObject, for example::
 
           session.Date.today().addDays(2)
@@ -403,6 +418,9 @@ class GemObject:
         This allows Gemstone collections to be iterated over using Python's
         iteration protocol.
 
+        It works by first calling self.asOrderedCollection in Gemstone - something
+        that may have performance implications depending on the situation.
+
         :yield: Each element in the collection.
         """
         self_as_collection = self.asOrderedCollection()
@@ -416,7 +434,7 @@ class GemObject:
         """Provide a human-readable string representation.
 
         This method attempts to create a readable representation of the Gemstone
-        object, similar to how it would be displayed in Gemstone itself.
+        object, similar to how it would be displayed in Gemstone using printString.
 
         :return: A human-readable string representation of the object.
         """
@@ -451,6 +469,9 @@ class GemstoneSession:
     
     The session maintains a cache of GemObject instances to ensure that the same 
     Gemstone object is always represented by the same Python object during its lifetime.
+
+    GemstoneSession is not intended to be instantiated directly, its subclasses are:
+    LinkedSession or RPCSession.
     """
     def __init__(self):
         self.instances = WeakValueDictionary()
@@ -478,8 +499,17 @@ class GemstoneSession:
     def from_py(self, py_object):
         """Convert a Python object to its corresponding Gemstone representation.
         
-        This method determines the appropriate conversion method based on the
-        Python object's type and delegates to a specialized conversion method.
+        This method creates an object in Gemstone corresponding to py_object of
+        appopriate type. Apart from a few collections, this only supports
+        basic types, such as unicode strings, various numbers and booleans.
+
+        Collections supported:
+         - list - becomes an OrderedCollection
+         - dict - becomes a Dictionary
+         - set - becomes an IdentitySet
+
+        In the case of collections, the contents of the collections on the Gemstone
+        side are created using session.from_py() on each element in the Python collections.
         
         :param py_object: A Python object to convert
         :return: A GemObject representing the converted object

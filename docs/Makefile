@@ -19,6 +19,14 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf api/
 
+# Run apidoc to generate API documentation and then filter undocumented items
+apidoc:
+	sphinx-apidoc --separate --module-first -o api ../ptongue 
+
+# Custom html target that runs apidoc first
+html: apidoc
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
