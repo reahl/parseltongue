@@ -41,7 +41,11 @@ jobs:
       - name: Define GemStone environment
         run: |
           su -lc "$GITHUB_WORKSPACE/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
-
+          
+      - name: Fix workspace permissions for developer
+        run: |
+          chown -R developer:developer $GITHUB_WORKSPACE
+    
       - name: Run tests with tox
         run: |
           su -lc "echo $GEMSTONE" developer
