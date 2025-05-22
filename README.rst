@@ -92,27 +92,19 @@ positional arguments::
     
 
 
+License
+-------
 
-which types of python things can be to_gemstoned on the fly (anything that can be passed to .from_py)
-which types can be to_py
+Parseltongue is licensed under the GNU Lesser General Public License v3.0 or later (LGPL-3.0-or-later).
 
-set <> IdentitySet
-list <> OrderedCollection
-dict <> Dictionary
-bytes <> ByteArray
-str   <> DoubleByteString / QuadByteString / Utf8 / Unicode7 / Unicode16 / Unicode32
-str <> Symbol
-str <> Character
-int <> SmallInteger, LargeInteger
-float <> SmallDouble, Float
-bool <> Boolean
+This means you can:
+
+- Use Parseltongue in commercial applications
+- Modify Parseltongue privately
+- Distribute Parseltongue as part of your applications
+
+If you modify Parseltongue itself, you must distribute those modifications under the terms of the LGPL.
+
+For the full license text, see the LICENSE file or visit: https://www.gnu.org/licenses/lgpl-3.0.html
 
 
-list, dict, set
- create an empty equivalent in GemStone, create a gemstone-site equivalent of each element and add it to the collection in gemstone
-
-the reverse is true for to_py on IdentitySet, OrderedCollection, Dictionary
- 
-
-iterate through Collection
-  returns GemObjects

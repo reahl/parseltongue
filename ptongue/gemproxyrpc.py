@@ -1,3 +1,26 @@
+# Copyright (C) 2025 Reahl Software Services (Pty) Ltd
+# 
+# This file is part of parseltongue.
+#
+# parseltongue is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# parseltongue is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
+"""
+RPC Sessions
+============
+
+This module provides thread-safe remote procedure call (RPC) connectivity to 
+GemStone/S 64 Bit object databases.
+"""
 import ctypes
 import os
 import warnings
@@ -200,6 +223,19 @@ GemstoneLibrary.register(GciTs35)
 
 #======================================================================================================================
 class RPCSession(GemstoneSession):
+    """
+    A session that interacts with a remote Gemstone database via remote procedure call.
+
+    Creating an RPCSession implies logging in, and for a gem to be created for the session
+    on the remote side.
+    
+    :param username: GemStone username for repository authentication
+    :param password: GemStone password for repository authentication
+    :param stone_name: Name of the stone (repository) to connect to
+    :param host_username: Operating system username for host authentication
+    :param host_password: Operating system password for host authentication
+    :param netldi_task: Network service name
+    """
     def __init__(self, username, password, stone_name='gs64stone',
                   host_username=None, host_password=None,
                   netldi_task='gemnetobject'):
@@ -221,22 +257,43 @@ class RPCSession(GemstoneSession):
         self.deallocated_unfreed_gemstone_objects.clear()
 
     def abort(self):
+        """
+        Abort the current transaction.
+        
+        :raises GemstoneError: If the abort operation fails
+        """
         error = GciErrSType()
         if not self.gci.GciTsAbort(self.c_session, ctypes.byref(error)):
             raise GemstoneError(self, error)
 
     def begin(self):
+        """
+        Begin a new transaction.
+        
+        :raises GemstoneError: If the begin operation fails
+        """
         error = GciErrSType()
         if not self.gci.GciTsBegin(self.c_session, ctypes.byref(error)):
             raise GemstoneError(self, error)
 
     def commit(self):
+        """
+        Commit the current transaction.
+        
+        :raises GemstoneError: If the commit operation fails
+        """
         error = GciErrSType()
         if not self.gci.GciTsCommit(self.c_session, ctypes.byref(error)):
             raise GemstoneError(self, error)
 
     @property
     def is_remote(self):
+        """
+        Check if the session is remote.
+        
+        :return: True if the session is remote, False otherwise
+        :raises InvalidSession: If the session is invalid
+        """
         remote = self.gci.GciTsSessionIsRemote(self.c_session)
         if remote == -1:
             raise InvalidSession()
@@ -244,6 +301,11 @@ class RPCSession(GemstoneSession):
 
     @property
     def is_logged_in(self):
+        """
+        Check if the session is currently logged in.
+        
+        :return: True if the session is logged in, False otherwise
+        """
         remote = self.gci.GciTsSessionIsRemote(self.c_session)
         return remote != -1
 
@@ -262,6 +324,16 @@ class RPCSession(GemstoneSession):
         return return_oop
 
     def execute(self, source, context=None, symbol_list=None):
+        """
+        Execute a GemStone Smalltalk expression.
+        
+        :param source: String or GemObject containing Smalltalk code to execute
+        :param context: Optional context object for the execution
+        :param symbol_list: Optional symbol list for name resolution
+        :return: GemObject representing the result of execution
+        :raises GemstoneApiError: If source is not a string or GemObject
+        :raises GemstoneError: If execution fails
+        """
         error = GciErrSType()
         if isinstance(source, str):
             return_oop = self.gci.GciTsExecute(self.c_session, source.encode('utf-8'), OOP_CLASS_Utf8,
@@ -280,6 +352,13 @@ class RPCSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def new_symbol(self, py_string):
+        """
+        Create a new GemStone symbol.
+        
+        :param py_string: String to convert to a symbol
+        :return: GemObject representing the created symbol
+        :raises GemstoneError: If symbol creation fails
+        """
         error = GciErrSType()
         return_oop = self.gci.GciTsNewSymbol(self.c_session, py_string.encode('utf-8'), ctypes.byref(error))
         if return_oop == OOP_ILLEGAL.value:
@@ -287,6 +366,20 @@ class RPCSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def resolve_symbol(self, symbol, symbol_list=None):
+        """
+        Resolve a symbol in the GemStone symbol list.
+
+        There is a shorthand for this method. These lines are equivalent::
+        
+            session.SymbolName
+            session.resolve_symbol('SymbolName')
+
+        :param symbol: String or GemObject symbol to resolve
+        :param symbol_list: Optional symbol list for resolution
+        :return: GemObject representing the resolved symbol
+        :raises GemstoneApiError: If symbol is not a string or GemObject
+        :raises GemstoneError: If resolution fails
+        """
         error = GciErrSType()
         if isinstance(symbol, str):
             return_oop = self.gci.GciTsResolveSymbol(self.c_session, symbol.encode('utf-8'), 
@@ -301,6 +394,11 @@ class RPCSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
            
     def log_out(self):
+        """
+        Log out from the GemStone session.
+        
+        :raises GemstoneError: If logout fails
+        """
         error = GciErrSType()
         if not self.gci.GciTsLogout(self.c_session, ctypes.byref(error)):
             raise GemstoneError(self, error)

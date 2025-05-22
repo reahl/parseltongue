@@ -1,3 +1,27 @@
+# Copyright (C) 2025 Reahl Software Services (Pty) Ltd
+# 
+# This file is part of parseltongue.
+#
+# parseltongue is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# parseltongue is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with parseltongue.  If not, see <https://www.gnu.org/licenses/>.
+"""
+Linked Sessions
+===============
+
+This module provides connectivity to GemStone/S 64 Bit object databases via
+a gem embedded in the calling process.
+
+"""
 import ctypes
 from contextlib import contextmanager
 from atexit import register
@@ -17,6 +41,7 @@ class GciLnk(GemstoneLibrary):
     short_name = 'gcilnk'
     min_version = '3.4.0'
     max_version = '3.7.9999'
+    
     def __init__(self, lib_path):
         super().__init__(lib_path)
 
@@ -173,6 +198,21 @@ def get_current_linked_session():
 
 #======================================================================================================================
 class LinkedSession(GemstoneSession):
+    """
+    A session that directly links to a GemStone database using the linked GCI API.
+    
+    LinkedSession provides a client that runs inside the Python process
+    (as opposed to RPCSession which connects to a remote server). Only one active 
+    LinkedSession can exist at a time per process.
+
+    Creating a LinkedSession implies logging in.
+    
+    :param username: GemStone user account name used for authentication
+    :param password: GemStone password used for authentication
+    :param stone_name: Name of the GemStone repository to connect to, defaults to 'gs64stone'
+    :param host_username: If specified, the OS username used for connecting to the server
+    :param host_password: Password for host_username, if required, defaults to empty string
+    """
     def __init__(self, username, password, stone_name='gs64stone',
                   host_username=None, host_password=''):
         super().__init__()
@@ -223,6 +263,14 @@ class LinkedSession(GemstoneSession):
         self.deallocated_unfreed_gemstone_objects.clear()
 
     def abort(self):
+        """
+        Abort the current transaction.
+        
+        Any changes made since the last commit or abort will be discarded.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -231,6 +279,14 @@ class LinkedSession(GemstoneSession):
             raise GemstoneError(self, error)
 
     def begin(self):
+        """
+        Begin a new transaction.
+        
+        If there is an active transaction, it is aborted before starting a new one.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -239,6 +295,14 @@ class LinkedSession(GemstoneSession):
             raise GemstoneError(self, error)
 
     def commit(self):
+        """
+        Commit the current transaction.
+        
+        Write all changes made in the current transaction to the database.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If the commit fails or an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -247,6 +311,15 @@ class LinkedSession(GemstoneSession):
 
     @property
     def is_remote(self):
+        """
+        Determine whether this session is connected to a remote Gem.
+        
+        For a :class:`LinkedSession`, this should typically return False.
+        
+        :return: True if connected to a remote Gem, False if using a linked Gem
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during the GemStone operation
+        """
         error = GciErrSType()
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
@@ -257,10 +330,22 @@ class LinkedSession(GemstoneSession):
 
     @property
     def is_logged_in(self):
+        """
+        Check if this session is currently logged in.
+        
+        :return: True if the session is logged in, False otherwise
+        """
         return (self.c_session_id == gci.GciGetSessionId()) and (self.c_session_id != GCI_INVALID_SESSION_ID)
 
     @property
     def is_current_session(self):
+        """
+        Check if this session is the current active linked session.
+        
+        Only one linked session can be active at a time in a process.
+        
+        :return: True if this is the current active session, False otherwise
+        """
         global current_linked_session
         return self is current_linked_session
 
@@ -283,6 +368,20 @@ class LinkedSession(GemstoneSession):
         return return_oop
 
     def execute(self, source, context=None, symbol_list=None):
+        """
+        Execute GemStone Smalltalk code.
+        
+        :param source: The Smalltalk code to execute, either as a Python string or 
+                      a GemStone string object
+        :param context: The context object in which to execute the code, defaults to None
+                       (which uses the default nil context)
+        :param symbol_list: The symbol list to use for name resolution, defaults to None
+                           (which uses the default symbol list from the user\'s profile)
+        :return: The result of executing the Smalltalk code
+        :raises GemstoneApiError: If this session is not the current active session,
+                                 or if the source is not of the expected type
+        :raises GemstoneError: If an error occurs during execution
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -299,6 +398,14 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def new_symbol(self, py_string):
+        """
+        Create a new GemStone Symbol object.
+        
+        :param py_string: The Python string to be converted to a Symbol
+        :return: The new Symbol object
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs, such as if the string is too long to be a Symbol
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -308,6 +415,23 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
 
     def resolve_symbol(self, symbol, symbol_list=None):
+        """
+        Resolve a symbol to its value in a symbol dictionary.
+
+        There is a shorthand for this method. These lines are equivalent::
+        
+            session.SymbolName
+            session.resolve_symbol('SymbolName')
+        
+        :param symbol: The name of the symbol to resolve, either as a Python string
+                      or a GemStone Symbol object
+        :param symbol_list: The symbol list to use for resolution, defaults to None
+                           (which uses the default symbol list from the user's profile)
+        :return: The object that the symbol refers to
+        :raises GemstoneApiError: If this session is not the current active session,
+                                 or if symbol is not of the expected type
+        :raises GemstoneError: If the symbol cannot be resolved or another error occurs
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -322,6 +446,14 @@ class LinkedSession(GemstoneSession):
         return self.get_or_create_gem_object(return_oop)
         
     def log_out(self):
+        """
+        Log out from the GemStone session.
+        
+        After log out, the session can no longer be used.
+        
+        :raises GemstoneApiError: If this session is not the current active session
+        :raises GemstoneError: If an error occurs during logout
+        """
         if not self.is_current_session:
             raise GemstoneApiError('Expected session to be the current session.')
         error = GciErrSType()
@@ -437,5 +569,4 @@ class LinkedSession(GemstoneSession):
         success = gci.GciClearStack(gemstone_process.oop)
         if gci.GciErr(ctypes.byref(error)):        
             raise GemstoneError(self, error)
-    
 #======================================================================================================================

@@ -5,6 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "parseltongue"
 version = "2.0.1"
+description = "Python bindings for GemStone/S 64 Bit"
+license = {text = "LGPL-3.0-or-later"}
+authors = [
+    {name = "Iwan Vosloo", email = "iwan@reahl.org"},
+    {name = "Craig Sparks", email = "craig@reahl.org"}
+]
+readme = "README.rst"
 dependencies = [
     "reahl-component",
     "packaging"
@@ -16,6 +23,11 @@ test = [
     "reahl-component",
     "reahl-tofu"
 ]
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinxcontrib-apidoc>=0.3.0",
+]
 
 [tool.setuptools]
 packages = ["ptongue"]
@@ -24,4 +36,8 @@ packages = ["ptongue"]
 addopts = "--strict-markers"
 testpaths = ["ptongue_dev"]
 
+[tool.sphinx-docs]
+source_dir = "docs"
+build_dir = "docs/_build"
+builder = "html"
 

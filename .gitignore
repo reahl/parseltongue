@@ -16,3 +16,7 @@ ptongue/gembuildertypes.c
 .tox/
 .pytest_cache/
 dist/
+
+_build
+_static
+_templates
