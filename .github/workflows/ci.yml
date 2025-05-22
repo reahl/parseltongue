@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Update and install system packages
+        run: |
+          apt-get update -y
+          apt-get install -y libpam0g-dev unzip openssh-server iputils-ping
+
+      - name: Add developer user
+        run: |
+          useradd -m developer
+          echo -e "developer\ndeveloper" | passwd developer
+
+      - name: Install tox
+        run: pip install tox
+
+      - name: Set environment variables
+        run: |
+          echo "SOURCE_ROOT=$(pwd)" >> $GITHUB_ENV
+          echo "DEV_USER=developer" >> $GITHUB_ENV
+
+      - name: Install GemStone
+        run: |
+          ./gemstone/installGemStone.sh 3.7.2
+
+      - name: Define GemStone environment
+        run: |
+          su -lc "$GITHUB_WORKSPACE/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
+
+      - name: Run tests with tox
+        run: |
+          su -lc "echo $GEMSTONE" developer
+          su -lc "echo $SOURCE_ROOT -- $(pwd)" developer
+          su -lc "cd $SOURCE_ROOT; tox" developer
