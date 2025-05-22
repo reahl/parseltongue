@@ -24,7 +24,7 @@ jobs:
       - name: Add developer user
         run: |
           useradd -m developer
-          echo -e "developer\ndeveloper" | passwd developer
+          echo 'developer:developer' | chpasswd
 
       - name: Install tox
         run: pip install tox
