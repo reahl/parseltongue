@@ -129,11 +129,11 @@ class GemstoneError(Exception):
     This class encapsulates errors that occurred within the Gemstone virtual machine,
     providing a Python-friendly interface to access information about the exception.
 
-    This class is not a GemProxy like other Gem objects because it
+    This class is not a :class:`GemObject` like other Gem objects because it
     needs to be a Python Exception to work properly with Python's exception
     handling mechanisms.
     
-    :param sess: The Gemstone session where the error occurred.
+    :param sess: The :class:`GemstoneSession` where the error occurred.
     :param c_error: A C structure containing the error details.
     """
     def __init__(self, sess, c_error):
@@ -153,7 +153,7 @@ class GemstoneError(Exception):
         execution state at the time of the error. This can be used for debugging
         and to manipulate the execution state.
         
-        :return: A GemObject representing the GsProcess context, or None if 
+        :return: A :class:`GemObject` representing the GsProcess context, or None if 
                 no context was provided.
         """
         obj = self.session.get_or_create_gem_object(self.c_error.context) if self.c_error.context else None
@@ -480,15 +480,6 @@ class GemstoneSession:
         self.export_set_free_batch_size = 1000
         
     def get_or_create_gem_object(self, oop):
-        """Get an existing GemObject or create a new one for the given OOP.
-        
-        This method ensures that the same OOP is always represented by the
-        same Python GemObject instance. If an object for the given OOP already
-        exists in the cache, it is returned; otherwise, a new one is created.
-        
-        :param oop: Object-oriented pointer (OOP) value for a Gemstone object
-        :return: A GemObject instance representing the object
-        """
         try:
             return self.instances[oop]
         except KeyError:

@@ -314,8 +314,7 @@ class LinkedSession(GemstoneSession):
         """
         Determine whether this session is connected to a remote Gem.
         
-        For a LinkedSession, this should typically return False unless 
-        the session was configured in a special way.
+        For a :class:`LinkedSession`, this should typically return False.
         
         :return: True if connected to a remote Gem, False if using a linked Gem
         :raises GemstoneApiError: If this session is not the current active session
@@ -419,9 +418,10 @@ class LinkedSession(GemstoneSession):
         """
         Resolve a symbol to its value in a symbol dictionary.
 
-        There is a shorthand for this method: session.SymbolName automatically
-        calls session.resolve_symbol('SymbolName') iff there is no Python attribute
-        named "SymbolName" on session.
+        There is a shorthand for this method. These lines are equivalent::
+        
+            session.SymbolName
+            session.resolve_symbol('SymbolName')
         
         :param symbol: The name of the symbol to resolve, either as a Python string
                       or a GemStone Symbol object

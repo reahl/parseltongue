@@ -226,7 +226,7 @@ class RPCSession(GemstoneSession):
     """
     A session that interacts with a remote Gemstone database via remote procedure call.
 
-    Creating an RPCSession impies logging in, and for a gem to be created for the session
+    Creating an RPCSession implies logging in, and for a gem to be created for the session
     on the remote side.
     
     :param username: GemStone username for repository authentication
@@ -369,10 +369,11 @@ class RPCSession(GemstoneSession):
         """
         Resolve a symbol in the GemStone symbol list.
 
-        There is a shorthand for this method: session.SymbolName automatically
-        calls session.resolve_symbol('SymbolName') iff there is no Python attribute
-        named "SymbolName" on session.
+        There is a shorthand for this method. These lines are equivalent::
         
+            session.SymbolName
+            session.resolve_symbol('SymbolName')
+
         :param symbol: String or GemObject symbol to resolve
         :param symbol_list: Optional symbol list for resolution
         :return: GemObject representing the resolved symbol
