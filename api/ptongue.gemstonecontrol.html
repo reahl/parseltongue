@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GemStone server process control &mdash; parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="prev" title="ptongue package" href="ptongue.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            parseltongue
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="ptongue.html">ptongue package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.GemObject"><code class="docutils literal notranslate"><span class="pre">GemObject</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.GemstoneSession"><code class="docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.LinkedSession"><code class="docutils literal notranslate"><span class="pre">LinkedSession</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.RPCSession"><code class="docutils literal notranslate"><span class="pre">RPCSession</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.GemstoneError"><code class="docutils literal notranslate"><span class="pre">GemstoneError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.InvalidSession"><code class="docutils literal notranslate"><span class="pre">InvalidSession</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.NotSupported"><code class="docutils literal notranslate"><span class="pre">NotSupported</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.GemstoneApiError"><code class="docutils literal notranslate"><span class="pre">GemstoneApiError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.html#ptongue.GemstoneWarning"><code class="docutils literal notranslate"><span class="pre">GemstoneWarning</span></code></a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="ptongue.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">GemStone server process control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneInstallation"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneInstallation.from_install_directory"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation.from_install_directory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneInstallation.environ"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation.environ</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneInstallation.environment_setup"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation.environment_setup()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneService"><code class="docutils literal notranslate"><span class="pre">GemstoneService</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneService.start"><code class="docutils literal notranslate"><span class="pre">GemstoneService.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneService.stop"><code class="docutils literal notranslate"><span class="pre">GemstoneService.stop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.gemstonecontrol.NetLDI"><code class="docutils literal notranslate"><span class="pre">NetLDI</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.gemstonecontrol.Stone"><code class="docutils literal notranslate"><span class="pre">Stone</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">parseltongue</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="ptongue.html">ptongue package</a></li>
+      <li class="breadcrumb-item active">GemStone server process control</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ptongue.gemstonecontrol.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gemstone-server-process-control">
+<span id="module-ptongue.gemstonecontrol"></span><h1>GemStone server process control<a class="headerlink" href="#gemstone-server-process-control" title="Link to this heading"></a></h1>
+<p>This module provides classes for managing GemStone/S 64 Bit database server
+processes and installations. It includes functionality to start and stop
+the Stone repository monitor and NetLDI network service, as well as to
+configure the environment for GemStone operations.</p>
+<p>The programmatic control offered here is useful for automated testing,
+application deployment, and system administration tasks.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneInstallation">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.gemstonecontrol.</span></span><span class="sig-name descname"><span class="pre">GemstoneInstallation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">install_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#GemstoneInstallation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneInstallation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Represents a GemStone installation on the filesystem.</p>
+<p>This class provides utilities for working with a specific GemStone
+installation, including environment setup and version information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>install_directory</strong> – Path to the GemStone installation directory</p></li>
+<li><p><strong>version</strong> – Version of the GemStone installation</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneInstallation.from_install_directory">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_install_directory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gemstone</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#GemstoneInstallation.from_install_directory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneInstallation.from_install_directory" title="Link to this definition"></a></dt>
+<dd><p>Create a GemstoneInstallation instance from an installation directory path.</p>
+<p>Parses the version from the directory name and creates a new installation
+instance with the appropriate parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gemstone</strong> – Path to the GemStone installation directory</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GemstoneInstallation instance</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – If the version cannot be parsed from the directory path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneInstallation.environ">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">environ</span></span><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneInstallation.environ" title="Link to this definition"></a></dt>
+<dd><p>Get environment variables needed for the GemStone installation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary of environment variables with PATH and GEMSTONE set</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneInstallation.environment_setup">
+<span class="sig-name descname"><span class="pre">environment_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#GemstoneInstallation.environment_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneInstallation.environment_setup" title="Link to this definition"></a></dt>
+<dd><p>Context manager for temporarily setting GemStone environment variables.</p>
+<p>Sets up the environment with the correct PATH and GEMSTONE variables for
+running GemStone commands, then restores the original environment when done.</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><dl class="simple">
+<dt>with gemstone_installation.environment_setup():</dt><dd><p># Run GemStone commands here</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneService">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.gemstonecontrol.</span></span><span class="sig-name descname"><span class="pre">GemstoneService</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_output_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_output_check</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gemstone_installation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#GemstoneService"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneService" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Manages a GemStone service process.</p>
+<p>Provides functionality to start, stop, and monitor GemStone services
+such as Stone, NetLDI, and other server processes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>service_name</strong> – Name of the service (e.g., ‘stone’, ‘netldi’)</p></li>
+<li><p><strong>start_command</strong> – Command to start the service</p></li>
+<li><p><strong>stop_command</strong> – Command to stop the service</p></li>
+<li><p><strong>start_args</strong> – Arguments for the start command</p></li>
+<li><p><strong>stop_args</strong> – Arguments for the stop command</p></li>
+<li><p><strong>start_output_check</strong> – String to verify in output when starting</p></li>
+<li><p><strong>stop_output_check</strong> – String to verify in output when stopping</p></li>
+<li><p><strong>gemstone_installation</strong> – GemstoneInstallation instance or None to use default</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneService.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#GemstoneService.start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneService.start" title="Link to this definition"></a></dt>
+<dd><p>Start the GemStone service.</p>
+<p>Sets up the GemStone environment, executes the start command with
+appropriate arguments, and verifies the output contains expected messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – If service is already running or start fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.GemstoneService.stop">
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#GemstoneService.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.GemstoneService.stop" title="Link to this definition"></a></dt>
+<dd><p>Stop the GemStone service.</p>
+<p>Sets up the GemStone environment, executes the stop command with
+appropriate arguments, and verifies the output contains expected messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#AssertionError" title="(in Python v3.13)"><strong>AssertionError</strong></a> – If stop fails or expected output is not found</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.NetLDI">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.gemstonecontrol.</span></span><span class="sig-name descname"><span class="pre">NetLDI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">guest_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gemstone_installation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#NetLDI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.NetLDI" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneService" title="ptongue.gemstonecontrol.GemstoneService"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneService</span></code></a></p>
+<p>Manages a GemStone NetLDI (Network Long Distance Information) service.</p>
+<p>The NetLDI service is responsible for starting GemStone Gem processes
+on behalf of client applications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>guest_mode</strong> – If True, start NetLDI with guest mode enabled (-g flag)</p></li>
+<li><p><strong>gemstone_installation</strong> – GemstoneInstallation instance or None to use default</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.gemstonecontrol.Stone">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.gemstonecontrol.</span></span><span class="sig-name descname"><span class="pre">Stone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gemstone_installation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemstonecontrol.html#Stone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.gemstonecontrol.Stone" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ptongue.gemstonecontrol.GemstoneService" title="ptongue.gemstonecontrol.GemstoneService"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneService</span></code></a></p>
+<p>Manages a GemStone Stone (repository monitor) service.</p>
+<p>The Stone process is the main database server that manages the repository
+and coordinates access to the database.</p>
+<p>Creates a Stone service for the default stone ‘gs64stone’ using
+standard DataCurator credentials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gemstone_installation</strong> – GemstoneInstallation instance or None to use default</p>
+</dd>
+</dl>
+</dd></dl>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ptongue.html" class="btn btn-neutral float-left" title="ptongue package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

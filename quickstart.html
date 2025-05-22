@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Start Guide &mdash; parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ptongue package" href="api/ptongue.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            parseltongue
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#connecting-to-gemstone">Connecting to GemStone</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resolving-objects">Resolving objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calling-methods">Calling methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transferring-basic-objects">Transferring basic objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-translation-of-arguments">Automatic translation of arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iterating-over-gemstone-collections">Iterating over Gemstone collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#method-name-mapping">Method name mapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-complete-example">A complete example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/ptongue.html">ptongue package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">parseltongue</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quick Start Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quick-start-guide">
+<h1>Quick Start Guide<a class="headerlink" href="#quick-start-guide" title="Link to this heading"></a></h1>
+<p>This guide will help you get started with Parseltongue, a Python interface to GemStone/S 64.</p>
+<p>For more examples see <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>, for API documentation, see <a class="reference internal" href="api/ptongue.html"><span class="doc">ptongue package</span></a>.</p>
+<section id="connecting-to-gemstone">
+<h2>Connecting to GemStone<a class="headerlink" href="#connecting-to-gemstone" title="Link to this heading"></a></h2>
+<p>Log in by creating a session. You can choose between an RPCSession or
+a LinkedSession.</p>
+<p>Multiple RPCSessions can exist simultaneously, but only a single
+instance of a LinkedSession is allowed per process:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemproxylinked</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkedSession</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemproxyrpc</span><span class="w"> </span><span class="kn">import</span> <span class="n">RPCSession</span>
+
+<span class="c1"># For a linked session (runs in the same process)</span>
+<span class="n">session</span> <span class="o">=</span> <span class="n">LinkedSession</span><span class="p">(</span>
+    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;DataCurator&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;swordfish&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Or for an RPC session (connects to a remote gem)</span>
+<span class="c1"># session = RPCSession(</span>
+<span class="c1">#     username=&quot;DataCurator&quot;,</span>
+<span class="c1">#     password=&quot;swordfish&quot;</span>
+<span class="c1"># )</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="n">session</span><span class="o">.</span><span class="n">is_logged_in</span>
+
+    <span class="c1"># Execute Smalltalk code</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;System gemVersionAt: #gsVersion&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GemStone version: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">to_py</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">log_out</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="resolving-objects">
+<h2>Resolving objects<a class="headerlink" href="#resolving-objects" title="Link to this heading"></a></h2>
+<p>Looking up a Smalltalk symbol from the usual symbol dictionaries
+results in a GemObject object being returned which represents that
+object in Python:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">date_class</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">Date</span> <span class="c1"># Shorthand for session.resolve_symbol(&#39;Date&#39;)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_class</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="calling-methods">
+<h2>Calling methods<a class="headerlink" href="#calling-methods" title="Link to this heading"></a></h2>
+<p>A GemObject object forwards method calls to its counterpart in the
+Gem. It returns other GemObject objects (and if the method takes
+arguments, those must also be GemObject objects):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">today</span> <span class="o">=</span> <span class="n">date_class</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">today</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">today</span><span class="o">.</span><span class="n">isKindOf</span><span class="p">(</span><span class="n">date_class</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="transferring-basic-objects">
+<h2>Transferring basic objects<a class="headerlink" href="#transferring-basic-objects" title="Link to this heading"></a></h2>
+<p>Some basic objects can be transferred between GemStone and
+Python. These include unicode strings, various numbers and booleans:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gem_number</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">long_ago</span> <span class="o">=</span> <span class="n">date_class</span><span class="o">.</span><span class="n">fromDays</span><span class="p">(</span><span class="n">gem_number</span><span class="p">)</span>
+
+<span class="n">long_ago_string</span> <span class="o">=</span> <span class="n">long_ago</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span>
+<span class="n">python_string</span> <span class="o">=</span> <span class="n">long_ago_string</span><span class="o">.</span><span class="n">to_py</span>
+
+<span class="k">assert</span> <span class="n">python_string</span> <span class="o">==</span> <span class="s1">&#39;1901/01/02&#39;</span>
+</pre></div>
+</div>
+<p>A few collection types can also be transferred. Transferring
+a collection also transfers its contents:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gem_number</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">gem_collection</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">OrderedCollection</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+<span class="n">gem_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gem_number</span><span class="p">)</span>
+
+<span class="n">py_list</span> <span class="o">=</span> <span class="n">gem_collection</span><span class="o">.</span><span class="n">to_py</span>
+<span class="k">assert</span> <span class="n">py_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="api/ptongue.html#ptongue.GemObject.to_py" title="ptongue.GemObject.to_py"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_py()</span></code></a> and <a class="reference internal" href="api/ptongue.html#ptongue.GemstoneSession.from_py" title="ptongue.GemstoneSession.from_py"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_py()</span></code></a>.</p>
+</section>
+<section id="automatic-translation-of-arguments">
+<h2>Automatic translation of arguments<a class="headerlink" href="#automatic-translation-of-arguments" title="Link to this heading"></a></h2>
+<p>Some arguments to Gemstone method calls can be turned into
+GemObject instances without first having to <a class="reference internal" href="api/ptongue.html#ptongue.GemstoneSession.from_py" title="ptongue.GemstoneSession.from_py"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_py()</span></code></a>. them:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">long_ago</span> <span class="o">=</span> <span class="n">date_class</span><span class="o">.</span><span class="n">fromDays</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">long_ago_string</span> <span class="o">=</span> <span class="n">long_ago</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span>
+<span class="n">python_string</span> <span class="o">=</span> <span class="n">long_ago_string</span><span class="o">.</span><span class="n">to_py</span>
+
+<span class="k">assert</span> <span class="n">python_string</span> <span class="o">==</span> <span class="s1">&#39;1901/01/02&#39;</span>
+</pre></div>
+</div>
+</section>
+<section id="iterating-over-gemstone-collections">
+<h2>Iterating over Gemstone collections<a class="headerlink" href="#iterating-over-gemstone-collections" title="Link to this heading"></a></h2>
+<p>When a Gemstone object understands asOrdereredCollection, Python can iterate over
+its elements without converting the collection or its elements to Python:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gem_collection</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">OrderedCollection</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+<span class="n">gem_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">to_py</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">gem_collection</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This is useful when you want to iterate over a Gemstone collection and execute
+methods without transferring it or its elements to Python.</p>
+</section>
+<section id="method-name-mapping">
+<h2>Method name mapping<a class="headerlink" href="#method-name-mapping" title="Link to this heading"></a></h2>
+<p>In Python, method names are spelt differently. Each ‘:’ in a Smalltalk
+method symbol is replaced with a ‘_’ in Python. When calling such a
+method, you must pass the correct number of arguments as Python
+positional arguments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">user_globals</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">UserGlobals</span>
+<span class="n">some_key</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">new_symbol</span><span class="p">(</span><span class="s1">&#39;akey&#39;</span><span class="p">)</span>
+
+<span class="n">user_globals</span><span class="o">.</span><span class="n">at_put</span><span class="p">(</span><span class="n">some_key</span><span class="p">,</span> <span class="mi">123</span><span class="p">)</span>  <span class="c1"># Note 123 becomes from_py(123) as explained</span>
+</pre></div>
+</div>
+</section>
+<section id="a-complete-example">
+<h2>A complete example<a class="headerlink" href="#a-complete-example" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ptongue</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkedSession</span><span class="p">,</span> <span class="n">GemObject</span>
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">LinkedSession</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;DataCurator&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;swordfish&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="n">session</span><span class="o">.</span><span class="n">is_logged_in</span>
+
+    <span class="n">date_class</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">Date</span> <span class="c1"># Shorthand for session.resolve_symbol(&#39;Date&#39;)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_class</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)</span>
+
+    <span class="n">today</span> <span class="o">=</span> <span class="n">date_class</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">today</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">today</span><span class="o">.</span><span class="n">isKindOf</span><span class="p">(</span><span class="n">date_class</span><span class="p">)</span>
+
+    <span class="n">long_ago</span> <span class="o">=</span> <span class="n">date_class</span><span class="o">.</span><span class="n">newDay_month_year</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;Jan&#39;</span><span class="p">,</span><span class="mi">1901</span><span class="p">)</span>
+
+    <span class="n">long_ago_string</span> <span class="o">=</span> <span class="n">long_ago</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span>
+    <span class="n">python_string</span> <span class="o">=</span> <span class="n">long_ago_string</span><span class="o">.</span><span class="n">to_py</span>
+
+    <span class="k">assert</span> <span class="n">python_string</span> <span class="o">==</span> <span class="s1">&#39;02/01/1901&#39;</span>
+
+    <span class="n">user_globals</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">UserGlobals</span>
+    <span class="n">some_key</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">new_symbol</span><span class="p">(</span><span class="s1">&#39;akey&#39;</span><span class="p">)</span>
+
+    <span class="n">user_globals</span><span class="o">.</span><span class="n">at_put</span><span class="p">(</span><span class="n">some_key</span><span class="p">,</span> <span class="mi">123</span><span class="p">)</span>  <span class="c1"># Note 123 becomes from_py(123) as explained</span>
+    <span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_globals</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;akey&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="s1">&#39;aSmallInteger(123)&#39;</span>
+    <span class="k">assert</span> <span class="n">user_globals</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="s1">&#39;akey&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_py</span> <span class="o">==</span> <span class="mi">123</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">log_out</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ptongue</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkedSession</span><span class="p">,</span> <span class="n">GemstoneError</span>
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">LinkedSession</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;DataCurator&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;swordfish&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># This will cause an error</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;1 zork: 2&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">GemstoneError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error number: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># You can continue execution after an error</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">continue_with</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Continuing&quot;</span><span class="p">)</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">log_out</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>Parseltongue is licensed under the GNU Lesser General Public License v3.0 or later (LGPL-3.0-or-later).</p>
+<p>This means you can:</p>
+<ul class="simple">
+<li><p>Use Parseltongue in commercial applications</p></li>
+<li><p>Modify Parseltongue privately</p></li>
+<li><p>Distribute Parseltongue as part of your applications</p></li>
+</ul>
+<p>If you modify Parseltongue itself, you must distribute those modifications under the terms of the LGPL.</p>
+<p>For the full license text, see the LICENSE file or visit: <a class="reference external" href="https://www.gnu.org/licenses/lgpl-3.0.html">https://www.gnu.org/licenses/lgpl-3.0.html</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/ptongue.html" class="btn btn-neutral float-right" title="ptongue package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

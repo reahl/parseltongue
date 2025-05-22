@@ -1,0 +1,739 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ptongue.gemproxy &mdash; parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            parseltongue
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/ptongue.html">ptongue package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">parseltongue</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ptongue.gemproxy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ptongue.gemproxy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2025 Reahl Software Services (Pty) Ltd</span>
+<span class="c1"># </span>
+<span class="c1"># This file is part of parseltongue.</span>
+<span class="c1">#</span>
+<span class="c1"># parseltongue is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># parseltongue is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with parseltongue.  If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Main Python wrapper and common classes</span>
+<span class="sd">======================================</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">weakref</span><span class="w"> </span><span class="kn">import</span> <span class="n">WeakValueDictionary</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">packaging.version</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">CDLL</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemstone</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1">#======================================================================================================================</span>
+<span class="n">well_known_class_names</span> <span class="o">=</span> <span class="p">{</span> 
+    <span class="n">OOP_CLASS_SMALL_INTEGER</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;small_integer&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_LargeInteger</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;large_integer&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_SMALL_DOUBLE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_Float</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_STRING</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_SYMBOL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_DoubleByteString</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_DoubleByteSymbol</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_QuadByteString</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_QuadByteSymbol</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_ByteArray</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_CHARACTER</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_Utf8</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_Unicode7</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_Unicode16</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_Unicode32</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_ORDERED_COLLECTION</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;ordered_collection&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_N_DICTIONARY</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;dictionary&#39;</span><span class="p">,</span>
+    <span class="n">OOP_CLASS_IDENTITY_SET</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="s1">&#39;identity_set&#39;</span>
+ <span class="p">}</span>
+
+<span class="n">well_known_instances</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">OOP_TRUE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">OOP_FALSE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">OOP_NIL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="kc">None</span>
+<span class="p">}</span>
+
+<span class="n">well_known_python_instances</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="kc">True</span><span class="p">:</span> <span class="n">OOP_TRUE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="kc">False</span><span class="p">:</span> <span class="n">OOP_FALSE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="kc">None</span><span class="p">:</span> <span class="n">OOP_NIL</span><span class="o">.</span><span class="n">value</span>
+<span class="p">}</span>
+
+<span class="n">implemented_python_types</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;NoneType&#39;</span><span class="p">:</span> <span class="s1">&#39;boolean_or_none&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="s1">&#39;boolean_or_none&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;int&#39;</span><span class="p">:</span> <span class="s1">&#39;integer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;float&#39;</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;list&#39;</span><span class="p">:</span> <span class="s1">&#39;ordered_collection&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;dict&#39;</span><span class="p">:</span> <span class="s1">&#39;dictionary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;set&#39;</span><span class="p">:</span> <span class="s1">&#39;identity_set&#39;</span>
+<span class="p">}</span>
+
+<span class="c1">#======================================================================================================================</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_small_integer_oop</span><span class="p">(</span><span class="n">py_int</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">py_int</span> <span class="o">&lt;=</span> <span class="n">MAX_SMALL_INT</span> <span class="ow">and</span> <span class="n">py_int</span> <span class="o">&gt;=</span> <span class="n">MIN_SMALL_INT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">py_int</span> <span class="o">&lt;&lt;</span> <span class="n">OOP_NUM_TAG_BITS</span><span class="p">)</span> <span class="o">|</span> <span class="n">OOP_TAG_SMALLINT</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">OverflowError</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">to_c_bytes</span><span class="p">(</span><span class="n">py_string</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">py_string</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">py_string</span> <span class="o">!=</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    
+<span class="c1">#======================================================================================================================</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GemstoneLibrary</span><span class="p">:</span>
+    <span class="n">registered_libraries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">short_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">min_version</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+    <span class="n">max_version</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lib_path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">CDLL</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lib_path</span><span class="p">))</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">library_class</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">registered_libraries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">library_class</span><span class="p">)</span>
+    
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_library</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">short_name</span><span class="p">):</span>
+        <span class="n">lib_dir</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;GEMSTONE&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="s1">&#39;lib&#39;</span>
+        <span class="n">lib_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lib_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*</span><span class="si">%s</span><span class="s1">-*&#39;</span> <span class="o">%</span> <span class="n">short_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">lib_names</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Could not find a </span><span class="si">%s</span><span class="s1"> library in your $GEMSTONE (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">short_name</span><span class="p">,</span> <span class="n">lib_dir</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lib_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Found many </span><span class="si">%s</span><span class="s1"> libraries in your $GEMSTONE (</span><span class="si">%s</span><span class="s1">): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">short_name</span><span class="p">,</span> <span class="n">lib_dir</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lib_names</span><span class="p">]))</span> <span class="p">)</span>
+        <span class="n">lib_path</span> <span class="o">=</span> <span class="n">lib_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">version</span><span class="p">,</span> <span class="n">bits</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;lib</span><span class="si">%s</span><span class="s1">-(.*)-(.*)..*&#39;</span> <span class="o">%</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">lib_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+        <span class="n">matching_libraries</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">registered_libraries</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">short_name</span> <span class="o">==</span> <span class="n">short_name</span> <span class="ow">and</span> <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">min_version</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">version</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">max_version</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_libraries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No support found for </span><span class="si">%s</span><span class="s1"> version </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">short_name</span><span class="p">,</span> <span class="n">version</span><span class="p">))</span>
+        <span class="n">latest_matching_class</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">matching_libraries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">min_version</span><span class="p">)))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">latest_matching_class</span><span class="p">(</span><span class="n">lib_path</span><span class="p">)</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lib_path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">library</span> <span class="o">=</span> <span class="n">CDLL</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">lib_path</span><span class="p">))</span>
+
+        
+<div class="viewcode-block" id="GemstoneError">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GemstoneError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an exception that happened in a Gem.</span>
+
+<span class="sd">    This class encapsulates errors that occurred within the Gemstone virtual machine,</span>
+<span class="sd">    providing a Python-friendly interface to access information about the exception.</span>
+
+<span class="sd">    This class is not a :class:`GemObject` like other Gem objects because it</span>
+<span class="sd">    needs to be a Python Exception to work properly with Python&#39;s exception</span>
+<span class="sd">    handling mechanisms.</span>
+<span class="sd">    </span>
+<span class="sd">    :param sess: The :class:`GemstoneSession` where the error occurred.</span>
+<span class="sd">    :param c_error: A C structure containing the error details.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">c_error</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span> <span class="o">=</span> <span class="n">c_error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">sess</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">category</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">isNil</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span> <span class="k">else</span> <span class="n">obj</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the context where the exception occurred.</span>
+<span class="sd">        </span>
+<span class="sd">        The context is typically a GsProcess object representing the Smalltalk </span>
+<span class="sd">        execution state at the time of the error. This can be used for debugging</span>
+<span class="sd">        and to manipulate the execution state.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A :class:`GemObject` representing the GsProcess context, or None if </span>
+<span class="sd">                no context was provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">context</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">context</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">isNil</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span> <span class="k">else</span> <span class="n">obj</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exception_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the actual exception object from Gemstone.</span>
+<span class="sd">        </span>
+<span class="sd">        This is an instance of AbstractException or one of its subclasses that</span>
+<span class="sd">        was signaled in the Gemstone environment. This may be nil if the error</span>
+<span class="sd">        was not signaled from Smalltalk execution.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A GemObject representing the AbstractException, or None if no </span>
+<span class="sd">                exception object was provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">exceptionObj</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">exceptionObj</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">isNil</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span> <span class="k">else</span> <span class="n">obj</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the arguments of the exception.</span>
+<span class="sd">        </span>
+<span class="sd">        These are the arguments that were provided when the error was signaled,</span>
+<span class="sd">        which provide additional context about the error condition.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A list of GemObjects representing the exception arguments, </span>
+<span class="sd">                or None if no arguments were provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">args</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">argCount</span><span class="p">]]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">argCount</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the numeric error code for this exception.</span>
+<span class="sd">        </span>
+<span class="sd">        Gemstone assigns numeric codes to common errors. These can be used to</span>
+<span class="sd">        identify specific error conditions programmatically.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: An integer representing the Gemstone error number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">number</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">arg_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">argCount</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_fatal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this is a fatal error.</span>
+<span class="sd">        </span>
+<span class="sd">        Fatal errors typically cannot be recovered from and may indicate </span>
+<span class="sd">        serious problems with the Gemstone server that require administrative</span>
+<span class="sd">        intervention.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: True if the error is fatal, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">fatal</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reason</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the reason for the exception.</span>
+<span class="sd">        </span>
+<span class="sd">        This field may contain additional context about why the exception occurred.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A UTF-8 decoded string containing the reason for the exception.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">reason</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the error message.</span>
+<span class="sd">        </span>
+<span class="sd">        This contains the formatted error text, including any arguments that</span>
+<span class="sd">        were provided.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A UTF-8 decoded string containing the error message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_error</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception_obj</span><span class="o">.</span><span class="n">asString</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exception_obj</span><span class="o">.</span><span class="n">printString</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+<div class="viewcode-block" id="GemstoneError.continue_with">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneError.continue_with">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">continue_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">continue_with_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">replace_top_of_stack</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Continue execution after the exception.</span>
+<span class="sd">        </span>
+<span class="sd">        This method allows for resuming execution at the point where the exception</span>
+<span class="sd">        occurred, similar to how Smalltalk exceptions can be resumed.</span>
+<span class="sd">        </span>
+<span class="sd">        :param continue_with_error: Another GemstoneError to continue with. If provided,</span>
+<span class="sd">                                   this error will be signaled instead, and replace_top_of_stack</span>
+<span class="sd">                                   must be None.</span>
+<span class="sd">        :param replace_top_of_stack: A GemObject to replace the top of the stack. This is</span>
+<span class="sd">                                     used if continue_with_error is None.</span>
+<span class="sd">        :return: The result of continuing execution as a GemObject.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">replace_top_of_stack_oop</span> <span class="o">=</span> <span class="n">replace_top_of_stack</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">replace_top_of_stack</span> <span class="k">else</span> <span class="n">OOP_ILLEGAL</span>
+        <span class="n">continue_with_error_oop</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">continue_with_error</span><span class="o">.</span><span class="n">c_error</span><span class="p">)</span> <span class="k">if</span> <span class="n">continue_with_error</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_continue_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">continue_with_error_oop</span><span class="p">,</span> <span class="n">replace_top_of_stack_oop</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GemstoneError.clear_stack">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneError.clear_stack">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the stack of the process where the exception occurred.</span>
+<span class="sd">        </span>
+<span class="sd">        This terminates the execution context of the GsProcess where</span>
+<span class="sd">        the error occurred, resetting it to a clean state.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: The result of clearing the stack.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_clear_stack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>        </div>
+</div>
+
+
+    
+<div class="viewcode-block" id="InvalidSession">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.InvalidSession">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvalidSession</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Indicates a problem with the current Session.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NotSupported">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.NotSupported">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NotSupported</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when an attempt is made to do something that is not</span>
+<span class="sd">       supported. For example, if you try to transfer a type of Python object</span>
+<span class="sd">       to Gemstone which cannot be transferred.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GemstoneApiError">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneApiError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GemstoneApiError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when problems are detected while communicating via the underlying C API.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="GemstoneWarning">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneWarning">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GemstoneWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a warning condition related to this API.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1">#======================================================================================================================</span>
+<div class="viewcode-block" id="GemObject">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GemObject</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Python object that represents a given object in a Gem.</span>
+
+<span class="sd">    This class serves as a bridge between Python code and Gemstone objects. Each instance</span>
+<span class="sd">    wraps a reference to an object in a Gemstone session and provides methods to interact</span>
+<span class="sd">    with that object.</span>
+
+<span class="sd">    A GemObject forwards method calls to its counterpart in the Gem. It returns other</span>
+<span class="sd">    GemObject objects (and if the method takes arguments, those must also be GemObject</span>
+<span class="sd">    objects)::</span>
+<span class="sd">             </span>
+<span class="sd">        today = date_class.today()</span>
+<span class="sd">        assert isinstance(today, GemObject)</span>
+<span class="sd">        assert today.is_kind_of(date_class)</span>
+
+<span class="sd">    In Python, method names are spelled differently. Each &#39;:&#39; in a Smalltalk</span>
+<span class="sd">    method symbol is replaced with a &#39;_&#39; in Python. When calling such a</span>
+<span class="sd">    method, you must pass the correct number of arguments as Python</span>
+<span class="sd">    positional arguments::</span>
+
+<span class="sd">        user_globals.at_put(some_key, gem_number)</span>
+
+<span class="sd">    :ivar oop: The object-oriented pointer value in the Gemstone VM.</span>
+<span class="sd">    :ivar session: Reference to the session this object belongs to.</span>
+<span class="sd">    </span>
+<span class="sd">    :param session: The Gemstone session this object belongs to.</span>
+<span class="sd">    :param oop: The object-oriented pointer value in the Gemstone VM.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">oop</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oop</span> <span class="o">=</span> <span class="n">oop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_nil</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this object is Gemstone&#39;s nil.</span>
+
+<span class="sd">        :return: True if this object is nil, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">oop</span> <span class="o">==</span> <span class="n">OOP_NIL</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this object is a Gemstone Symbol.</span>
+
+<span class="sd">        :return: True if this object is a Symbol, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_kind_of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">OOP_CLASS_SYMBOL</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this GemObject to an appropriate Python object.</span>
+
+<span class="sd">        This method transfers the GemObject to a Python object of appropriate type.</span>
+<span class="sd">        Apart from a few collections, this only supports basic types, such</span>
+<span class="sd">        as unicode strings, various numbers and booleans.</span>
+
+<span class="sd">        Collections supported:</span>
+<span class="sd">         - OrderedCollection - becomes a Python list</span>
+<span class="sd">         - Dictionary - becomes a Python dict</span>
+<span class="sd">         - IdentitySet - becomes a Python set</span>
+
+<span class="sd">        In the case of collections, the contents of the new collections on the Python</span>
+<span class="sd">        side are created using object.to_py individually on the Gemstone elements contained</span>
+<span class="sd">        inside the Gemstone collections.</span>
+
+<span class="sd">        :return: A Python representation of this Gemstone object.</span>
+<span class="sd">        :raises NotSupported: If the object cannot be converted to a Python type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GemObject.is_kind_of">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.is_kind_of">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_kind_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_class</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this object is an instance of the given class or one of its subclasses.</span>
+
+<span class="sd">        :param a_class: A Gemstone class object to check against.</span>
+<span class="sd">        :return: True if this object is an instance of the given class or a subclass,</span>
+<span class="sd">                False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_is_kind_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_class</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="GemObject.gemstone_class">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.gemstone_class">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gemstone_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the Gemstone class of this object.</span>
+
+<span class="sd">        :return: A GemObject representing the class of this object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_gemstone_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_mapped_selector</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">perform_mapped_selector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">smalltalk_selector</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">or</span> <span class="s1">&#39;_&#39;</span> <span class="ow">in</span> <span class="n">selector</span><span class="p">:</span>
+           <span class="n">smalltalk_selector</span> <span class="o">+=</span> <span class="s1">&#39;:&#39;</span>
+        <span class="n">expected_args</span> <span class="o">=</span> <span class="n">smalltalk_selector</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_args</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">() takes exactly </span><span class="si">%s</span><span class="s1"> arguments (</span><span class="si">%s</span><span class="s1"> given)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">expected_args</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)))</span>
+        <span class="n">selector_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">new_symbol</span><span class="p">(</span><span class="n">smalltalk_selector</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">selector_symbol</span><span class="p">,</span> <span class="o">*</span><span class="p">[(</span><span class="n">i</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+
+<div class="viewcode-block" id="GemObject.perform">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.perform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Directly perform a method on the Gemstone object.</span>
+
+<span class="sd">        This is the low-level method that executes a method call on the</span>
+<span class="sd">        Gemstone object. It accepts a Gemstone selector and arguments.</span>
+
+<span class="sd">        This method need not be called directly, it is usually automatically invoked</span>
+<span class="sd">        when an unknown attribute is called on a GemObject, for example::</span>
+
+<span class="sd">          session.Date.today().addDays(2)</span>
+
+<span class="sd">        :param selector: The method selector, either as a GemObject Symbol</span>
+<span class="sd">                         or a string that will be converted to a Symbol.</span>
+<span class="sd">        :param args: GemObject arguments to pass to the method. If not a GemObject,</span>
+<span class="sd">                     the object will be transformed using session.from_py()</span>
+<span class="sd">        :return: The result of the method call.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GemObject.__iter__">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.__iter__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide iteration over collection objects.</span>
+
+<span class="sd">        This allows Gemstone collections to be iterated over using Python&#39;s</span>
+<span class="sd">        iteration protocol.</span>
+
+<span class="sd">        It works by first calling self.asOrderedCollection in Gemstone - something</span>
+<span class="sd">        that may have performance implications depending on the situation.</span>
+
+<span class="sd">        :yield: Each element in the collection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">self_as_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">asOrderedCollection</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">self_as_collection</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">self_as_collection</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oop</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GemObject.__str__">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.__str__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide a human-readable string representation.</span>
+
+<span class="sd">        This method attempts to create a readable representation of the Gemstone</span>
+<span class="sd">        object, similar to how it would be displayed in Gemstone using printString.</span>
+
+<span class="sd">        :return: A human-readable string representation of the object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;isBehavior&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_py</span><span class="p">:</span>
+            <span class="n">printed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;printString&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_py</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;printString&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_py</span>
+            <span class="n">pre</span> <span class="o">=</span> <span class="s1">&#39;an&#39;</span> <span class="k">if</span> <span class="p">(</span><span class="n">class_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;AEIOU&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;a&#39;</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)</span>
+            <span class="n">gem_printed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;printString&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gem_printed</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_py</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">class_name</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">):</span>
+                <span class="n">printed</span> <span class="o">=</span> <span class="n">gem_printed</span><span class="o">.</span><span class="n">to_py</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">printed</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">description</span><span class="p">):</span>
+                    <span class="n">printed</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="n">printed</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">printed</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="k">return</span> <span class="n">printed</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">is_logged_in</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">deallocated_unfreed_gemstone_objects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">export_set_free_batch_size</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">remove_dead_gemstone_objects</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">deallocated_unfreed_gemstone_objects</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oop</span><span class="p">)</span></div>
+
+            
+<span class="c1">#======================================================================================================================</span>
+<div class="viewcode-block" id="GemstoneSession">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneSession">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GemstoneSession</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A Python interface for managing a connection to a Gemstone database.</span>
+<span class="sd">    </span>
+<span class="sd">    This class provides the foundation for interacting with Gemstone objects from Python.</span>
+<span class="sd">    It manages conversion between Python and Gemstone objects, caches Gemstone objects </span>
+<span class="sd">    to maintain identity, and handles object lifecycle management.</span>
+<span class="sd">    </span>
+<span class="sd">    The session maintains a cache of GemObject instances to ensure that the same </span>
+<span class="sd">    Gemstone object is always represented by the same Python object during its lifetime.</span>
+
+<span class="sd">    GemstoneSession is not intended to be instantiated directly, its subclasses are:</span>
+<span class="sd">    LinkedSession or RPCSession.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instances</span> <span class="o">=</span> <span class="n">WeakValueDictionary</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deallocated_unfreed_gemstone_objects</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_fetch_size</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">export_set_free_batch_size</span> <span class="o">=</span> <span class="mi">1000</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_or_create_gem_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oop</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">oop</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">new_gem_object</span> <span class="o">=</span> <span class="n">GemObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oop</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">oop</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_gem_object</span>
+            <span class="k">return</span> <span class="n">new_gem_object</span>
+            
+<div class="viewcode-block" id="GemstoneSession.from_py">
+<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneSession.from_py">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_object</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a Python object to its corresponding Gemstone representation.</span>
+<span class="sd">        </span>
+<span class="sd">        This method creates an object in Gemstone corresponding to py_object of</span>
+<span class="sd">        appopriate type. Apart from a few collections, this only supports</span>
+<span class="sd">        basic types, such as unicode strings, various numbers and booleans.</span>
+
+<span class="sd">        Collections supported:</span>
+<span class="sd">         - list - becomes an OrderedCollection</span>
+<span class="sd">         - dict - becomes a Dictionary</span>
+<span class="sd">         - set - becomes an IdentitySet</span>
+
+<span class="sd">        In the case of collections, the contents of the collections on the Gemstone</span>
+<span class="sd">        side are created using session.from_py() on each element in the Python collections.</span>
+<span class="sd">        </span>
+<span class="sd">        :param py_object: A Python object to convert</span>
+<span class="sd">        :return: A GemObject representing the converted object</span>
+<span class="sd">        :raises NotSupported: If the Python type cannot be converted</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="n">implemented_python_types</span><span class="p">[</span><span class="n">py_object</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;py_to_</span><span class="si">{}</span><span class="s1">_&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">method_name</span><span class="p">))(</span><span class="n">py_object</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotSupported</span><span class="p">(</span><span class="s1">&#39;Cannot convert </span><span class="si">%s</span><span class="s1"> to a GemObject&#39;</span> <span class="o">%</span> <span class="n">py_object</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span></div>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_boolean_or_none_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_object</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">well_known_python_instances</span><span class="p">[</span><span class="n">py_object</span><span class="p">]</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_integer_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_int</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="n">compute_small_integer_oop</span><span class="p">(</span><span class="n">py_int</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OverflowError</span><span class="p">:</span>    
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;^</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">py_int</span><span class="p">))</span><span class="o">.</span><span class="n">oop</span>
+        <span class="k">return</span> <span class="n">return_oop</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_ordered_collection_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_list</span><span class="p">):</span>
+        <span class="n">collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_symbol</span><span class="p">(</span><span class="s1">&#39;OrderedCollection&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">py_list</span><span class="p">:</span>
+            <span class="n">collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">collection</span><span class="o">.</span><span class="n">oop</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_dictionary_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_dict</span><span class="p">):</span>
+        <span class="n">dictionary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_symbol</span><span class="p">(</span><span class="s1">&#39;Dictionary&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">py_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">dictionary</span><span class="o">.</span><span class="n">at_put</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">oop</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_identity_set_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_set</span><span class="p">):</span>
+        <span class="n">identity_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_symbol</span><span class="p">(</span><span class="s1">&#39;IdentitySet&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">new</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">py_set</span><span class="p">:</span>
+            <span class="n">identity_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">identity_set</span><span class="o">.</span><span class="n">oop</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="n">well_known_instances</span><span class="p">[</span><span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">gem_class_name</span> <span class="o">=</span> <span class="n">well_known_class_names</span><span class="p">[</span><span class="n">instance</span><span class="o">.</span><span class="n">gemstone_class</span><span class="p">()</span><span class="o">.</span><span class="n">oop</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NotSupported</span><span class="p">(</span><span class="s1">&#39;Cannot convert a gemstone </span><span class="si">%s</span><span class="s1"> to python&#39;</span> <span class="o">%</span> <span class="n">instance</span><span class="o">.</span><span class="n">gemstone_class</span><span class="p">()</span><span class="o">.</span><span class="n">name</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;object_</span><span class="si">{}</span><span class="s1">_to_py&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gem_class_name</span><span class="p">))(</span><span class="n">instance</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_small_integer_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">GCI_OOP_IS_SMALL_INT</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;&gt;</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">(</span><span class="n">OOP_NUM_TAG_BITS</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneApiError</span><span class="p">(</span><span class="s1">&#39;Expected oop to represent a Small Integer.&#39;</span><span class="p">)</span>
+            
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_large_integer_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">string_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_latin1_to_py</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">object_perform</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s1">&#39;asString&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">string_result</span><span class="p">)</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_ordered_collection_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">py_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">py_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">to_py</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">py_list</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_dictionary_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">py_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="o">.</span><span class="n">asArray</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">keys</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">py_dict</span><span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">to_py</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_py</span>
+        <span class="k">return</span> <span class="n">py_dict</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_identity_set_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">py_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">asArray</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">items</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_py</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">py_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">to_py</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">py_set</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_symbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">#======================================================================================================================</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

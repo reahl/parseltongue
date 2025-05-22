@@ -1,0 +1,954 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ptongue package &mdash; parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GemStone server process control" href="ptongue.gemstonecontrol.html" />
+    <link rel="prev" title="Quick Start Guide" href="../quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            parseltongue
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ptongue package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.GemObject"><code class="docutils literal notranslate"><span class="pre">GemObject</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.__iter__"><code class="docutils literal notranslate"><span class="pre">GemObject.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.__str__"><code class="docutils literal notranslate"><span class="pre">GemObject.__str__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.gemstone_class"><code class="docutils literal notranslate"><span class="pre">GemObject.gemstone_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.is_kind_of"><code class="docutils literal notranslate"><span class="pre">GemObject.is_kind_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.is_nil"><code class="docutils literal notranslate"><span class="pre">GemObject.is_nil</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.is_symbol"><code class="docutils literal notranslate"><span class="pre">GemObject.is_symbol</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.perform"><code class="docutils literal notranslate"><span class="pre">GemObject.perform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemObject.to_py"><code class="docutils literal notranslate"><span class="pre">GemObject.to_py</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.GemstoneSession"><code class="docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneSession.from_py"><code class="docutils literal notranslate"><span class="pre">GemstoneSession.from_py()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.LinkedSession"><code class="docutils literal notranslate"><span class="pre">LinkedSession</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.abort"><code class="docutils literal notranslate"><span class="pre">LinkedSession.abort()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.begin"><code class="docutils literal notranslate"><span class="pre">LinkedSession.begin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.commit"><code class="docutils literal notranslate"><span class="pre">LinkedSession.commit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.execute"><code class="docutils literal notranslate"><span class="pre">LinkedSession.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.is_current_session"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_current_session</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.is_logged_in"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_logged_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.is_remote"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_remote</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.log_out"><code class="docutils literal notranslate"><span class="pre">LinkedSession.log_out()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.new_symbol"><code class="docutils literal notranslate"><span class="pre">LinkedSession.new_symbol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.LinkedSession.resolve_symbol"><code class="docutils literal notranslate"><span class="pre">LinkedSession.resolve_symbol()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.RPCSession"><code class="docutils literal notranslate"><span class="pre">RPCSession</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.abort"><code class="docutils literal notranslate"><span class="pre">RPCSession.abort()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.begin"><code class="docutils literal notranslate"><span class="pre">RPCSession.begin()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.commit"><code class="docutils literal notranslate"><span class="pre">RPCSession.commit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.execute"><code class="docutils literal notranslate"><span class="pre">RPCSession.execute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.is_logged_in"><code class="docutils literal notranslate"><span class="pre">RPCSession.is_logged_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.is_remote"><code class="docutils literal notranslate"><span class="pre">RPCSession.is_remote</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.log_out"><code class="docutils literal notranslate"><span class="pre">RPCSession.log_out()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.new_symbol"><code class="docutils literal notranslate"><span class="pre">RPCSession.new_symbol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.RPCSession.resolve_symbol"><code class="docutils literal notranslate"><span class="pre">RPCSession.resolve_symbol()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.GemstoneError"><code class="docutils literal notranslate"><span class="pre">GemstoneError</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.args"><code class="docutils literal notranslate"><span class="pre">GemstoneError.args</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.clear_stack"><code class="docutils literal notranslate"><span class="pre">GemstoneError.clear_stack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.context"><code class="docutils literal notranslate"><span class="pre">GemstoneError.context</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.continue_with"><code class="docutils literal notranslate"><span class="pre">GemstoneError.continue_with()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.exception_obj"><code class="docutils literal notranslate"><span class="pre">GemstoneError.exception_obj</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.is_fatal"><code class="docutils literal notranslate"><span class="pre">GemstoneError.is_fatal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.message"><code class="docutils literal notranslate"><span class="pre">GemstoneError.message</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.number"><code class="docutils literal notranslate"><span class="pre">GemstoneError.number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ptongue.GemstoneError.reason"><code class="docutils literal notranslate"><span class="pre">GemstoneError.reason</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.InvalidSession"><code class="docutils literal notranslate"><span class="pre">InvalidSession</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.NotSupported"><code class="docutils literal notranslate"><span class="pre">NotSupported</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.GemstoneApiError"><code class="docutils literal notranslate"><span class="pre">GemstoneApiError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ptongue.GemstoneWarning"><code class="docutils literal notranslate"><span class="pre">GemstoneWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ptongue.gemstonecontrol.html">GemStone server process control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneInstallation"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneService"><code class="docutils literal notranslate"><span class="pre">GemstoneService</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.NetLDI"><code class="docutils literal notranslate"><span class="pre">NetLDI</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.Stone"><code class="docutils literal notranslate"><span class="pre">Stone</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">parseltongue</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ptongue package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/ptongue.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-ptongue">
+<span id="ptongue-package"></span><h1>ptongue package<a class="headerlink" href="#module-ptongue" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.GemObject">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">GemObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oop</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemObject" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A Python object that represents a given object in a Gem.</p>
+<p>This class serves as a bridge between Python code and Gemstone objects. Each instance
+wraps a reference to an object in a Gemstone session and provides methods to interact
+with that object.</p>
+<p>A GemObject forwards method calls to its counterpart in the Gem. It returns other
+GemObject objects (and if the method takes arguments, those must also be GemObject
+objects):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">today</span> <span class="o">=</span> <span class="n">date_class</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">today</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">today</span><span class="o">.</span><span class="n">is_kind_of</span><span class="p">(</span><span class="n">date_class</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In Python, method names are spelled differently. Each ‘:’ in a Smalltalk
+method symbol is replaced with a ‘_’ in Python. When calling such a
+method, you must pass the correct number of arguments as Python
+positional arguments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">user_globals</span><span class="o">.</span><span class="n">at_put</span><span class="p">(</span><span class="n">some_key</span><span class="p">,</span> <span class="n">gem_number</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>oop</strong> – The object-oriented pointer value in the Gemstone VM.</p></li>
+<li><p><strong>session</strong> – Reference to the session this object belongs to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>session</strong> – The Gemstone session this object belongs to.</p></li>
+<li><p><strong>oop</strong> – The object-oriented pointer value in the Gemstone VM.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemObject.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemObject.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemObject.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Provide iteration over collection objects.</p>
+<p>This allows Gemstone collections to be iterated over using Python’s
+iteration protocol.</p>
+<p>It works by first calling self.asOrderedCollection in Gemstone - something
+that may have performance implications depending on the situation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yield<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Each element in the collection.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemObject.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemObject.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemObject.__str__" title="Link to this definition"></a></dt>
+<dd><p>Provide a human-readable string representation.</p>
+<p>This method attempts to create a readable representation of the Gemstone
+object, similar to how it would be displayed in Gemstone using printString.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A human-readable string representation of the object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemObject.gemstone_class">
+<span class="sig-name descname"><span class="pre">gemstone_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemObject.gemstone_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemObject.gemstone_class" title="Link to this definition"></a></dt>
+<dd><p>Get the Gemstone class of this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A GemObject representing the class of this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemObject.is_kind_of">
+<span class="sig-name descname"><span class="pre">is_kind_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemObject.is_kind_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemObject.is_kind_of" title="Link to this definition"></a></dt>
+<dd><p>Check if this object is an instance of the given class or one of its subclasses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>a_class</strong> – A Gemstone class object to check against.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if this object is an instance of the given class or a subclass,
+False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemObject.is_nil">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_nil</span></span><a class="headerlink" href="#ptongue.GemObject.is_nil" title="Link to this definition"></a></dt>
+<dd><p>Check if this object is Gemstone’s nil.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if this object is nil, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemObject.is_symbol">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol</span></span><a class="headerlink" href="#ptongue.GemObject.is_symbol" title="Link to this definition"></a></dt>
+<dd><p>Check if this object is a Gemstone Symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if this object is a Symbol, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemObject.perform">
+<span class="sig-name descname"><span class="pre">perform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selector</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemObject.perform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemObject.perform" title="Link to this definition"></a></dt>
+<dd><p>Directly perform a method on the Gemstone object.</p>
+<p>This is the low-level method that executes a method call on the
+Gemstone object. It accepts a Gemstone selector and arguments.</p>
+<p>This method need not be called directly, it is usually automatically invoked
+when an unknown attribute is called on a GemObject, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">session</span><span class="o">.</span><span class="n">Date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">addDays</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selector</strong> – The method selector, either as a GemObject Symbol
+or a string that will be converted to a Symbol.</p></li>
+<li><p><strong>args</strong> – GemObject arguments to pass to the method. If not a GemObject,
+the object will be transformed using session.from_py()</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of the method call.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemObject.to_py">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_py</span></span><a class="headerlink" href="#ptongue.GemObject.to_py" title="Link to this definition"></a></dt>
+<dd><p>Convert this GemObject to an appropriate Python object.</p>
+<p>This method transfers the GemObject to a Python object of appropriate type.
+Apart from a few collections, this only supports basic types, such
+as unicode strings, various numbers and booleans.</p>
+<dl class="simple">
+<dt>Collections supported:</dt><dd><ul class="simple">
+<li><p>OrderedCollection - becomes a Python list</p></li>
+<li><p>Dictionary - becomes a Python dict</p></li>
+<li><p>IdentitySet - becomes a Python set</p></li>
+</ul>
+</dd>
+</dl>
+<p>In the case of collections, the contents of the new collections on the Python
+side are created using object.to_py individually on the Gemstone elements contained
+inside the Gemstone collections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A Python representation of this Gemstone object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#ptongue.NotSupported" title="ptongue.NotSupported"><strong>NotSupported</strong></a> – If the object cannot be converted to a Python type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.GemstoneSession">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneSession</span></span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneSession" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A Python interface for managing a connection to a Gemstone database.</p>
+<p>This class provides the foundation for interacting with Gemstone objects from Python.
+It manages conversion between Python and Gemstone objects, caches Gemstone objects
+to maintain identity, and handles object lifecycle management.</p>
+<p>The session maintains a cache of GemObject instances to ensure that the same
+Gemstone object is always represented by the same Python object during its lifetime.</p>
+<p>GemstoneSession is not intended to be instantiated directly, its subclasses are:
+LinkedSession or RPCSession.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemstoneSession.from_py">
+<span class="sig-name descname"><span class="pre">from_py</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">py_object</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneSession.from_py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneSession.from_py" title="Link to this definition"></a></dt>
+<dd><p>Convert a Python object to its corresponding Gemstone representation.</p>
+<p>This method creates an object in Gemstone corresponding to py_object of
+appopriate type. Apart from a few collections, this only supports
+basic types, such as unicode strings, various numbers and booleans.</p>
+<dl class="simple">
+<dt>Collections supported:</dt><dd><ul class="simple">
+<li><p>list - becomes an OrderedCollection</p></li>
+<li><p>dict - becomes a Dictionary</p></li>
+<li><p>set - becomes an IdentitySet</p></li>
+</ul>
+</dd>
+</dl>
+<p>In the case of collections, the contents of the collections on the Gemstone
+side are created using session.from_py() on each element in the Python collections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>py_object</strong> – A Python object to convert</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GemObject representing the converted object</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ptongue.NotSupported" title="ptongue.NotSupported"><strong>NotSupported</strong></a> – If the Python type cannot be converted</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.LinkedSession">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">LinkedSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stone_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gs64stone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ptongue.gemproxy.html#ptongue.gemproxy.GemstoneSession" title="ptongue.gemproxy.GemstoneSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a></p>
+<p>A session that directly links to a GemStone database using the linked GCI API.</p>
+<p>LinkedSession provides a client that runs inside the Python process
+(as opposed to RPCSession which connects to a remote server). Only one active
+LinkedSession can exist at a time per process.</p>
+<p>Creating a LinkedSession implies logging in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>username</strong> – GemStone user account name used for authentication</p></li>
+<li><p><strong>password</strong> – GemStone password used for authentication</p></li>
+<li><p><strong>stone_name</strong> – Name of the GemStone repository to connect to, defaults to ‘gs64stone’</p></li>
+<li><p><strong>host_username</strong> – If specified, the OS username used for connecting to the server</p></li>
+<li><p><strong>host_password</strong> – Password for host_username, if required, defaults to empty string</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.abort">
+<span class="sig-name descname"><span class="pre">abort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.abort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.abort" title="Link to this definition"></a></dt>
+<dd><p>Abort the current transaction.</p>
+<p>Any changes made since the last commit or abort will be discarded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during the GemStone operation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.begin">
+<span class="sig-name descname"><span class="pre">begin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.begin" title="Link to this definition"></a></dt>
+<dd><p>Begin a new transaction.</p>
+<p>If there is an active transaction, it is aborted before starting a new one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during the GemStone operation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.commit" title="Link to this definition"></a></dt>
+<dd><p>Commit the current transaction.</p>
+<p>Write all changes made in the current transaction to the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the commit fails or an error occurs during the GemStone operation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.execute" title="Link to this definition"></a></dt>
+<dd><p>Execute GemStone Smalltalk code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> – The Smalltalk code to execute, either as a Python string or
+a GemStone string object</p></li>
+<li><p><strong>context</strong> – The context object in which to execute the code, defaults to None
+(which uses the default nil context)</p></li>
+<li><p><strong>symbol_list</strong> – The symbol list to use for name resolution, defaults to None
+(which uses the default symbol list from the user’s profile)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of executing the Smalltalk code</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session,
+or if the source is not of the expected type</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during execution</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.is_current_session">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_current_session</span></span><a class="headerlink" href="#ptongue.LinkedSession.is_current_session" title="Link to this definition"></a></dt>
+<dd><p>Check if this session is the current active linked session.</p>
+<p>Only one linked session can be active at a time in a process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if this is the current active session, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.is_logged_in">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_logged_in</span></span><a class="headerlink" href="#ptongue.LinkedSession.is_logged_in" title="Link to this definition"></a></dt>
+<dd><p>Check if this session is currently logged in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the session is logged in, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.is_remote">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_remote</span></span><a class="headerlink" href="#ptongue.LinkedSession.is_remote" title="Link to this definition"></a></dt>
+<dd><p>Determine whether this session is connected to a remote Gem.</p>
+<p>For a <a class="reference internal" href="#ptongue.LinkedSession" title="ptongue.LinkedSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkedSession</span></code></a>, this should typically return False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if connected to a remote Gem, False if using a linked Gem</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during the GemStone operation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.log_out">
+<span class="sig-name descname"><span class="pre">log_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.log_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.log_out" title="Link to this definition"></a></dt>
+<dd><p>Log out from the GemStone session.</p>
+<p>After log out, the session can no longer be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during logout</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.new_symbol">
+<span class="sig-name descname"><span class="pre">new_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">py_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.new_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.new_symbol" title="Link to this definition"></a></dt>
+<dd><p>Create a new GemStone Symbol object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>py_string</strong> – The Python string to be converted to a Symbol</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The new Symbol object</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs, such as if the string is too long to be a Symbol</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.LinkedSession.resolve_symbol">
+<span class="sig-name descname"><span class="pre">resolve_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxylinked.html#LinkedSession.resolve_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.LinkedSession.resolve_symbol" title="Link to this definition"></a></dt>
+<dd><p>Resolve a symbol to its value in a symbol dictionary.</p>
+<p>There is a shorthand for this method. These lines are equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">session</span><span class="o">.</span><span class="n">SymbolName</span>
+<span class="n">session</span><span class="o">.</span><span class="n">resolve_symbol</span><span class="p">(</span><span class="s1">&#39;SymbolName&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symbol</strong> – The name of the symbol to resolve, either as a Python string
+or a GemStone Symbol object</p></li>
+<li><p><strong>symbol_list</strong> – The symbol list to use for resolution, defaults to None
+(which uses the default symbol list from the user’s profile)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The object that the symbol refers to</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session,
+or if symbol is not of the expected type</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the symbol cannot be resolved or another error occurs</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="ptongue.RPCSession">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">RPCSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stone_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gs64stone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netldi_task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gemnetobject'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="ptongue.gemproxy.html#ptongue.gemproxy.GemstoneSession" title="ptongue.gemproxy.GemstoneSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a></p>
+<p>A session that interacts with a remote Gemstone database via remote procedure call.</p>
+<p>Creating an RPCSession implies logging in, and for a gem to be created for the session
+on the remote side.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>username</strong> – GemStone username for repository authentication</p></li>
+<li><p><strong>password</strong> – GemStone password for repository authentication</p></li>
+<li><p><strong>stone_name</strong> – Name of the stone (repository) to connect to</p></li>
+<li><p><strong>host_username</strong> – Operating system username for host authentication</p></li>
+<li><p><strong>host_password</strong> – Operating system password for host authentication</p></li>
+<li><p><strong>netldi_task</strong> – Network service name</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.abort">
+<span class="sig-name descname"><span class="pre">abort</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.abort"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.abort" title="Link to this definition"></a></dt>
+<dd><p>Abort the current transaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the abort operation fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.begin">
+<span class="sig-name descname"><span class="pre">begin</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.begin" title="Link to this definition"></a></dt>
+<dd><p>Begin a new transaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the begin operation fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.commit" title="Link to this definition"></a></dt>
+<dd><p>Commit the current transaction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the commit operation fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.execute" title="Link to this definition"></a></dt>
+<dd><p>Execute a GemStone Smalltalk expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> – String or GemObject containing Smalltalk code to execute</p></li>
+<li><p><strong>context</strong> – Optional context object for the execution</p></li>
+<li><p><strong>symbol_list</strong> – Optional symbol list for name resolution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>GemObject representing the result of execution</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If source is not a string or GemObject</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If execution fails</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.RPCSession.is_logged_in">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_logged_in</span></span><a class="headerlink" href="#ptongue.RPCSession.is_logged_in" title="Link to this definition"></a></dt>
+<dd><p>Check if the session is currently logged in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the session is logged in, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.RPCSession.is_remote">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_remote</span></span><a class="headerlink" href="#ptongue.RPCSession.is_remote" title="Link to this definition"></a></dt>
+<dd><p>Check if the session is remote.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the session is remote, False otherwise</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#ptongue.InvalidSession" title="ptongue.InvalidSession"><strong>InvalidSession</strong></a> – If the session is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.log_out">
+<span class="sig-name descname"><span class="pre">log_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.log_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.log_out" title="Link to this definition"></a></dt>
+<dd><p>Log out from the GemStone session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If logout fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.new_symbol">
+<span class="sig-name descname"><span class="pre">new_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">py_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.new_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.new_symbol" title="Link to this definition"></a></dt>
+<dd><p>Create a new GemStone symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>py_string</strong> – String to convert to a symbol</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>GemObject representing the created symbol</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If symbol creation fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.RPCSession.resolve_symbol">
+<span class="sig-name descname"><span class="pre">resolve_symbol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxyrpc.html#RPCSession.resolve_symbol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.RPCSession.resolve_symbol" title="Link to this definition"></a></dt>
+<dd><p>Resolve a symbol in the GemStone symbol list.</p>
+<p>There is a shorthand for this method. These lines are equivalent:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">session</span><span class="o">.</span><span class="n">SymbolName</span>
+<span class="n">session</span><span class="o">.</span><span class="n">resolve_symbol</span><span class="p">(</span><span class="s1">&#39;SymbolName&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symbol</strong> – String or GemObject symbol to resolve</p></li>
+<li><p><strong>symbol_list</strong> – Optional symbol list for resolution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>GemObject representing the resolved symbol</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#ptongue.GemstoneApiError" title="ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If symbol is not a string or GemObject</p></li>
+<li><p><a class="reference internal" href="#ptongue.GemstoneError" title="ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If resolution fails</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ptongue.GemstoneError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Represents an exception that happened in a Gem.</p>
+<p>This class encapsulates errors that occurred within the Gemstone virtual machine,
+providing a Python-friendly interface to access information about the exception.</p>
+<p>This class is not a <a class="reference internal" href="#ptongue.GemObject" title="ptongue.GemObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemObject</span></code></a> like other Gem objects because it
+needs to be a Python Exception to work properly with Python’s exception
+handling mechanisms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sess</strong> – The <a class="reference internal" href="#ptongue.GemstoneSession" title="ptongue.GemstoneSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a> where the error occurred.</p></li>
+<li><p><strong>c_error</strong> – A C structure containing the error details.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.args">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#ptongue.GemstoneError.args" title="Link to this definition"></a></dt>
+<dd><p>Get the arguments of the exception.</p>
+<p>These are the arguments that were provided when the error was signaled,
+which provide additional context about the error condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of GemObjects representing the exception arguments,
+or None if no arguments were provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.clear_stack">
+<span class="sig-name descname"><span class="pre">clear_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneError.clear_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneError.clear_stack" title="Link to this definition"></a></dt>
+<dd><p>Clear the stack of the process where the exception occurred.</p>
+<p>This terminates the execution context of the GsProcess where
+the error occurred, resetting it to a clean state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The result of clearing the stack.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.context">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#ptongue.GemstoneError.context" title="Link to this definition"></a></dt>
+<dd><p>Get the context where the exception occurred.</p>
+<p>The context is typically a GsProcess object representing the Smalltalk
+execution state at the time of the error. This can be used for debugging
+and to manipulate the execution state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="#ptongue.GemObject" title="ptongue.GemObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemObject</span></code></a> representing the GsProcess context, or None if
+no context was provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.continue_with">
+<span class="sig-name descname"><span class="pre">continue_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">continue_with_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace_top_of_stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneError.continue_with"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneError.continue_with" title="Link to this definition"></a></dt>
+<dd><p>Continue execution after the exception.</p>
+<p>This method allows for resuming execution at the point where the exception
+occurred, similar to how Smalltalk exceptions can be resumed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>continue_with_error</strong> – Another GemstoneError to continue with. If provided,
+this error will be signaled instead, and replace_top_of_stack
+must be None.</p></li>
+<li><p><strong>replace_top_of_stack</strong> – A GemObject to replace the top of the stack. This is
+used if continue_with_error is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of continuing execution as a GemObject.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.exception_obj">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exception_obj</span></span><a class="headerlink" href="#ptongue.GemstoneError.exception_obj" title="Link to this definition"></a></dt>
+<dd><p>Get the actual exception object from Gemstone.</p>
+<p>This is an instance of AbstractException or one of its subclasses that
+was signaled in the Gemstone environment. This may be nil if the error
+was not signaled from Smalltalk execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A GemObject representing the AbstractException, or None if no
+exception object was provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.is_fatal">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_fatal</span></span><a class="headerlink" href="#ptongue.GemstoneError.is_fatal" title="Link to this definition"></a></dt>
+<dd><p>Check if this is a fatal error.</p>
+<p>Fatal errors typically cannot be recovered from and may indicate
+serious problems with the Gemstone server that require administrative
+intervention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the error is fatal, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.message">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">message</span></span><a class="headerlink" href="#ptongue.GemstoneError.message" title="Link to this definition"></a></dt>
+<dd><p>Get the error message.</p>
+<p>This contains the formatted error text, including any arguments that
+were provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A UTF-8 decoded string containing the error message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.number">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number</span></span><a class="headerlink" href="#ptongue.GemstoneError.number" title="Link to this definition"></a></dt>
+<dd><p>Get the numeric error code for this exception.</p>
+<p>Gemstone assigns numeric codes to common errors. These can be used to
+identify specific error conditions programmatically.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An integer representing the Gemstone error number.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="ptongue.GemstoneError.reason">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reason</span></span><a class="headerlink" href="#ptongue.GemstoneError.reason" title="Link to this definition"></a></dt>
+<dd><p>Get the reason for the exception.</p>
+<p>This field may contain additional context about why the exception occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A UTF-8 decoded string containing the reason for the exception.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ptongue.InvalidSession">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">InvalidSession</span></span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#InvalidSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.InvalidSession" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Indicates a problem with the current Session.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ptongue.NotSupported">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">NotSupported</span></span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#NotSupported"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.NotSupported" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Thrown when an attempt is made to do something that is not
+supported. For example, if you try to transfer a type of Python object
+to Gemstone which cannot be transferred.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ptongue.GemstoneApiError">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneApiError</span></span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneApiError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneApiError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Thrown when problems are detected while communicating via the underlying C API.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="ptongue.GemstoneWarning">
+<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneWarning</span></span><a class="reference internal" href="../_modules/ptongue/gemproxy.html#GemstoneWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ptongue.GemstoneWarning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a></p>
+<p>Represents a warning condition related to this API.</p>
+</dd></dl>
+
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ptongue.gemstonecontrol.html">GemStone server process control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneInstallation"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneInstallation.from_install_directory"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation.from_install_directory()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneInstallation.environ"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation.environ</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneInstallation.environment_setup"><code class="docutils literal notranslate"><span class="pre">GemstoneInstallation.environment_setup()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneService"><code class="docutils literal notranslate"><span class="pre">GemstoneService</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneService.start"><code class="docutils literal notranslate"><span class="pre">GemstoneService.start()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.GemstoneService.stop"><code class="docutils literal notranslate"><span class="pre">GemstoneService.stop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.NetLDI"><code class="docutils literal notranslate"><span class="pre">NetLDI</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="ptongue.gemstonecontrol.html#ptongue.gemstonecontrol.Stone"><code class="docutils literal notranslate"><span class="pre">Stone</span></code></a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../quickstart.html" class="btn btn-neutral float-left" title="Quick Start Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ptongue.gemstonecontrol.html" class="btn btn-neutral float-right" title="GemStone server process control" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,638 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ptongue.gemproxyrpc &mdash; parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            parseltongue
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/ptongue.html">ptongue package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">parseltongue</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ptongue.gemproxyrpc</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ptongue.gemproxyrpc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (C) 2025 Reahl Software Services (Pty) Ltd</span>
+<span class="c1"># </span>
+<span class="c1"># This file is part of parseltongue.</span>
+<span class="c1">#</span>
+<span class="c1"># parseltongue is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU Lesser General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># parseltongue is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU Lesser General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License</span>
+<span class="c1"># along with parseltongue.  If not, see &lt;https://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">RPC Sessions</span>
+<span class="sd">============</span>
+
+<span class="sd">This module provides thread-safe remote procedure call (RPC) connectivity to </span>
+<span class="sd">GemStone/S 64 Bit object databases.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemstone</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemproxy</span><span class="w"> </span><span class="kn">import</span> <span class="n">GemstoneLibrary</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">,</span> <span class="n">GemstoneSession</span><span class="p">,</span> <span class="n">GemstoneError</span><span class="p">,</span> <span class="n">to_c_bytes</span><span class="p">,</span> <span class="n">InvalidSession</span><span class="p">,</span> \
+    <span class="n">GemstoneApiError</span><span class="p">,</span> <span class="n">GemstoneWarning</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GciTs</span><span class="p">(</span><span class="n">GemstoneLibrary</span><span class="p">):</span>
+    <span class="n">short_name</span> <span class="o">=</span> <span class="s1">&#39;gcits&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lib_path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lib_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_fetch_size</span> <span class="o">=</span> <span class="mi">200</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsEncrypt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsEncrypt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsEncrypt</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsEncrypt</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsLogout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogout</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogout</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsSessionIsRemote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsSessionIsRemote</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsSessionIsRemote</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsSessionIsRemote</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsExecute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsExecute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsExecute</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsExecute</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_ushort</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsPerform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsPerform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsPerform</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsPerform</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">OopType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span>
+                                      <span class="n">ctypes</span><span class="o">.</span><span class="n">c_ushort</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsResolveSymbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsResolveSymbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsResolveSymbol</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsResolveSymbol</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsResolveSymbolObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsResolveSymbolObj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsResolveSymbolObj</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsResolveSymbolObj</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsNewSymbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsNewSymbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsNewSymbol</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsNewSymbol</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsIsKindOf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsIsKindOf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsIsKindOf</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsIsKindOf</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchClass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsFetchClass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchClass</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchClass</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsAbort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsAbort</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsAbort</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsAbort</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsCommit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsCommit</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsCommit</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsCommit</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsBegin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsBegin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsBegin</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsBegin</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsOopToDouble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsOopToDouble</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsOopToDouble</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsOopToDouble</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsOopToI64</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsOopToI64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsOopToI64</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsOopToI64</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsDoubleToOop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsDoubleToOop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsDoubleToOop</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsDoubleToOop</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsI64ToOop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsI64ToOop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsI64ToOop</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsI64ToOop</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchUtf8</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsFetchUtf8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchUtf8</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchUtf8</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ByteType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchUtf8Bytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsFetchUtf8Bytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchUtf8Bytes</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchUtf8Bytes</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ByteType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">OopType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchBytes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsFetchBytes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchBytes</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsFetchBytes</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ByteType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int64</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsNewUtf8String</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsNewUtf8String</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsNewUtf8String</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsNewUtf8String</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">BoolType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsReleaseObjs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsReleaseObjs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsReleaseObjs</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsReleaseObjs</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">OopType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsContinueWith</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsContinueWith</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsContinueWith</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">OopType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsContinueWith</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsClearStack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsClearStack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsClearStack</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsClearStack</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+        
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">encrypt_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unencrypted_password</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">unencrypted_password</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">out_buff_size</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">encrypted_char</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">encrypted_char</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">out_buff_size</span> <span class="o">=</span> <span class="n">out_buff_size</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_fetch_size</span>
+            <span class="n">out_buff</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">create_string_buffer</span><span class="p">(</span><span class="n">out_buff_size</span><span class="p">)</span>
+            <span class="n">encrypted_char</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GciTsEncrypt</span><span class="p">(</span><span class="n">unencrypted_password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">out_buff</span><span class="p">,</span> <span class="n">out_buff_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_buff</span><span class="o">.</span><span class="n">value</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GciTs34</span><span class="p">(</span><span class="n">GciTs</span><span class="p">):</span>
+    <span class="n">min_version</span> <span class="o">=</span> <span class="s1">&#39;3.4.0&#39;</span>
+    <span class="n">max_version</span> <span class="o">=</span> <span class="s1">&#39;3.4.9999&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lib_path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lib_path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsLogin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">GciSession</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">BoolType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span>
+                                    <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stone_name</span><span class="p">,</span> <span class="n">host_username</span><span class="p">,</span> <span class="n">host_password</span><span class="p">,</span> <span class="n">netldi_task</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span><span class="p">(</span><span class="n">stone_name</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+                                  <span class="n">to_c_bytes</span><span class="p">(</span><span class="n">host_username</span><span class="p">),</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">encrypt_password</span><span class="p">(</span><span class="n">host_password</span><span class="p">),</span>
+                                  <span class="kc">True</span><span class="p">,</span>
+                                  <span class="n">netldi_task</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+                                  <span class="n">username</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">encrypt_password</span><span class="p">(</span><span class="n">password</span><span class="p">),</span>
+                                  <span class="n">GCI_LOGIN_PW_ENCRYPTED</span> <span class="o">|</span> <span class="n">GCI_LOGIN_QUIET</span><span class="p">,</span>
+                                  <span class="mi">0</span><span class="p">,</span>
+                                  <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">session</span>
+
+
+<span class="n">GemstoneLibrary</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GciTs34</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GciTs35</span><span class="p">(</span><span class="n">GciTs</span><span class="p">):</span>
+    <span class="n">min_version</span> <span class="o">=</span> <span class="s1">&#39;3.5.0&#39;</span>
+    <span class="n">max_version</span> <span class="o">=</span> <span class="s1">&#39;3.7.9999&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lib_path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">lib_path</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsLogin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">GciSession</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">BoolType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span><span class="p">,</span>
+                                    <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">BoolType</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stone_name</span><span class="p">,</span> <span class="n">host_username</span><span class="p">,</span> <span class="n">host_password</span><span class="p">,</span> <span class="n">netldi_task</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">executed_session_init</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">()</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GciTsLogin</span><span class="p">(</span><span class="n">stone_name</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+                                  <span class="n">to_c_bytes</span><span class="p">(</span><span class="n">host_username</span><span class="p">),</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">encrypt_password</span><span class="p">(</span><span class="n">host_password</span><span class="p">),</span>
+                                  <span class="kc">True</span><span class="p">,</span>
+                                  <span class="n">netldi_task</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+                                  <span class="n">username</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">encrypt_password</span><span class="p">(</span><span class="n">password</span><span class="p">),</span>
+                                  <span class="n">GCI_LOGIN_PW_ENCRYPTED</span> <span class="o">|</span> <span class="n">GCI_LOGIN_QUIET</span><span class="p">,</span>
+                                  <span class="mi">0</span><span class="p">,</span>
+                                  <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">executed_session_init</span><span class="p">),</span>
+                                  <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">executed_session_init</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">exceptionObj</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">reason</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">GemstoneWarning</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">session</span>
+
+
+<span class="n">GemstoneLibrary</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">GciTs35</span><span class="p">)</span>
+
+
+<span class="c1">#======================================================================================================================</span>
+<div class="viewcode-block" id="RPCSession">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RPCSession</span><span class="p">(</span><span class="n">GemstoneSession</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A session that interacts with a remote Gemstone database via remote procedure call.</span>
+
+<span class="sd">    Creating an RPCSession implies logging in, and for a gem to be created for the session</span>
+<span class="sd">    on the remote side.</span>
+<span class="sd">    </span>
+<span class="sd">    :param username: GemStone username for repository authentication</span>
+<span class="sd">    :param password: GemStone password for repository authentication</span>
+<span class="sd">    :param stone_name: Name of the stone (repository) to connect to</span>
+<span class="sd">    :param host_username: Operating system username for host authentication</span>
+<span class="sd">    :param host_password: Operating system password for host authentication</span>
+<span class="sd">    :param netldi_task: Network service name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">stone_name</span><span class="o">=</span><span class="s1">&#39;gs64stone&#39;</span><span class="p">,</span>
+                  <span class="n">host_username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">host_password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">netldi_task</span><span class="o">=</span><span class="s1">&#39;gemnetobject&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">gci</span> <span class="o">=</span> <span class="n">GemstoneLibrary</span><span class="o">.</span><span class="n">find_library</span><span class="p">(</span><span class="s1">&#39;gcits&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c_session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">log_in</span><span class="p">(</span><span class="n">stone_name</span><span class="p">,</span> <span class="n">host_username</span><span class="p">,</span> <span class="n">host_password</span><span class="p">,</span> <span class="n">netldi_task</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">encrypt_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unencrypted_password</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">encrypt_password</span><span class="p">(</span><span class="n">unencrypted_password</span><span class="p">)</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_dead_gemstone_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">unreferenced_gemstone_objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">oop</span> <span class="k">for</span> <span class="n">oop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deallocated_unfreed_gemstone_objects</span> <span class="k">if</span> <span class="n">oop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">instances</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">unreferenced_gemstone_objects</span><span class="p">:</span>
+            <span class="n">c_dead_oops</span> <span class="o">=</span> <span class="p">(</span><span class="n">OopType</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">unreferenced_gemstone_objects</span><span class="p">))(</span><span class="o">*</span><span class="n">unreferenced_gemstone_objects</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsReleaseObjs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">c_dead_oops</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">unreferenced_gemstone_objects</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deallocated_unfreed_gemstone_objects</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RPCSession.abort">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.abort">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abort the current transaction.</span>
+<span class="sd">        </span>
+<span class="sd">        :raises GemstoneError: If the abort operation fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsAbort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RPCSession.begin">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.begin">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Begin a new transaction.</span>
+<span class="sd">        </span>
+<span class="sd">        :raises GemstoneError: If the begin operation fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsBegin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RPCSession.commit">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.commit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Commit the current transaction.</span>
+<span class="sd">        </span>
+<span class="sd">        :raises GemstoneError: If the commit operation fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsCommit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_remote</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the session is remote.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: True if the session is remote, False otherwise</span>
+<span class="sd">        :raises InvalidSession: If the session is invalid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">remote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsSessionIsRemote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remote</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidSession</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">remote</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_logged_in</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the session is currently logged in.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: True if the session is logged in, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">remote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsSessionIsRemote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">remote</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_string_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_str</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsNewUtf8String</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">py_str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_oop</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">py_to_float_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_float</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsDoubleToOop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">py_float</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_oop</span>
+
+<div class="viewcode-block" id="RPCSession.execute">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.execute">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">symbol_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute a GemStone Smalltalk expression.</span>
+<span class="sd">        </span>
+<span class="sd">        :param source: String or GemObject containing Smalltalk code to execute</span>
+<span class="sd">        :param context: Optional context object for the execution</span>
+<span class="sd">        :param symbol_list: Optional symbol list for name resolution</span>
+<span class="sd">        :return: GemObject representing the result of execution</span>
+<span class="sd">        :raises GemstoneApiError: If source is not a string or GemObject</span>
+<span class="sd">        :raises GemstoneError: If execution fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsExecute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">OOP_CLASS_Utf8</span><span class="p">,</span>
+                                               <span class="n">context</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">context</span> <span class="k">else</span> <span class="n">OOP_NIL</span><span class="p">,</span> 
+                                               <span class="n">symbol_list</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">symbol_list</span> <span class="k">else</span> <span class="n">OOP_NIL</span><span class="p">,</span>
+                                               <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>  <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">):</span>
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsExecute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span>
+                                               <span class="n">context</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">context</span> <span class="k">else</span> <span class="n">OOP_NIL</span><span class="p">,</span> 
+                                               <span class="n">symbol_list</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">symbol_list</span> <span class="k">else</span> <span class="n">OOP_NIL</span><span class="p">,</span>
+                                               <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>  <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneApiError</span><span class="p">(</span><span class="s1">&#39;Source is type </span><span class="si">{}</span><span class="s1">.Expected source to be a str or GemObject&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RPCSession.new_symbol">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.new_symbol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">new_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_string</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new GemStone symbol.</span>
+<span class="sd">        </span>
+<span class="sd">        :param py_string: String to convert to a symbol</span>
+<span class="sd">        :return: GemObject representing the created symbol</span>
+<span class="sd">        :raises GemstoneError: If symbol creation fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsNewSymbol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">py_string</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RPCSession.resolve_symbol">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.resolve_symbol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resolve_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">symbol_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resolve a symbol in the GemStone symbol list.</span>
+
+<span class="sd">        There is a shorthand for this method. These lines are equivalent::</span>
+<span class="sd">        </span>
+<span class="sd">            session.SymbolName</span>
+<span class="sd">            session.resolve_symbol(&#39;SymbolName&#39;)</span>
+
+<span class="sd">        :param symbol: String or GemObject symbol to resolve</span>
+<span class="sd">        :param symbol_list: Optional symbol list for resolution</span>
+<span class="sd">        :return: GemObject representing the resolved symbol</span>
+<span class="sd">        :raises GemstoneApiError: If symbol is not a string or GemObject</span>
+<span class="sd">        :raises GemstoneError: If resolution fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsResolveSymbol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">symbol</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> 
+                                                     <span class="n">symbol_list</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">symbol_list</span> <span class="k">else</span> <span class="n">OOP_NIL</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">):</span>
+            <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsResolveSymbolObj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">symbol</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> 
+                                                        <span class="n">symbol_list</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="n">symbol_list</span> <span class="k">else</span> <span class="n">OOP_NIL</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneApiError</span><span class="p">(</span><span class="s1">&#39;Symbol is type </span><span class="si">{}</span><span class="s1">.Expected symbol to be a str or GemObject&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">symbol</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span></div>
+
+           
+<div class="viewcode-block" id="RPCSession.log_out">
+<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.log_out">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log out from the GemStone session.</span>
+<span class="sd">        </span>
+<span class="sd">        :raises GemstoneError: If logout fails</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsLogout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_is_kind_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">a_class</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">is_kind_of_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsIsKindOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">a_class</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">is_kind_of_result</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">is_kind_of_result</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_gemstone_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsFetchClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+           <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_float_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsOopToDouble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_string_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">num_bytes</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_fetch_size</span>
+        <span class="n">bytes_returned</span> <span class="o">=</span> <span class="n">num_bytes</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">py_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+        <span class="n">utf8_string</span> <span class="o">=</span> <span class="n">OopType</span><span class="p">(</span><span class="n">OOP_NIL</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="n">bytes_returned</span> <span class="o">==</span> <span class="n">num_bytes</span><span class="p">:</span>
+            <span class="n">dest</span> <span class="o">=</span> <span class="p">(</span><span class="n">ByteType</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_bytes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))()</span>
+            <span class="n">bytes_returned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsFetchUtf8Bytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">start_index</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">num_bytes</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">utf8_string</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">bytes_returned</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+            <span class="n">py_bytes</span> <span class="o">+=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">dest</span><span class="p">[:</span><span class="n">bytes_returned</span><span class="p">])</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">num_bytes</span>
+            <span class="k">if</span> <span class="n">utf8_string</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">OOP_NIL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsReleaseObjs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">utf8_string</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+                    <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">py_bytes</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_latin1_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_bytes_to_py</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_bytes_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">num_bytes</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_fetch_size</span>
+        <span class="n">bytes_returned</span> <span class="o">=</span> <span class="n">num_bytes</span>
+        <span class="n">py_bytes</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
+        <span class="k">while</span> <span class="n">bytes_returned</span> <span class="o">==</span> <span class="n">num_bytes</span><span class="p">:</span>
+            <span class="n">dest</span> <span class="o">=</span> <span class="p">(</span><span class="n">ByteType</span> <span class="o">*</span> <span class="p">(</span><span class="n">num_bytes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))()</span>
+            <span class="n">bytes_returned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsFetchBytes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">start_index</span><span class="p">,</span>
+                                                      <span class="n">dest</span><span class="p">,</span> <span class="n">num_bytes</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">));</span>
+            <span class="k">if</span> <span class="n">bytes_returned</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+            <span class="n">py_bytes</span> <span class="o">+=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">dest</span><span class="p">[:</span><span class="n">bytes_returned</span><span class="p">])</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">num_bytes</span>
+        <span class="k">return</span> <span class="n">py_bytes</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneApiError</span><span class="p">(</span><span class="s1">&#39;Selector is type </span><span class="si">{}</span><span class="s1">.Expected selector to be a str or GemObject&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">selector</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+
+        <span class="n">selector_oop</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">oop</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">)</span> <span class="k">else</span> <span class="n">OOP_ILLEGAL</span>
+        <span class="n">selector_str</span> <span class="o">=</span> <span class="n">to_c_bytes</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">cargs</span> <span class="o">=</span> <span class="p">(</span><span class="n">OopType</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">))(</span><span class="o">*</span><span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">oop</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">environment_id</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsPerform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span>
+                                           <span class="n">instance</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span>
+                                           <span class="n">selector_oop</span><span class="p">,</span>
+                                           <span class="n">selector_str</span><span class="p">,</span>
+                                           <span class="n">cargs</span><span class="p">,</span> 
+                                           <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
+                                           <span class="n">flags</span><span class="p">,</span>
+                                           <span class="n">environment_id</span><span class="p">,</span>
+                                           <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_continue_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gemstone_process</span><span class="p">,</span> <span class="n">continue_with_error_oop</span><span class="p">,</span> <span class="n">replace_top_of_stack_oop</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">return_oop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsContinueWith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">gemstone_process</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">replace_top_of_stack_oop</span><span class="p">,</span> <span class="n">continue_with_error_oop</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_oop</span> <span class="o">==</span> <span class="n">OOP_ILLEGAL</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_or_create_gem_object</span><span class="p">(</span><span class="n">return_oop</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">object_clear_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gemstone_process</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsClearStack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">gemstone_process</span><span class="o">.</span><span class="n">oop</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+
+    
+<span class="c1">#======================================================================================================================</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
