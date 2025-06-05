@@ -4,6 +4,12 @@ Parseltongue
 Parseltongue is a library that lets Python programs execute methods on
 objects inside a GemStone Smalltalk server.
 
+See also
+--------
+
+- `Reference documentation <https://reahl.github.io/parseltongue/>`_   
+- `Source code <https://github.com/reahl/parseltongue/>`_   
+- `Other Reahl Software <https://reahl.org>`_
 
 Sessions
 --------
