@@ -28,8 +28,8 @@ from atexit import register
 import warnings
 from ctypes import cdll, CDLL, create_string_buffer
 
-from ptongue.gemstone import *
-from ptongue.gemproxy import GemstoneLibrary, GemstoneWarning, GemstoneSession, to_c_bytes, GemstoneError, GemstoneApiError, GemObject
+from .gemstone import *
+from .gemproxy import GemstoneLibrary, GemstoneWarning, GemstoneSession, to_c_bytes, GemstoneError, GemstoneApiError, GemObject
 
 
 is_gembuilder_initialised = False

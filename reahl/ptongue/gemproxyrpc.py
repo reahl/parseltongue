@@ -25,8 +25,8 @@ import ctypes
 import os
 import warnings
 
-from ptongue.gemstone import *
-from ptongue.gemproxy import GemstoneLibrary, GemObject, GemstoneSession, GemstoneError, to_c_bytes, InvalidSession, \
+from .gemstone import *
+from .gemproxy import GemstoneLibrary, GemObject, GemstoneSession, GemstoneError, to_c_bytes, InvalidSession, \
     GemstoneApiError, GemstoneWarning
 
 

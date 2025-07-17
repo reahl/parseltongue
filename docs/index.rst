@@ -1,7 +1,7 @@
 Welcome to Parseltongue Documentation
 =====================================
 
-Parseltongue (ptongue) is a Python interface to GemStone/S 64. 
+Parseltongue (reahl-parseltongue) is a Python interface to GemStone/S 64. 
 It provides Python bindings to the GemStone C Interface (GCI) and allows interaction 
 with a running GemStone/S 64 server.
 
@@ -11,7 +11,7 @@ with a running GemStone/S 64 server.
    
    installation
    quickstart
-   api/ptongue
+   api/reahl.ptongue
    examples
 
 Indices and tables

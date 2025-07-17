@@ -11,7 +11,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
-project = 'parseltongue'
+project = 'reahl-parseltongue'
 copyright = f'2022-{datetime.now().year}, Reahl Software Services (Pty) Ltd'
 author = 'Reahl Software Services (Pty) Ltd'
 
@@ -21,7 +21,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
-    'sphinxcontrib.apidoc',
+    # 'sphinxcontrib.apidoc',  # Disabled - we handle apidoc manually
 ]
 
 templates_path = ['_templates']
@@ -65,9 +65,9 @@ napoleon_include_private_with_doc = False
 napoleon_include_special_with_doc = True
 
 # apidoc settings
-apidoc_module_dir = '../ptongue'
+apidoc_module_dir = '../reahl/ptongue'
 apidoc_output_dir = 'api'
-apidoc_excluded_paths = ['../ptongue/gemproxy*', '../ptongue/gemstone.py']
+apidoc_excluded_paths = ['../reahl/ptongue/gemproxy*', '../reahl/ptongue/gemstone.py']
 apidoc_separate_modules = True
 apidoc_toc_file = 'modules'
 apidoc_module_first = True
