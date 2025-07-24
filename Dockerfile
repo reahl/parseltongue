@@ -2,7 +2,7 @@
 
 FROM iwanvosloo/reahl-dev:7.0
 
-ARG GEMSTONE_VERSION=3.7.2
+ARG GEMSTONE_VERSION=3.7.4.3
 ARG DEV_HOME=/home/developer
 ARG DEV_USER=developer
 
