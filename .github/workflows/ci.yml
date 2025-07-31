@@ -32,7 +32,7 @@ jobs:
       - name: Load environment variables
         run: |
           # Load all variables from .env file into GitHub Actions environment
-          cat .env >> $GITHUB_ENV
+          grep -v '^#' .env | grep -v '^$' >> $GITHUB_ENV
           echo "SOURCE_ROOT=$(pwd)" >> $GITHUB_ENV
           echo "DEV_USER=developer" >> $GITHUB_ENV
 

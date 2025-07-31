@@ -9,8 +9,8 @@ before_script:
 
   - pip install tox
     
-  # Load all variables from .env file
-  - export $(cat .env | xargs)
+  # Load all variables from .env file (filter out comments and empty lines)
+  - export $(grep -v '^#' .env | grep -v '^$' | xargs)
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
   - gemstone/installGemStone.sh $GEMSTONE_VERSION
