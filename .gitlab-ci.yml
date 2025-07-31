@@ -9,10 +9,12 @@ before_script:
 
   - pip install tox
     
+  # Load all variables from .env file
+  - export $(cat .env | xargs)
   - export SOURCE_ROOT="$(pwd)"
   - export DEV_USER=developer
-  - gemstone/installGemStone.sh 3.7.2
-  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
+  - gemstone/installGemStone.sh $GEMSTONE_VERSION
+  - su -lc "$SOURCE_ROOT/gemstone/defineGemStoneEnvironment.sh $GEMSTONE_VERSION" developer
 
 test_parseltongue:
   script:
