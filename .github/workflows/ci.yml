@@ -29,18 +29,20 @@ jobs:
       - name: Install tox
         run: pip install tox
 
-      - name: Set environment variables
+      - name: Load environment variables
         run: |
+          # Load all variables from .env file into GitHub Actions environment
+          grep -v '^#' .env | grep -v '^$' >> $GITHUB_ENV
           echo "SOURCE_ROOT=$(pwd)" >> $GITHUB_ENV
           echo "DEV_USER=developer" >> $GITHUB_ENV
 
       - name: Install GemStone
         run: |
-          ./gemstone/installGemStone.sh 3.7.2
+          ./gemstone/installGemStone.sh $GEMSTONE_VERSION
 
       - name: Define GemStone environment
         run: |
-          su -lc "$GITHUB_WORKSPACE/gemstone/defineGemStoneEnvironment.sh 3.7.2" developer
+          su -lc "$GITHUB_WORKSPACE/gemstone/defineGemStoneEnvironment.sh $GEMSTONE_VERSION" developer
           
       - name: Fix workspace permissions for developer
         run: |

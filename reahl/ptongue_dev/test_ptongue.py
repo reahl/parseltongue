@@ -22,10 +22,8 @@ import warnings
 import pytest
 from reahl.tofu import expected, NoException
 
-from ptongue.gemproxy import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError, GemstoneWarning
-from ptongue.gemproxyrpc import RPCSession
-from ptongue.gemproxylinked import LinkedSession
-from ptongue.gemstonecontrol import GemstoneInstallation, GemstoneService, NetLDI, Stone
+from reahl.ptongue import GemObject, GemstoneError, NotSupported, InvalidSession, GemstoneApiError, GemstoneWarning, RPCSession, LinkedSession
+from reahl.ptongue.gemstonecontrol import GemstoneInstallation, GemstoneService, NetLDI, Stone
 
 #======================================================================================================================
 

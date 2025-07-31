@@ -8,7 +8,7 @@ Basic Session Management
 
 .. code-block:: python
 
-    from ptongue.gemproxylinked import LinkedSession
+    from reahl.ptongue import LinkedSession
 
     # Create a linked session
     session = LinkedSession(
@@ -38,7 +38,7 @@ Working with Collections
 
 .. code-block:: python
 
-    from ptongue.gemproxylinked import LinkedSession
+    from reahl.ptongue import LinkedSession
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 
@@ -82,7 +82,7 @@ Converting Between Python and GemStone
 
 .. code-block:: python
 
-    from ptongue.gemproxylinked import LinkedSession
+    from reahl.ptongue import LinkedSession
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 
@@ -126,7 +126,7 @@ Database Operations
 
 .. code-block:: python
 
-    from ptongue.gemproxylinked import LinkedSession
+    from reahl.ptongue import LinkedSession
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 

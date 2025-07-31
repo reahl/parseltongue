@@ -3,8 +3,8 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "parseltongue"
-version = "2.0.1"
+name = "reahl-parseltongue"
+version = "3.0.0"
 description = "Python bindings for GemStone/S 64 Bit"
 license = {text = "LGPL-3.0-or-later"}
 authors = [
@@ -30,11 +30,11 @@ docs = [
 ]
 
 [tool.setuptools]
-packages = ["ptongue"]
+packages = ["reahl.ptongue"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
-testpaths = ["ptongue_dev"]
+testpaths = ["reahl/ptongue_dev"]
 
 [tool.sphinx-docs]
 source_dir = "docs"

@@ -55,7 +55,7 @@ class GemstoneInstallation(object):
         :return: A new GemstoneInstallation instance
         :raises AssertionError: If the version cannot be parsed from the directory path
         """
-        version_match = re.match('/opt/gemstone/GemStone64Bit(\d+\.\d+\.\d+)-x86_64.Linux', gemstone)
+        version_match = re.match('/opt/gemstone/GemStone64Bit(\d+(?:\.\d+)+)-x86_64.Linux', gemstone)
         assert version_match, 'Cannot parse a gemstone version from "%s"' % gemstone
         version = version_match.group(1)
         return GemstoneInstallation(os.environ['GEMSTONE'], version)

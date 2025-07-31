@@ -17,7 +17,7 @@ Installing from PyPI
 
 .. code-block:: bash
 
-    pip install parseltongue
+    pip install reahl-parseltongue
 
 Installing from Source
 ----------------------

@@ -30,7 +30,7 @@ import re
 import packaging.version
 from ctypes import CDLL
 
-from ptongue.gemstone import *
+from .gemstone import *
 
 
 #======================================================================================================================
