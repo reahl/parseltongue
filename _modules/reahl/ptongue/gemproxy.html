@@ -1,23 +1,23 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ptongue.gemproxy &mdash; parseltongue  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+  <title>reahl.ptongue.gemproxy &mdash; reahl-parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
-      <script src="../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -28,11 +28,11 @@
 
           
           
-          <a href="../../index.html" class="icon icon-home">
-            parseltongue
+          <a href="../../../index.html" class="icon icon-home">
+            reahl-parseltongue
           </a>
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -41,10 +41,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/ptongue.html">ptongue package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/reahl.ptongue.html">reahl.ptongue package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
 </ul>
 
         </div>
@@ -53,16 +53,16 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">parseltongue</a>
+          <a href="../../../index.html">reahl-parseltongue</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">ptongue.gemproxy</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">reahl.ptongue.gemproxy</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -71,7 +71,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for ptongue.gemproxy</h1><div class="highlight"><pre>
+  <h1>Source code for reahl.ptongue.gemproxy</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (C) 2025 Reahl Software Services (Pty) Ltd</span>
 <span class="c1"># </span>
 <span class="c1"># This file is part of parseltongue.</span>
@@ -104,7 +104,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">packaging.version</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">CDLL</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemstone</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gemstone</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 
 <span class="c1">#======================================================================================================================</span>
@@ -198,7 +198,7 @@
 
         
 <div class="viewcode-block" id="GemstoneError">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneError">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GemstoneError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an exception that happened in a Gem.</span>
 
@@ -322,7 +322,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
 
 <div class="viewcode-block" id="GemstoneError.continue_with">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneError.continue_with">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneError.continue_with">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">continue_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">continue_with_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">replace_top_of_stack</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Continue execution after the exception.</span>
 <span class="sd">        </span>
@@ -342,7 +342,7 @@
 
 
 <div class="viewcode-block" id="GemstoneError.clear_stack">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneError.clear_stack">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneError.clear_stack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the stack of the process where the exception occurred.</span>
 <span class="sd">        </span>
@@ -357,14 +357,14 @@
 
     
 <div class="viewcode-block" id="InvalidSession">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.InvalidSession">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.InvalidSession">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InvalidSession</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Indicates a problem with the current Session.&quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="NotSupported">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.NotSupported">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.NotSupported">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NotSupported</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when an attempt is made to do something that is not</span>
 <span class="sd">       supported. For example, if you try to transfer a type of Python object</span>
@@ -374,14 +374,14 @@
 
 
 <div class="viewcode-block" id="GemstoneApiError">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneApiError">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneApiError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GemstoneApiError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thrown when problems are detected while communicating via the underlying C API.&quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="GemstoneWarning">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneWarning">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneWarning">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GemstoneWarning</span><span class="p">(</span><span class="ne">Warning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents a warning condition related to this API.&quot;&quot;&quot;</span>
     <span class="k">pass</span></div>
@@ -389,7 +389,7 @@
 
 <span class="c1">#======================================================================================================================</span>
 <div class="viewcode-block" id="GemObject">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemObject">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GemObject</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Python object that represents a given object in a Gem.</span>
 
@@ -462,7 +462,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">object_to_py</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GemObject.is_kind_of">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.is_kind_of">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemObject.is_kind_of">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_kind_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a_class</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this object is an instance of the given class or one of its subclasses.</span>
 
@@ -474,7 +474,7 @@
 
     
 <div class="viewcode-block" id="GemObject.gemstone_class">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.gemstone_class">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemObject.gemstone_class">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">gemstone_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the Gemstone class of this object.</span>
 
@@ -497,7 +497,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">perform</span><span class="p">(</span><span class="n">selector_symbol</span><span class="p">,</span> <span class="o">*</span><span class="p">[(</span><span class="n">i</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">from_py</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
 
 <div class="viewcode-block" id="GemObject.perform">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.perform">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemObject.perform">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">perform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Directly perform a method on the Gemstone object.</span>
 
@@ -519,7 +519,7 @@
 
 
 <div class="viewcode-block" id="GemObject.__iter__">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.__iter__">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemObject.__iter__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide iteration over collection objects.</span>
 
@@ -540,7 +540,7 @@
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oop</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GemObject.__str__">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemObject.__str__">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemObject.__str__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Provide a human-readable string representation.</span>
 
@@ -574,7 +574,7 @@
             
 <span class="c1">#======================================================================================================================</span>
 <div class="viewcode-block" id="GemstoneSession">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneSession">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneSession">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GemstoneSession</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A Python interface for managing a connection to a Gemstone database.</span>
 <span class="sd">    </span>
@@ -603,7 +603,7 @@
             <span class="k">return</span> <span class="n">new_gem_object</span>
             
 <div class="viewcode-block" id="GemstoneSession.from_py">
-<a class="viewcode-back" href="../../api/ptongue.gemproxy.html#ptongue.GemstoneSession.from_py">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.GemstoneSession.from_py">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_py</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_object</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a Python object to its corresponding Gemstone representation.</span>
 <span class="sd">        </span>

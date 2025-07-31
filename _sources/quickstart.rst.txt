@@ -3,7 +3,7 @@ Quick Start Guide
 
 This guide will help you get started with Parseltongue, a Python interface to GemStone/S 64.
 
-For more examples see :doc:`examples`, for API documentation, see :doc:`api/ptongue`.
+For more examples see :doc:`examples`, for API documentation, see :doc:`api/reahl.ptongue`.
 
 
 Connecting to GemStone
@@ -15,8 +15,7 @@ a LinkedSession.
 Multiple RPCSessions can exist simultaneously, but only a single
 instance of a LinkedSession is allowed per process::
 
-    from ptongue.gemproxylinked import LinkedSession
-    from ptongue.gemproxyrpc import RPCSession
+    from reahl.ptongue import LinkedSession, RPCSession
 
     # For a linked session (runs in the same process)
     session = LinkedSession(
@@ -87,13 +86,13 @@ a collection also transfers its contents::
    py_list = gem_collection.to_py
    assert py_list[0] == 1
 
-See :meth:`~ptongue.GemObject.to_py` and :meth:`~ptongue.GemstoneSession.from_py`.
+See :meth:`~reahl.ptongue.GemObject.to_py` and :meth:`~reahl.ptongue.GemstoneSession.from_py`.
 
 Automatic translation of arguments
 ----------------------------------
 
 Some arguments to Gemstone method calls can be turned into
-GemObject instances without first having to :meth:`~ptongue.GemstoneSession.from_py`. them::
+GemObject instances without first having to :meth:`~reahl.ptongue.GemstoneSession.from_py` them::
 
           
     long_ago = date_class.fromDays(1)
@@ -139,7 +138,7 @@ A complete example
 
 .. code-block:: python
 
-    from ptongue import LinkedSession, GemObject
+    from reahl.ptongue import LinkedSession, GemObject
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 
@@ -174,7 +173,7 @@ Error Handling
 
 .. code-block:: python
 
-    from ptongue import LinkedSession, GemstoneError
+    from reahl.ptongue import LinkedSession, GemstoneError
 
     session = LinkedSession(username="DataCurator", password="swordfish")
 

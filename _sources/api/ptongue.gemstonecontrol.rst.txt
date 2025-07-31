@@ -1,4 +1,0 @@
-.. automodule:: ptongue.gemstonecontrol
-   :members:
-   :show-inheritance:
-   :undoc-members:

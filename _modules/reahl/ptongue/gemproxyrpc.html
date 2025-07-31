@@ -1,23 +1,23 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ptongue.gemproxyrpc &mdash; parseltongue  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+  <title>reahl.ptongue.gemproxyrpc &mdash; reahl-parseltongue  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
-      <script src="../../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -28,11 +28,11 @@
 
           
           
-          <a href="../../index.html" class="icon icon-home">
-            parseltongue
+          <a href="../../../index.html" class="icon icon-home">
+            reahl-parseltongue
           </a>
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -41,10 +41,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/ptongue.html">ptongue package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/reahl.ptongue.html">reahl.ptongue package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
 </ul>
 
         </div>
@@ -53,16 +53,16 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../index.html">parseltongue</a>
+          <a href="../../../index.html">reahl-parseltongue</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">ptongue.gemproxyrpc</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">reahl.ptongue.gemproxyrpc</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -71,7 +71,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for ptongue.gemproxyrpc</h1><div class="highlight"><pre>
+  <h1>Source code for reahl.ptongue.gemproxyrpc</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (C) 2025 Reahl Software Services (Pty) Ltd</span>
 <span class="c1"># </span>
 <span class="c1"># This file is part of parseltongue.</span>
@@ -99,8 +99,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemstone</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ptongue.gemproxy</span><span class="w"> </span><span class="kn">import</span> <span class="n">GemstoneLibrary</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">,</span> <span class="n">GemstoneSession</span><span class="p">,</span> <span class="n">GemstoneError</span><span class="p">,</span> <span class="n">to_c_bytes</span><span class="p">,</span> <span class="n">InvalidSession</span><span class="p">,</span> \
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gemstone</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.gemproxy</span><span class="w"> </span><span class="kn">import</span> <span class="n">GemstoneLibrary</span><span class="p">,</span> <span class="n">GemObject</span><span class="p">,</span> <span class="n">GemstoneSession</span><span class="p">,</span> <span class="n">GemstoneError</span><span class="p">,</span> <span class="n">to_c_bytes</span><span class="p">,</span> <span class="n">InvalidSession</span><span class="p">,</span> \
     <span class="n">GemstoneApiError</span><span class="p">,</span> <span class="n">GemstoneWarning</span>
 
 
@@ -297,7 +297,7 @@
 
 <span class="c1">#======================================================================================================================</span>
 <div class="viewcode-block" id="RPCSession">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RPCSession</span><span class="p">(</span><span class="n">GemstoneSession</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A session that interacts with a remote Gemstone database via remote procedure call.</span>
@@ -333,7 +333,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">deallocated_unfreed_gemstone_objects</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
 <div class="viewcode-block" id="RPCSession.abort">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.abort">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.abort">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">abort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Abort the current transaction.</span>
@@ -346,7 +346,7 @@
 
 
 <div class="viewcode-block" id="RPCSession.begin">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.begin">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.begin">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Begin a new transaction.</span>
@@ -359,7 +359,7 @@
 
 
 <div class="viewcode-block" id="RPCSession.commit">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.commit">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.commit">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Commit the current transaction.</span>
@@ -409,7 +409,7 @@
         <span class="k">return</span> <span class="n">return_oop</span>
 
 <div class="viewcode-block" id="RPCSession.execute">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.execute">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.execute">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">symbol_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Execute a GemStone Smalltalk expression.</span>
@@ -440,7 +440,7 @@
 
 
 <div class="viewcode-block" id="RPCSession.new_symbol">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.new_symbol">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.new_symbol">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">new_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">py_string</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new GemStone symbol.</span>
@@ -457,7 +457,7 @@
 
 
 <div class="viewcode-block" id="RPCSession.resolve_symbol">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.resolve_symbol">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.resolve_symbol">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">resolve_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">symbol_list</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Resolve a symbol in the GemStone symbol list.</span>
@@ -488,7 +488,7 @@
 
            
 <div class="viewcode-block" id="RPCSession.log_out">
-<a class="viewcode-back" href="../../api/ptongue.gemproxyrpc.html#ptongue.RPCSession.log_out">[docs]</a>
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.log_out">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">log_out</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Log out from the GemStone session.</span>

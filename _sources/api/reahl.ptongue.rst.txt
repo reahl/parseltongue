@@ -1,7 +1,7 @@
-ptongue package
-===============
+reahl.ptongue package
+=====================
 
-.. automodule:: ptongue
+.. automodule:: reahl.ptongue
    :members:
    :show-inheritance:
    :undoc-members:
@@ -12,4 +12,4 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   ptongue.gemstonecontrol
+   reahl.ptongue.gemstonecontrol
