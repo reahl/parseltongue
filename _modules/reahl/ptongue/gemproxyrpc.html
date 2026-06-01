@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>reahl.ptongue.gemproxyrpc &mdash; reahl-parseltongue  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -207,7 +207,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">GciTsClearStack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsClearStack</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">GciTsClearStack</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">GciTsClearStack</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">OopType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
-        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsBreak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">GciTsBreak</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsBreak</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">BoolType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GciTsBreak</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">GciSession</span><span class="p">,</span> <span class="n">BoolType</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">GciErrSType</span><span class="p">)]</span>
+
         
     <span class="k">def</span><span class="w"> </span><span class="nf">encrypt_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unencrypted_password</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">unencrypted_password</span><span class="p">:</span>
@@ -368,6 +372,53 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsCommit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RPCSession.soft_break">
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.soft_break">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">soft_break</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ask the session to stop the Smalltalk code it is currently executing.</span>
+
+<span class="sd">        This is the gentler of the two ways to cancel a long-running call such as</span>
+<span class="sd">        :meth:`execute` or :meth:`~reahl.ptongue.GemObject.perform`. The request is</span>
+<span class="sd">        honoured once the executing code reaches a safe point between Smalltalk</span>
+<span class="sd">        operations, at which point the blocked call ends by raising a</span>
+<span class="sd">        :class:`GemstoneError`. Because it waits for such a point, it cannot stop</span>
+<span class="sd">        code that is busy inside a single long-running primitive - reach for</span>
+<span class="sd">        :meth:`hard_break` when that happens. The executing code can still catch and</span>
+<span class="sd">        respond to the request, and the session stays usable afterwards.</span>
+
+<span class="sd">        You may call this from a thread other than the one whose call is blocked,</span>
+<span class="sd">        which is how you would wire it up to, for example, a &quot;Stop&quot; button. It does</span>
+<span class="sd">        nothing when the session is not executing anything.</span>
+
+<span class="sd">        :raises GemstoneError: If the request could not be delivered to the gem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsBreak</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">FALSE</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RPCSession.hard_break">
+<a class="viewcode-back" href="../../../api/reahl.ptongue.html#reahl.ptongue.RPCSession.hard_break">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hard_break</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Force the session to abandon the Smalltalk code it is currently executing.</span>
+
+<span class="sd">        This is the stronger counterpart of :meth:`soft_break`. It stops the</span>
+<span class="sd">        executing code straight away, even when that code is busy inside a long</span>
+<span class="sd">        primitive and would ignore a soft break. The executing code cannot intercept</span>
+<span class="sd">        it, so the blocked call always ends by raising a :class:`GemstoneError`.</span>
+
+<span class="sd">        As with :meth:`soft_break`, you may call this from a thread other than the</span>
+<span class="sd">        one whose call is blocked, and it does nothing when the session is idle.</span>
+
+<span class="sd">        :raises GemstoneError: If the request could not be delivered to the gem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">GciErrSType</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci</span><span class="o">.</span><span class="n">GciTsBreak</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_session</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">error</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">GemstoneError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span></div>
 
 
@@ -615,7 +666,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+    <p>&#169; Copyright 2022-2026, Reahl Software Services (Pty) Ltd.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>reahl.ptongue package &mdash; reahl-parseltongue  documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -48,14 +48,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start Guide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">reahl.ptongue package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#reahl.ptongue.GemObject"><code class="docutils literal notranslate"><span class="pre">GemObject</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.__iter__"><code class="docutils literal notranslate"><span class="pre">GemObject.__iter__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.__str__"><code class="docutils literal notranslate"><span class="pre">GemObject.__str__()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.gemstone_class"><code class="docutils literal notranslate"><span class="pre">GemObject.gemstone_class()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.is_kind_of"><code class="docutils literal notranslate"><span class="pre">GemObject.is_kind_of()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.is_nil"><code class="docutils literal notranslate"><span class="pre">GemObject.is_nil</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.is_symbol"><code class="docutils literal notranslate"><span class="pre">GemObject.is_symbol</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.perform"><code class="docutils literal notranslate"><span class="pre">GemObject.perform()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.to_py"><code class="docutils literal notranslate"><span class="pre">GemObject.to_py</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.is_kind_of"><code class="docutils literal notranslate"><span class="pre">GemObject.is_kind_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.gemstone_class"><code class="docutils literal notranslate"><span class="pre">GemObject.gemstone_class()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.perform"><code class="docutils literal notranslate"><span class="pre">GemObject.perform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.__iter__"><code class="docutils literal notranslate"><span class="pre">GemObject.__iter__()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemObject.__str__"><code class="docutils literal notranslate"><span class="pre">GemObject.__str__()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#reahl.ptongue.GemstoneSession"><code class="docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a><ul>
@@ -66,37 +66,41 @@
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.abort"><code class="docutils literal notranslate"><span class="pre">LinkedSession.abort()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.begin"><code class="docutils literal notranslate"><span class="pre">LinkedSession.begin()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.commit"><code class="docutils literal notranslate"><span class="pre">LinkedSession.commit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.execute"><code class="docutils literal notranslate"><span class="pre">LinkedSession.execute()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.is_current_session"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_current_session</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.is_logged_in"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_logged_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.soft_break"><code class="docutils literal notranslate"><span class="pre">LinkedSession.soft_break()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.hard_break"><code class="docutils literal notranslate"><span class="pre">LinkedSession.hard_break()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.is_remote"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_remote</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.log_out"><code class="docutils literal notranslate"><span class="pre">LinkedSession.log_out()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.is_logged_in"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_logged_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.is_current_session"><code class="docutils literal notranslate"><span class="pre">LinkedSession.is_current_session</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.execute"><code class="docutils literal notranslate"><span class="pre">LinkedSession.execute()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.new_symbol"><code class="docutils literal notranslate"><span class="pre">LinkedSession.new_symbol()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.resolve_symbol"><code class="docutils literal notranslate"><span class="pre">LinkedSession.resolve_symbol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.LinkedSession.log_out"><code class="docutils literal notranslate"><span class="pre">LinkedSession.log_out()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#reahl.ptongue.RPCSession"><code class="docutils literal notranslate"><span class="pre">RPCSession</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.abort"><code class="docutils literal notranslate"><span class="pre">RPCSession.abort()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.begin"><code class="docutils literal notranslate"><span class="pre">RPCSession.begin()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.commit"><code class="docutils literal notranslate"><span class="pre">RPCSession.commit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.execute"><code class="docutils literal notranslate"><span class="pre">RPCSession.execute()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.is_logged_in"><code class="docutils literal notranslate"><span class="pre">RPCSession.is_logged_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.soft_break"><code class="docutils literal notranslate"><span class="pre">RPCSession.soft_break()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.hard_break"><code class="docutils literal notranslate"><span class="pre">RPCSession.hard_break()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.is_remote"><code class="docutils literal notranslate"><span class="pre">RPCSession.is_remote</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.log_out"><code class="docutils literal notranslate"><span class="pre">RPCSession.log_out()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.is_logged_in"><code class="docutils literal notranslate"><span class="pre">RPCSession.is_logged_in</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.execute"><code class="docutils literal notranslate"><span class="pre">RPCSession.execute()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.new_symbol"><code class="docutils literal notranslate"><span class="pre">RPCSession.new_symbol()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.resolve_symbol"><code class="docutils literal notranslate"><span class="pre">RPCSession.resolve_symbol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.RPCSession.log_out"><code class="docutils literal notranslate"><span class="pre">RPCSession.log_out()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#reahl.ptongue.GemstoneError"><code class="docutils literal notranslate"><span class="pre">GemstoneError</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.args"><code class="docutils literal notranslate"><span class="pre">GemstoneError.args</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.clear_stack"><code class="docutils literal notranslate"><span class="pre">GemstoneError.clear_stack()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.context"><code class="docutils literal notranslate"><span class="pre">GemstoneError.context</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.continue_with"><code class="docutils literal notranslate"><span class="pre">GemstoneError.continue_with()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.exception_obj"><code class="docutils literal notranslate"><span class="pre">GemstoneError.exception_obj</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.is_fatal"><code class="docutils literal notranslate"><span class="pre">GemstoneError.is_fatal</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.message"><code class="docutils literal notranslate"><span class="pre">GemstoneError.message</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.args"><code class="docutils literal notranslate"><span class="pre">GemstoneError.args</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.number"><code class="docutils literal notranslate"><span class="pre">GemstoneError.number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.is_fatal"><code class="docutils literal notranslate"><span class="pre">GemstoneError.is_fatal</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.reason"><code class="docutils literal notranslate"><span class="pre">GemstoneError.reason</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.message"><code class="docutils literal notranslate"><span class="pre">GemstoneError.message</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.continue_with"><code class="docutils literal notranslate"><span class="pre">GemstoneError.continue_with()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reahl.ptongue.GemstoneError.clear_stack"><code class="docutils literal notranslate"><span class="pre">GemstoneError.clear_stack()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#reahl.ptongue.InvalidSession"><code class="docutils literal notranslate"><span class="pre">InvalidSession</span></code></a></li>
@@ -140,8 +144,8 @@
 <span id="reahl-ptongue-package"></span><h1>reahl.ptongue package<a class="headerlink" href="#module-reahl.ptongue" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="reahl.ptongue.GemObject">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oop</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oop</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A Python object that represents a given object in a Gem.</p>
 <p>This class serves as a bridge between Python code and Gemstone objects. Each instance
 wraps a reference to an object in a Gemstone session and provides methods to interact
@@ -175,41 +179,52 @@ positional arguments:</p>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="reahl.ptongue.GemObject.__iter__">
-<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject.__iter__" title="Link to this definition"></a></dt>
-<dd><p>Provide iteration over collection objects.</p>
-<p>This allows Gemstone collections to be iterated over using Python’s
-iteration protocol.</p>
-<p>It works by first calling self.asOrderedCollection in Gemstone - something
-that may have performance implications depending on the situation.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemObject.is_nil">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_nil</span></span><a class="headerlink" href="#reahl.ptongue.GemObject.is_nil" title="Link to this definition"></a></dt>
+<dd><p>Check if this object is Gemstone’s nil.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Yield<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Each element in the collection.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if this object is nil, False otherwise.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="reahl.ptongue.GemObject.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject.__str__" title="Link to this definition"></a></dt>
-<dd><p>Provide a human-readable string representation.</p>
-<p>This method attempts to create a readable representation of the Gemstone
-object, similar to how it would be displayed in Gemstone using printString.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemObject.is_symbol">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_symbol</span></span><a class="headerlink" href="#reahl.ptongue.GemObject.is_symbol" title="Link to this definition"></a></dt>
+<dd><p>Check if this object is a Gemstone Symbol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A human-readable string representation of the object.</p>
+<dd class="field-odd"><p>True if this object is a Symbol, False otherwise.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="reahl.ptongue.GemObject.gemstone_class">
-<span class="sig-name descname"><span class="pre">gemstone_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject.gemstone_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject.gemstone_class" title="Link to this definition"></a></dt>
-<dd><p>Get the Gemstone class of this object.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemObject.to_py">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">to_py</span></span><a class="headerlink" href="#reahl.ptongue.GemObject.to_py" title="Link to this definition"></a></dt>
+<dd><p>Convert this GemObject to an appropriate Python object.</p>
+<p>This method transfers the GemObject to a Python object of appropriate type.
+Apart from a few collections, this only supports basic types, such
+as unicode strings, various numbers and booleans.</p>
+<dl class="simple">
+<dt>Collections supported:</dt><dd><ul class="simple">
+<li><p>OrderedCollection - becomes a Python list</p></li>
+<li><p>Dictionary - becomes a Python dict</p></li>
+<li><p>IdentitySet - becomes a Python set</p></li>
+</ul>
+</dd>
+</dl>
+<p>In the case of collections, the contents of the new collections on the Python
+side are created using object.to_py individually on the Gemstone elements contained
+inside the Gemstone collections.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A GemObject representing the class of this object.</p>
+<dd class="field-odd"><p>A Python representation of this Gemstone object.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#reahl.ptongue.NotSupported" title="reahl.ptongue.NotSupported"><strong>NotSupported</strong></a> – If the object cannot be converted to a Python type.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -229,24 +244,13 @@ False otherwise.</p>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemObject.is_nil">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_nil</span></span><a class="headerlink" href="#reahl.ptongue.GemObject.is_nil" title="Link to this definition"></a></dt>
-<dd><p>Check if this object is Gemstone’s nil.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.GemObject.gemstone_class">
+<span class="sig-name descname"><span class="pre">gemstone_class</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject.gemstone_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject.gemstone_class" title="Link to this definition"></a></dt>
+<dd><p>Get the Gemstone class of this object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if this object is nil, False otherwise.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemObject.is_symbol">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_symbol</span></span><a class="headerlink" href="#reahl.ptongue.GemObject.is_symbol" title="Link to this definition"></a></dt>
-<dd><p>Check if this object is a Gemstone Symbol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if this object is a Symbol, False otherwise.</p>
+<dd class="field-odd"><p>A GemObject representing the class of this object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -277,30 +281,30 @@ the object will be transformed using session.from_py()</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemObject.to_py">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_py</span></span><a class="headerlink" href="#reahl.ptongue.GemObject.to_py" title="Link to this definition"></a></dt>
-<dd><p>Convert this GemObject to an appropriate Python object.</p>
-<p>This method transfers the GemObject to a Python object of appropriate type.
-Apart from a few collections, this only supports basic types, such
-as unicode strings, various numbers and booleans.</p>
-<dl class="simple">
-<dt>Collections supported:</dt><dd><ul class="simple">
-<li><p>OrderedCollection - becomes a Python list</p></li>
-<li><p>Dictionary - becomes a Python dict</p></li>
-<li><p>IdentitySet - becomes a Python set</p></li>
-</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.GemObject.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Provide iteration over collection objects.</p>
+<p>This allows Gemstone collections to be iterated over using Python’s
+iteration protocol.</p>
+<p>It works by first calling self.asOrderedCollection in Gemstone - something
+that may have performance implications depending on the situation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yield<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Each element in the collection.</p>
 </dd>
 </dl>
-<p>In the case of collections, the contents of the new collections on the Python
-side are created using object.to_py individually on the Gemstone elements contained
-inside the Gemstone collections.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.GemObject.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemObject.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemObject.__str__" title="Link to this definition"></a></dt>
+<dd><p>Provide a human-readable string representation.</p>
+<p>This method attempts to create a readable representation of the Gemstone
+object, similar to how it would be displayed in Gemstone using printString.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A Python representation of this Gemstone object.</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#reahl.ptongue.NotSupported" title="reahl.ptongue.NotSupported"><strong>NotSupported</strong></a> – If the object cannot be converted to a Python type.</p>
+<dd class="field-odd"><p>A human-readable string representation of the object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -309,8 +313,8 @@ inside the Gemstone collections.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="reahl.ptongue.GemstoneSession">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneSession</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneSession" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneSession</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneSession" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A Python interface for managing a connection to a Gemstone database.</p>
 <p>This class provides the foundation for interacting with Gemstone objects from Python.
 It manages conversion between Python and Gemstone objects, caches Gemstone objects
@@ -353,7 +357,7 @@ side are created using session.from_py() on each element in the Python collectio
 
 <dl class="py class">
 <dt class="sig sig-object py" id="reahl.ptongue.LinkedSession">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">LinkedSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stone_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gs64stone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">LinkedSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stone_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gs64stone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#reahl.ptongue.GemstoneSession" title="reahl.ptongue.gemproxy.GemstoneSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a></p>
 <p>A session that directly links to a GemStone database using the linked GCI API.</p>
 <p>LinkedSession provides a client that runs inside the Python process
@@ -417,6 +421,79 @@ LinkedSession can exist at a time per process.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.soft_break">
+<span class="sig-name descname"><span class="pre">soft_break</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession.soft_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession.soft_break" title="Link to this definition"></a></dt>
+<dd><p>Ask the session to stop the Smalltalk code it is currently executing.</p>
+<p>This is the gentler of the two ways to cancel a long-running call such as
+<a class="reference internal" href="#reahl.ptongue.LinkedSession.execute" title="reahl.ptongue.LinkedSession.execute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute()</span></code></a> or <a class="reference internal" href="#reahl.ptongue.GemObject.perform" title="reahl.ptongue.GemObject.perform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">perform()</span></code></a>. The request is
+honoured once the executing code reaches a safe point between Smalltalk
+operations, at which point the blocked call ends by raising a
+<a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneError</span></code></a>. Because it waits for such a point, it cannot stop
+code that is busy inside a single long-running primitive - use
+<a class="reference internal" href="#reahl.ptongue.LinkedSession.hard_break" title="reahl.ptongue.LinkedSession.hard_break"><code class="xref py py-meth docutils literal notranslate"><span class="pre">hard_break()</span></code></a> for that. The executing code can still catch and respond
+to the request, and the session stays usable afterwards.</p>
+<p>Unlike most methods on a <a class="reference internal" href="#reahl.ptongue.LinkedSession" title="reahl.ptongue.LinkedSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkedSession</span></code></a>, you may call this from a
+thread other than the one whose call is blocked, which is how you would
+wire it up to a “Stop” button. The request is handed to the gem in the
+background, so any resulting failure surfaces on the blocked call rather
+than here. It does nothing when the session is idle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.hard_break">
+<span class="sig-name descname"><span class="pre">hard_break</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession.hard_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession.hard_break" title="Link to this definition"></a></dt>
+<dd><p>Force the session to abandon the Smalltalk code it is currently executing.</p>
+<p>This is the stronger counterpart of <a class="reference internal" href="#reahl.ptongue.LinkedSession.soft_break" title="reahl.ptongue.LinkedSession.soft_break"><code class="xref py py-meth docutils literal notranslate"><span class="pre">soft_break()</span></code></a>. It stops the
+executing code straight away, even when that code is busy inside a long
+primitive and would ignore a soft break, and the executing code cannot
+intercept it, so the blocked call ends by raising a <a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneError</span></code></a>.</p>
+<p>As with <a class="reference internal" href="#reahl.ptongue.LinkedSession.soft_break" title="reahl.ptongue.LinkedSession.soft_break"><code class="xref py py-meth docutils literal notranslate"><span class="pre">soft_break()</span></code></a>, you may call this from a thread other than the
+one whose call is blocked, the request is handed to the gem in the
+background, and it does nothing when the session is idle.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.is_remote">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_remote</span></span><a class="headerlink" href="#reahl.ptongue.LinkedSession.is_remote" title="Link to this definition"></a></dt>
+<dd><p>Determine whether this session is connected to a remote Gem.</p>
+<p>For a <a class="reference internal" href="#reahl.ptongue.LinkedSession" title="reahl.ptongue.LinkedSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkedSession</span></code></a>, this should typically return False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if connected to a remote Gem, False if using a linked Gem</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneApiError" title="reahl.ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during the GemStone operation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.is_logged_in">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_logged_in</span></span><a class="headerlink" href="#reahl.ptongue.LinkedSession.is_logged_in" title="Link to this definition"></a></dt>
+<dd><p>Check if this session is currently logged in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the session is logged in, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.is_current_session">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_current_session</span></span><a class="headerlink" href="#reahl.ptongue.LinkedSession.is_current_session" title="Link to this definition"></a></dt>
+<dd><p>Check if this session is the current active linked session.</p>
+<p>Only one linked session can be active at a time in a process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if this is the current active session, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession.execute" title="Link to this definition"></a></dt>
 <dd><p>Execute GemStone Smalltalk code.</p>
@@ -439,62 +516,6 @@ a GemStone string object</p></li>
 <li><p><a class="reference internal" href="#reahl.ptongue.GemstoneApiError" title="reahl.ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session,
 or if the source is not of the expected type</p></li>
 <li><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during execution</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.is_current_session">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_current_session</span></span><a class="headerlink" href="#reahl.ptongue.LinkedSession.is_current_session" title="Link to this definition"></a></dt>
-<dd><p>Check if this session is the current active linked session.</p>
-<p>Only one linked session can be active at a time in a process.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if this is the current active session, False otherwise</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.is_logged_in">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_logged_in</span></span><a class="headerlink" href="#reahl.ptongue.LinkedSession.is_logged_in" title="Link to this definition"></a></dt>
-<dd><p>Check if this session is currently logged in.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if the session is logged in, False otherwise</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.is_remote">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_remote</span></span><a class="headerlink" href="#reahl.ptongue.LinkedSession.is_remote" title="Link to this definition"></a></dt>
-<dd><p>Determine whether this session is connected to a remote Gem.</p>
-<p>For a <a class="reference internal" href="#reahl.ptongue.LinkedSession" title="reahl.ptongue.LinkedSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkedSession</span></code></a>, this should typically return False.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if connected to a remote Gem, False if using a linked Gem</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneApiError" title="reahl.ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
-<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during the GemStone operation</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.log_out">
-<span class="sig-name descname"><span class="pre">log_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession.log_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession.log_out" title="Link to this definition"></a></dt>
-<dd><p>Log out from the GemStone session.</p>
-<p>After log out, the session can no longer be used.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneApiError" title="reahl.ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
-<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during logout</p></li>
 </ul>
 </dd>
 </dl>
@@ -551,11 +572,26 @@ or if symbol is not of the expected type</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.LinkedSession.log_out">
+<span class="sig-name descname"><span class="pre">log_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxylinked.html#LinkedSession.log_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.LinkedSession.log_out" title="Link to this definition"></a></dt>
+<dd><p>Log out from the GemStone session.</p>
+<p>After log out, the session can no longer be used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneApiError" title="reahl.ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If this session is not the current active session</p></li>
+<li><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If an error occurs during logout</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="reahl.ptongue.RPCSession">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">RPCSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stone_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gs64stone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netldi_task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gemnetobject'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">RPCSession</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stone_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gs64stone'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host_password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netldi_task</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gemnetobject'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#reahl.ptongue.GemstoneSession" title="reahl.ptongue.gemproxy.GemstoneSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneSession</span></code></a></p>
 <p>A session that interacts with a remote Gemstone database via remote procedure call.</p>
 <p>Creating an RPCSession implies logging in, and for a gem to be created for the session
@@ -606,6 +642,70 @@ on the remote side.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.soft_break">
+<span class="sig-name descname"><span class="pre">soft_break</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession.soft_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession.soft_break" title="Link to this definition"></a></dt>
+<dd><p>Ask the session to stop the Smalltalk code it is currently executing.</p>
+<p>This is the gentler of the two ways to cancel a long-running call such as
+<a class="reference internal" href="#reahl.ptongue.RPCSession.execute" title="reahl.ptongue.RPCSession.execute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute()</span></code></a> or <a class="reference internal" href="#reahl.ptongue.GemObject.perform" title="reahl.ptongue.GemObject.perform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">perform()</span></code></a>. The request is
+honoured once the executing code reaches a safe point between Smalltalk
+operations, at which point the blocked call ends by raising a
+<a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneError</span></code></a>. Because it waits for such a point, it cannot stop
+code that is busy inside a single long-running primitive - reach for
+<a class="reference internal" href="#reahl.ptongue.RPCSession.hard_break" title="reahl.ptongue.RPCSession.hard_break"><code class="xref py py-meth docutils literal notranslate"><span class="pre">hard_break()</span></code></a> when that happens. The executing code can still catch and
+respond to the request, and the session stays usable afterwards.</p>
+<p>You may call this from a thread other than the one whose call is blocked,
+which is how you would wire it up to, for example, a “Stop” button. It does
+nothing when the session is not executing anything.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the request could not be delivered to the gem.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.hard_break">
+<span class="sig-name descname"><span class="pre">hard_break</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession.hard_break"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession.hard_break" title="Link to this definition"></a></dt>
+<dd><p>Force the session to abandon the Smalltalk code it is currently executing.</p>
+<p>This is the stronger counterpart of <a class="reference internal" href="#reahl.ptongue.RPCSession.soft_break" title="reahl.ptongue.RPCSession.soft_break"><code class="xref py py-meth docutils literal notranslate"><span class="pre">soft_break()</span></code></a>. It stops the
+executing code straight away, even when that code is busy inside a long
+primitive and would ignore a soft break. The executing code cannot intercept
+it, so the blocked call always ends by raising a <a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemstoneError</span></code></a>.</p>
+<p>As with <a class="reference internal" href="#reahl.ptongue.RPCSession.soft_break" title="reahl.ptongue.RPCSession.soft_break"><code class="xref py py-meth docutils literal notranslate"><span class="pre">soft_break()</span></code></a>, you may call this from a thread other than the
+one whose call is blocked, and it does nothing when the session is idle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If the request could not be delivered to the gem.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.is_remote">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_remote</span></span><a class="headerlink" href="#reahl.ptongue.RPCSession.is_remote" title="Link to this definition"></a></dt>
+<dd><p>Check if the session is remote.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the session is remote, False otherwise</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#reahl.ptongue.InvalidSession" title="reahl.ptongue.InvalidSession"><strong>InvalidSession</strong></a> – If the session is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.is_logged_in">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_logged_in</span></span><a class="headerlink" href="#reahl.ptongue.RPCSession.is_logged_in" title="Link to this definition"></a></dt>
+<dd><p>Check if the session is currently logged in.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if the session is logged in, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="reahl.ptongue.RPCSession.execute">
 <span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symbol_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession.execute" title="Link to this definition"></a></dt>
 <dd><p>Execute a GemStone Smalltalk expression.</p>
@@ -625,42 +725,6 @@ on the remote side.</p>
 <li><p><a class="reference internal" href="#reahl.ptongue.GemstoneApiError" title="reahl.ptongue.GemstoneApiError"><strong>GemstoneApiError</strong></a> – If source is not a string or GemObject</p></li>
 <li><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If execution fails</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.is_logged_in">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_logged_in</span></span><a class="headerlink" href="#reahl.ptongue.RPCSession.is_logged_in" title="Link to this definition"></a></dt>
-<dd><p>Check if the session is currently logged in.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if the session is logged in, False otherwise</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.is_remote">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_remote</span></span><a class="headerlink" href="#reahl.ptongue.RPCSession.is_remote" title="Link to this definition"></a></dt>
-<dd><p>Check if the session is remote.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if the session is remote, False otherwise</p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#reahl.ptongue.InvalidSession" title="reahl.ptongue.InvalidSession"><strong>InvalidSession</strong></a> – If the session is invalid</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.log_out">
-<span class="sig-name descname"><span class="pre">log_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession.log_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession.log_out" title="Link to this definition"></a></dt>
-<dd><p>Log out from the GemStone session.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If logout fails</p>
 </dd>
 </dl>
 </dd></dl>
@@ -710,12 +774,23 @@ on the remote side.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.RPCSession.log_out">
+<span class="sig-name descname"><span class="pre">log_out</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxyrpc.html#RPCSession.log_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.RPCSession.log_out" title="Link to this definition"></a></dt>
+<dd><p>Log out from the GemStone session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#reahl.ptongue.GemstoneError" title="reahl.ptongue.GemstoneError"><strong>GemstoneError</strong></a> – If logout fails</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="reahl.ptongue.GemstoneError">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneError" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_error</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Represents an exception that happened in a Gem.</p>
 <p>This class encapsulates errors that occurred within the Gemstone virtual machine,
 providing a Python-friendly interface to access information about the exception.</p>
@@ -731,8 +806,38 @@ handling mechanisms.</p>
 </dd>
 </dl>
 <dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.context">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.context" title="Link to this definition"></a></dt>
+<dd><p>Get the context where the exception occurred.</p>
+<p>The context is typically a GsProcess object representing the Smalltalk
+execution state at the time of the error. This can be used for debugging
+and to manipulate the execution state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="#reahl.ptongue.GemObject" title="reahl.ptongue.GemObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemObject</span></code></a> representing the GsProcess context, or None if
+no context was provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.exception_obj">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">exception_obj</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.exception_obj" title="Link to this definition"></a></dt>
+<dd><p>Get the actual exception object from Gemstone.</p>
+<p>This is an instance of AbstractException or one of its subclasses that
+was signaled in the Gemstone environment. This may be nil if the error
+was not signaled from Smalltalk execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A GemObject representing the AbstractException, or None if no
+exception object was provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.args">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.args" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.args" title="Link to this definition"></a></dt>
 <dd><p>Get the arguments of the exception.</p>
 <p>These are the arguments that were provided when the error was signaled,
 which provide additional context about the error condition.</p>
@@ -744,30 +849,54 @@ or None if no arguments were provided.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.clear_stack">
-<span class="sig-name descname"><span class="pre">clear_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneError.clear_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneError.clear_stack" title="Link to this definition"></a></dt>
-<dd><p>Clear the stack of the process where the exception occurred.</p>
-<p>This terminates the execution context of the GsProcess where
-the error occurred, resetting it to a clean state.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.number">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">number</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.number" title="Link to this definition"></a></dt>
+<dd><p>Get the numeric error code for this exception.</p>
+<p>Gemstone assigns numeric codes to common errors. These can be used to
+identify specific error conditions programmatically.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The result of clearing the stack.</p>
+<dd class="field-odd"><p>An integer representing the Gemstone error number.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.context">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.context" title="Link to this definition"></a></dt>
-<dd><p>Get the context where the exception occurred.</p>
-<p>The context is typically a GsProcess object representing the Smalltalk
-execution state at the time of the error. This can be used for debugging
-and to manipulate the execution state.</p>
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.is_fatal">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_fatal</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.is_fatal" title="Link to this definition"></a></dt>
+<dd><p>Check if this is a fatal error.</p>
+<p>Fatal errors typically cannot be recovered from and may indicate
+serious problems with the Gemstone server that require administrative
+intervention.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <a class="reference internal" href="#reahl.ptongue.GemObject" title="reahl.ptongue.GemObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">GemObject</span></code></a> representing the GsProcess context, or None if
-no context was provided.</p>
+<dd class="field-odd"><p>True if the error is fatal, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.reason">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">reason</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.reason" title="Link to this definition"></a></dt>
+<dd><p>Get the reason for the exception.</p>
+<p>This field may contain additional context about why the exception occurred.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A UTF-8 decoded string containing the reason for the exception.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.message">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">message</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.message" title="Link to this definition"></a></dt>
+<dd><p>Get the error message.</p>
+<p>This contains the formatted error text, including any arguments that
+were provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A UTF-8 decoded string containing the error message.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -794,69 +923,15 @@ used if continue_with_error is None.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.exception_obj">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exception_obj</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.exception_obj" title="Link to this definition"></a></dt>
-<dd><p>Get the actual exception object from Gemstone.</p>
-<p>This is an instance of AbstractException or one of its subclasses that
-was signaled in the Gemstone environment. This may be nil if the error
-was not signaled from Smalltalk execution.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.clear_stack">
+<span class="sig-name descname"><span class="pre">clear_stack</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneError.clear_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneError.clear_stack" title="Link to this definition"></a></dt>
+<dd><p>Clear the stack of the process where the exception occurred.</p>
+<p>This terminates the execution context of the GsProcess where
+the error occurred, resetting it to a clean state.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A GemObject representing the AbstractException, or None if no
-exception object was provided.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.is_fatal">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_fatal</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.is_fatal" title="Link to this definition"></a></dt>
-<dd><p>Check if this is a fatal error.</p>
-<p>Fatal errors typically cannot be recovered from and may indicate
-serious problems with the Gemstone server that require administrative
-intervention.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>True if the error is fatal, False otherwise.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.message">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">message</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.message" title="Link to this definition"></a></dt>
-<dd><p>Get the error message.</p>
-<p>This contains the formatted error text, including any arguments that
-were provided.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A UTF-8 decoded string containing the error message.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.number">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.number" title="Link to this definition"></a></dt>
-<dd><p>Get the numeric error code for this exception.</p>
-<p>Gemstone assigns numeric codes to common errors. These can be used to
-identify specific error conditions programmatically.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>An integer representing the Gemstone error number.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="reahl.ptongue.GemstoneError.reason">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reason</span></span><a class="headerlink" href="#reahl.ptongue.GemstoneError.reason" title="Link to this definition"></a></dt>
-<dd><p>Get the reason for the exception.</p>
-<p>This field may contain additional context about why the exception occurred.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A UTF-8 decoded string containing the reason for the exception.</p>
+<dd class="field-odd"><p>The result of clearing the stack.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -865,15 +940,15 @@ identify specific error conditions programmatically.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="reahl.ptongue.InvalidSession">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">InvalidSession</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#InvalidSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.InvalidSession" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">InvalidSession</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#InvalidSession"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.InvalidSession" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Indicates a problem with the current Session.</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="reahl.ptongue.NotSupported">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">NotSupported</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#NotSupported"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.NotSupported" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">NotSupported</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#NotSupported"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.NotSupported" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Thrown when an attempt is made to do something that is not
 supported. For example, if you try to transfer a type of Python object
 to Gemstone which cannot be transferred.</p>
@@ -881,15 +956,15 @@ to Gemstone which cannot be transferred.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="reahl.ptongue.GemstoneApiError">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneApiError</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneApiError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneApiError" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneApiError</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneApiError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneApiError" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Thrown when problems are detected while communicating via the underlying C API.</p>
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="reahl.ptongue.GemstoneWarning">
-<em class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneWarning</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneWarning" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">reahl.ptongue.</span></span><span class="sig-name descname"><span class="pre">GemstoneWarning</span></span><a class="reference internal" href="../_modules/reahl/ptongue/gemproxy.html#GemstoneWarning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#reahl.ptongue.GemstoneWarning" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Warning</span></code></a></p>
 <p>Represents a warning condition related to this API.</p>
 </dd></dl>
 
@@ -930,7 +1005,7 @@ to Gemstone which cannot be transferred.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022-2025, Reahl Software Services (Pty) Ltd.</p>
+    <p>&#169; Copyright 2022-2026, Reahl Software Services (Pty) Ltd.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

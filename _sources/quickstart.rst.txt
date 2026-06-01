@@ -195,8 +195,53 @@ Error Handling
         session.log_out()
 
 
+Interrupting a long-running operation
+-------------------------------------
 
-        
+A call such as :meth:`~reahl.ptongue.GemstoneSession.execute` blocks until the
+Smalltalk code it runs has finished. To cancel a long-running operation (for
+example behind a "Stop" button), send the session a break from another thread.
+The blocked call then raises a :class:`~reahl.ptongue.GemstoneError`:
+
+.. code-block:: python
+
+    import threading
+    from reahl.ptongue import RPCSession, GemstoneError
+
+    session = RPCSession(username="DataCurator", password="swordfish")
+
+    def stop():
+        session.soft_break()
+
+    try:
+        # Cancel the operation half a second after it starts.
+        threading.Timer(0.5, stop).start()
+        try:
+            session.execute("[true] whileTrue: [nil]")  # runs forever
+        except GemstoneError as e:
+            print(f"Interrupted: {e}")
+
+        # The session is still usable after a soft break.
+        assert session.execute("3 + 4").to_py == 7
+    finally:
+        session.log_out()
+
+There are two kinds of break, both of which are safe to call from a thread
+other than the one that is blocked, and both of which do nothing if the session
+is idle:
+
+- :meth:`~reahl.ptongue.GemstoneSession.soft_break` asks the executing code to
+  stop once it reaches a safe point. The executing code can still respond to the
+  request, the session stays usable, and code that is busy inside a single
+  long-running primitive is left alone.
+- :meth:`~reahl.ptongue.GemstoneSession.hard_break` is more forceful: it stops
+  the executing code straight away, including long primitives that a soft break
+  would leave running, and the executing code cannot intercept it.
+
+Both :class:`~reahl.ptongue.RPCSession` and :class:`~reahl.ptongue.LinkedSession`
+support ``soft_break`` and ``hard_break``.
+
+
 License
 -------
 
