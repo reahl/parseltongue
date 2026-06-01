@@ -133,7 +133,11 @@ class GciTs(GemstoneLibrary):
         self.GciTsClearStack = self.library.GciTsClearStack
         self.GciTsClearStack.restype = BoolType
         self.GciTsClearStack.argtypes = [GciSession, OopType, ctypes.POINTER(GciErrSType)]
-        
+
+        self.GciTsBreak = self.library.GciTsBreak
+        self.GciTsBreak.restype = BoolType
+        self.GciTsBreak.argtypes = [GciSession, BoolType, ctypes.POINTER(GciErrSType)]
+
         
     def encrypt_password(self, unencrypted_password):
         if not unencrypted_password:
@@ -284,6 +288,47 @@ class RPCSession(GemstoneSession):
         """
         error = GciErrSType()
         if not self.gci.GciTsCommit(self.c_session, ctypes.byref(error)):
+            raise GemstoneError(self, error)
+
+    def soft_break(self):
+        """
+        Ask the session to stop the Smalltalk code it is currently executing.
+
+        This is the gentler of the two ways to cancel a long-running call such as
+        :meth:`execute` or :meth:`~reahl.ptongue.GemObject.perform`. The request is
+        honoured once the executing code reaches a safe point between Smalltalk
+        operations, at which point the blocked call ends by raising a
+        :class:`GemstoneError`. Because it waits for such a point, it cannot stop
+        code that is busy inside a single long-running primitive - reach for
+        :meth:`hard_break` when that happens. The executing code can still catch and
+        respond to the request, and the session stays usable afterwards.
+
+        You may call this from a thread other than the one whose call is blocked,
+        which is how you would wire it up to, for example, a "Stop" button. It does
+        nothing when the session is not executing anything.
+
+        :raises GemstoneError: If the request could not be delivered to the gem.
+        """
+        error = GciErrSType()
+        if not self.gci.GciTsBreak(self.c_session, FALSE, ctypes.byref(error)):
+            raise GemstoneError(self, error)
+
+    def hard_break(self):
+        """
+        Force the session to abandon the Smalltalk code it is currently executing.
+
+        This is the stronger counterpart of :meth:`soft_break`. It stops the
+        executing code straight away, even when that code is busy inside a long
+        primitive and would ignore a soft break. The executing code cannot intercept
+        it, so the blocked call always ends by raising a :class:`GemstoneError`.
+
+        As with :meth:`soft_break`, you may call this from a thread other than the
+        one whose call is blocked, and it does nothing when the session is idle.
+
+        :raises GemstoneError: If the request could not be delivered to the gem.
+        """
+        error = GciErrSType()
+        if not self.gci.GciTsBreak(self.c_session, TRUE, ctypes.byref(error)):
             raise GemstoneError(self, error)
 
     @property

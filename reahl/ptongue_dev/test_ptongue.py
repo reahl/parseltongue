@@ -17,6 +17,8 @@
 
 from contextlib import contextmanager
 import os
+import threading
+import time
 import warnings
 
 import pytest
@@ -1104,4 +1106,85 @@ def test_rpc_clear_stack(rpc_session):
 
 def test_linked_clear_stack(linked_session):
     check_clear_stack(linked_session)
-    
+
+
+#--[ interrupting a running operation ]------------------------------------------------------------
+
+def interrupt_running_smalltalk_with(session, send_break):
+    # AI: Run an endless Smalltalk loop in one thread while another thread sends
+    # AI: the break. The first break may arrive before the gem has entered the
+    # AI: loop, so keep sending until the execution has actually been interrupted.
+    execution_interrupted = threading.Event()
+
+    def keep_sending_break():
+        while not execution_interrupted.wait(0.2):
+            send_break()
+
+    breaker = threading.Thread(target=keep_sending_break)
+    breaker.start()
+    try:
+        with expected(GemstoneError):
+            session.execute('[true] whileTrue: [nil]')
+    finally:
+        execution_interrupted.set()
+        breaker.join()
+
+    assert session.execute('3 + 4').to_py == 7
+
+
+def check_soft_break_interrupts_running_smalltalk(session):
+    """AI: A soft break, sent from a different thread than the one executing,
+       interrupts the Smalltalk code running in the session, causing that
+       execution to raise a GemstoneError. A soft break is recoverable: the
+       session remains usable afterwards."""
+    interrupt_running_smalltalk_with(session, session.soft_break)
+
+def test_rpc_soft_break_interrupts_running_smalltalk(rpc_session):
+    check_soft_break_interrupts_running_smalltalk(rpc_session)
+
+def test_linked_soft_break_interrupts_running_smalltalk(linked_session):
+    check_soft_break_interrupts_running_smalltalk(linked_session)
+
+
+def check_hard_break_interrupts_running_smalltalk(session):
+    """AI: A hard break, the forceful counterpart of a soft break, also interrupts
+       the Smalltalk code running in the session from another thread, causing the
+       execution to raise a GemstoneError, and the session remains usable afterwards."""
+    interrupt_running_smalltalk_with(session, session.hard_break)
+
+def test_rpc_hard_break_interrupts_running_smalltalk(rpc_session):
+    check_hard_break_interrupts_running_smalltalk(rpc_session)
+
+def test_linked_hard_break_interrupts_running_smalltalk(linked_session):
+    check_hard_break_interrupts_running_smalltalk(linked_session)
+
+
+def break_while_idle_is_harmless(session, send_break):
+    with expected(NoException):
+        send_break()
+    assert session.execute('3 + 4').to_py == 7
+
+
+def check_soft_break_while_idle_is_harmless(session):
+    """AI: Sending a soft break while nothing is executing in the session has no
+       effect and raises no error - the session continues to work normally."""
+    break_while_idle_is_harmless(session, session.soft_break)
+
+def test_rpc_soft_break_while_idle_is_harmless(rpc_session):
+    check_soft_break_while_idle_is_harmless(rpc_session)
+
+def test_linked_soft_break_while_idle_is_harmless(linked_session):
+    check_soft_break_while_idle_is_harmless(linked_session)
+
+
+def check_hard_break_while_idle_is_harmless(session):
+    """AI: Sending a hard break while nothing is executing in the session has no
+       effect and raises no error - the session continues to work normally."""
+    break_while_idle_is_harmless(session, session.hard_break)
+
+def test_rpc_hard_break_while_idle_is_harmless(rpc_session):
+    check_hard_break_while_idle_is_harmless(rpc_session)
+
+def test_linked_hard_break_while_idle_is_harmless(linked_session):
+    check_hard_break_while_idle_is_harmless(linked_session)
+
